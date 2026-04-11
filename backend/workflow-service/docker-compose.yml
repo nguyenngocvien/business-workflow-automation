@@ -1,0 +1,186 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: e-workflow-postgres
+    environment:
+      POSTGRES_DB: e_workflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d e_workflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: e-workflow-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: e-workflow-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200 >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: e-workflow-keycloak
+    command:
+      - start-dev
+      - --http-port=18080
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "18080:18080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:18080/realms/master >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  identity:
+    image: camunda/identity:8.8.0
+    container_name: e-workflow-identity
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8084
+      IDENTITY_AUTH_PROVIDER_BACKEND_URL: http://keycloak:18080/auth/realms/camunda-platform
+      IDENTITY_ISSUER_BACKEND_URL: http://keycloak:18080/auth/realms/camunda-platform
+      IDENTITY_BASE_URL: http://identity:8084
+      IDENTITY_ZEEBE_AUDIENCE: zeebe-api
+      IDENTITY_CLIENT_ID: identity
+      IDENTITY_CLIENT_SECRET: identity-secret
+      KEYCLOAK_URL: http://keycloak:18080/auth
+      KEYCLOAK_REALM: camunda-platform
+      KEYCLOAK_SETUP_USER: admin
+      KEYCLOAK_SETUP_PASSWORD: admin
+    ports:
+      - "8084:8084"
+
+  zeebe:
+    image: camunda/zeebe:8.8.0
+    container_name: e-workflow-zeebe
+    environment:
+      ZEEBE_BROKER_CLUSTER_PARTITIONSCOUNT: 1
+      ZEEBE_BROKER_CLUSTER_REPLICATIONFACTOR: 1
+      ZEEBE_BROKER_CLUSTER_CLUSTERSIZE: 1
+      ZEEBE_BROKER_GATEWAY_ENABLE: "true"
+      ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_MODE: none
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME: io.camunda.zeebe.exporter.ElasticsearchExporter
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL: http://elasticsearch:9200
+      ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE: 1
+    ports:
+      - "26500:26500"
+      - "9600:9600"
+      - "8088:8080"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/26500'"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  operate:
+    image: camunda/operate:8.8.0
+    container_name: e-workflow-operate
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      zeebe:
+        condition: service_healthy
+    environment:
+      CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS: zeebe:26500
+      CAMUNDA_OPERATE_ELASTICSEARCH_URL: http://elasticsearch:9200
+      CAMUNDA_OPERATE_CAMUNDA_BASEURL: http://zeebe:8080
+      CAMUNDA_OPERATE_IDENTITY_BASEURL: http://identity:8084
+      CAMUNDA_OPERATE_IDENTITY_ENABLED: "false"
+    ports:
+      - "8081:8080"
+
+  tasklist:
+    image: camunda/tasklist:8.8.0
+    container_name: e-workflow-tasklist
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      zeebe:
+        condition: service_healthy
+    environment:
+      CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS: zeebe:26500
+      CAMUNDA_TASKLIST_ELASTICSEARCH_URL: http://elasticsearch:9200
+      CAMUNDA_TASKLIST_CAMUNDA_BASEURL: http://zeebe:8080
+      CAMUNDA_TASKLIST_IDENTITY_BASEURL: http://identity:8084
+      CAMUNDA_TASKLIST_IDENTITY_ENABLED: "false"
+    ports:
+      - "8082:8080"
+
+  e-workflow-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: e-workflow-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      zeebe:
+        condition: service_healthy
+      tasklist:
+        condition: service_started
+      operate:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/e_workflow
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_SECURITY_USER_NAME: admin
+      SPRING_SECURITY_USER_PASSWORD: admin123
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      CAMUNDA_CLIENT_MODE: self-managed
+      CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500
+      CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080
+      CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
+      CAMUNDA_CLIENT_AUTH_METHOD: none
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  elasticsearch_data:
