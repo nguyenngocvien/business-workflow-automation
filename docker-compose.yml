@@ -36,7 +36,8 @@ services:
       - "26500:26500"
       - "9600:9600"
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
   operate:
     image: camunda/operate:8.5.0
@@ -71,6 +72,10 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
 
   # -----------------------------
   # KEYCLOAK
@@ -82,8 +87,14 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-    ports:
-      - "8080:8080"
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=postgres
+      - KC_DB_URL_DATABASE=bpm
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   # -----------------------------
   # MINIO
@@ -113,6 +124,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+    - rabbitmq_data:/var/lib/rabbitmq
 
 # -----------------------------
 # VOLUMES
@@ -120,3 +133,5 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  es_data:
+  rabbitmq_data:
