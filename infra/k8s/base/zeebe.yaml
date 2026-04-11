@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zeebe
+spec:
+  selector:
+    app: zeebe
+  ports:
+    - name: gateway
+      port: 26500
+      targetPort: 26500
+    - name: monitoring
+      port: 9600
+      targetPort: 9600
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zeebe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zeebe
+  template:
+    metadata:
+      labels:
+        app: zeebe
+    spec:
+      containers:
+        - name: zeebe
+          image: camunda/zeebe:8.5.0
+          ports:
+            - containerPort: 26500
+              name: gateway
+            - containerPort: 9600
+              name: monitoring
+          env:
+            - name: ZEEBE_BROKER_GATEWAY_ENABLE
+              value: "true"
+            - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME
+              value: io.camunda.zeebe.exporter.ElasticsearchExporter
+            - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL
+              value: http://elasticsearch:9200

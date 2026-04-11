@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: operate
+spec:
+  selector:
+    app: operate
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: operate
+  template:
+    metadata:
+      labels:
+        app: operate
+    spec:
+      containers:
+        - name: operate
+          image: camunda/operate:8.5.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS
+              value: zeebe:26500
+            - name: CAMUNDA_OPERATE_ELASTICSEARCH_URL
+              value: http://elasticsearch:9200

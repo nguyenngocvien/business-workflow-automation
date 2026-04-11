@@ -1,0 +1,122 @@
+version: "3.8"
+
+services:
+
+  # -----------------------------
+  # POSTGRES
+  # -----------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: bpm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bpm"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # -----------------------------
+  # CAMUNDA 8 (Self-managed stack)
+  # -----------------------------
+  zeebe:
+    image: camunda/zeebe:8.5.0
+    container_name: zeebe
+    environment:
+      - ZEEBE_BROKER_GATEWAY_ENABLE=true
+      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME=io.camunda.zeebe.exporter.ElasticsearchExporter
+      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch:9200
+    ports:
+      - "26500:26500"
+      - "9600:9600"
+    depends_on:
+      - elasticsearch
+
+  operate:
+    image: camunda/operate:8.5.0
+    container_name: operate
+    environment:
+      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=zeebe:26500
+      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "8081:8080"
+    depends_on:
+      - zeebe
+      - elasticsearch
+
+  tasklist:
+    image: camunda/tasklist:8.5.0
+    container_name: tasklist
+    environment:
+      - CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS=zeebe:26500
+      - CAMUNDA_TASKLIST_ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "8082:8080"
+    depends_on:
+      - zeebe
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+
+  # -----------------------------
+  # KEYCLOAK
+  # -----------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8080:8080"
+
+  # -----------------------------
+  # MINIO
+  # -----------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  # -----------------------------
+  # RABBITMQ
+  # -----------------------------
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+# -----------------------------
+# VOLUMES
+# -----------------------------
+volumes:
+  postgres_data:
+  minio_data:

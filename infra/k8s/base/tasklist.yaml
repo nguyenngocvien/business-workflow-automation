@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasklist
+spec:
+  selector:
+    app: tasklist
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasklist
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tasklist
+  template:
+    metadata:
+      labels:
+        app: tasklist
+    spec:
+      containers:
+        - name: tasklist
+          image: camunda/tasklist:8.5.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS
+              value: zeebe:26500
+            - name: CAMUNDA_TASKLIST_ELASTICSEARCH_URL
+              value: http://elasticsearch:9200
