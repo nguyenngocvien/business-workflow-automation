@@ -1,0 +1,60 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+target/
+**/target/
+*.class
+*.log
+hs_err_pid*
+replay_pid*
+
+# Spring / build tools
+.mvn/wrapper/maven-wrapper.jar
+**/.mvn/wrapper/maven-wrapper.jar
+build/
+**/build/
+
+# Node / frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+**/coverage/
+.next/
+**/.next/
+.vite/
+**/.vite/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+.springBeans
+.sts4-cache/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Docker / local data
+*.pid
+*.seed
+postgres_data/
+minio_data/
+es_data/
+rabbitmq_data/
+
+# Misc
+tmp/
+temp/

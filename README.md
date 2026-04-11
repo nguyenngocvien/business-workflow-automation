@@ -3,6 +3,8 @@
 This setup provides a complete local environment including:
 
 * Camunda 8 (Zeebe, Operate, Tasklist)
+* Workflow Service
+* Integration Service
 * Keycloak (IAM)
 * MinIO (S3-compatible storage)
 * RabbitMQ (message broker)
@@ -39,6 +41,13 @@ docker ps
 | Operate       | http://localhost:8081 | Monitor and inspect workflows |
 | Tasklist      | http://localhost:8082 | Human task UI                 |
 | Zeebe Gateway | localhost:26500       | gRPC endpoint for clients     |
+
+### Backend Services
+
+| Service            | URL                   | Description                          |
+| ------------------ | --------------------- | ------------------------------------ |
+| Workflow Service    | http://localhost:8083 | Workflow runtime and task APIs       |
+| Integration Service | http://localhost:8084 | Connector and integration APIs       |
 
 ---
 
@@ -155,3 +164,4 @@ docker compose restart <service-name>
 * MinIO data is persisted via Docker volume
 * Camunda is running in **self-managed minimal mode**
 * RabbitMQ is not wired to Camunda by default
+* Workflow Service and Integration Service run from the Dockerfiles in `backend/`
