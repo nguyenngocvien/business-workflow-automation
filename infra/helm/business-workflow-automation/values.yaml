@@ -1,0 +1,49 @@
+namespace: bpm-dev
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  db: bpm
+  user: postgres
+  password: postgres
+  storage: 1Gi
+
+elasticsearch:
+  enabled: true
+  image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+  storage: 5Gi
+
+zeebe:
+  enabled: true
+  image: camunda/zeebe:8.5.0
+
+operate:
+  enabled: true
+  image: camunda/operate:8.5.0
+
+tasklist:
+  enabled: true
+  image: camunda/tasklist:8.5.0
+
+keycloak:
+  enabled: true
+  image: quay.io/keycloak/keycloak:24.0
+
+minio:
+  enabled: true
+  image: minio/minio:latest
+  storage: 5Gi
+
+rabbitmq:
+  enabled: true
+  image: rabbitmq:3.13-management
+
+workflowService:
+  enabled: true
+  image: workflow-service:local
+  servicePort: 8083
+
+integrationService:
+  enabled: true
+  image: integration-service:local
+  servicePort: 8084
