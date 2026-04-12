@@ -2,10 +2,11 @@
 
 This setup provides a complete local environment including:
 
-* Camunda 8 (Zeebe, Operate, Tasklist)
+* Camunda Orchestration, Optimize, Identity, Console, Connectors, Web Modeler
 * Workflow Service
 * Integration Service
 * Keycloak (IAM)
+* PostgreSQL
 * MinIO (S3-compatible storage)
 * RabbitMQ (message broker)
 
@@ -21,7 +22,7 @@ This setup provides a complete local environment including:
 ## Start the stack
 
 ```bash
-docker compose up -d
+./scripts/start.sh
 ```
 
 Check containers:
@@ -34,34 +35,38 @@ docker ps
 
 ## Services Overview
 
-### Camunda 8 Components
+### Camunda Platform Components
 
 | Service       | URL                   | Description                   |
 | ------------- | --------------------- | ----------------------------- |
-| Operate       | http://localhost:8081 | Monitor and inspect workflows |
-| Tasklist      | http://localhost:8082 | Human task UI                 |
-| Zeebe Gateway | localhost:26500       | gRPC endpoint for clients     |
+| Orchestration  | http://localhost:8088 | Runtime, Operate, and Tasklist |
+| Connectors     | http://localhost:8086 | Connector runtime              |
+| Optimize       | http://localhost:8083 | Process analytics              |
+| Identity       | http://localhost:8084 | Camunda identity service       |
+| Console        | http://localhost:8087 | Platform administration UI     |
+| Web Modeler    | http://localhost:8070 | Modeler UI                     |
+| Zeebe Gateway  | localhost:26500      | gRPC endpoint for clients      |
 
 ### Backend Services
 
 | Service            | URL                   | Description                          |
 | ------------------ | --------------------- | ------------------------------------ |
-| Workflow Service    | http://localhost:8083 | Workflow runtime and task APIs       |
-| Integration Service | http://localhost:8084 | Connector and integration APIs       |
+| Workflow Service    | http://localhost:8085 | Workflow runtime and task APIs       |
+| Integration Service | http://localhost:8089 | Connector and integration APIs       |
 
 ---
 
 ### Identity (Keycloak)
 
-| Service                | URL                   |
-| ---------------------- | --------------------- |
-| Keycloak Admin Console | http://localhost:8080 |
+| Service                | URL                        |
+| ---------------------- | -------------------------- |
+| Keycloak Admin Console | http://localhost:8080/auth |
 
 **Default credentials:**
 
 ```
 username: admin
-password: admin
+password: admin_password
 ```
 
 ---
@@ -104,27 +109,33 @@ password: guest
 | ------------- | --------------------- |
 | Elasticsearch | http://localhost:9200 |
 
-Used internally by Camunda (Operate, Tasklist).
+Used internally by Camunda components.
 
 ---
 
 ## Quick Health Checks
 
 ```bash
-# Zeebe Gateway
+# Orchestration Gateway
 nc -z localhost 26500
 
 # Elasticsearch
 curl http://localhost:9200
 
 # Keycloak
-curl http://localhost:8080
+curl http://localhost:8080/auth
 
 # MinIO
 curl http://localhost:9000/minio/health/live
 
 # RabbitMQ
 curl http://localhost:15672
+
+# Workflow Service
+curl http://localhost:8085/actuator/health
+
+# Integration Service
+curl http://localhost:8089/actuator/health
 ```
 
 ---
@@ -134,13 +145,13 @@ curl http://localhost:15672
 ### Stop services
 
 ```bash
-docker compose down
+./scripts/stop.sh
 ```
 
 ### Stop and remove volumes
 
 ```bash
-docker compose down -v
+./scripts/stop.sh -v
 ```
 
 ### View logs
@@ -160,8 +171,9 @@ docker compose restart <service-name>
 ## Notes
 
 * This setup is intended for **local development only**
-* Keycloak runs in **dev mode** (no persistence)
-* MinIO data is persisted via Docker volume
-* Camunda is running in **self-managed minimal mode**
-* RabbitMQ is not wired to Camunda by default
+* PostgreSQL uses the `bpm` database
+* Keycloak is configured for the Camunda identity stack
+* If you already have an existing `postgres_data` volume, remove it once so the Keycloak database/user init script can run
+* MinIO, PostgreSQL, Elasticsearch, and RabbitMQ use Docker volumes for persistence
+* Camunda is running in **self-managed full stack mode**
 * Workflow Service and Integration Service run from the Dockerfiles in `backend/`

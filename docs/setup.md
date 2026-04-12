@@ -13,7 +13,7 @@ From the repository root:
 ./scripts/start.sh
 ```
 
-If you want to start a specific Compose target, pass the service name:
+If you want to start a specific Compose service, pass the service name:
 
 ```bash
 ./scripts/start.sh workflow-service
@@ -33,25 +33,26 @@ To remove volumes as well:
 
 ## 4. Access URLs
 
-### Backend Services
+### Camunda Platform
 
-- Workflow Service: http://localhost:8083
-- Integration Service: http://localhost:8084
-
-### Camunda 8
-
-- Operate: http://localhost:8081
-- Tasklist: http://localhost:8082
+- Orchestration: http://localhost:8088
+- Connectors: http://localhost:8086
+- Optimize: http://localhost:8083
+- Identity: http://localhost:8084
+- Console: http://localhost:8087
+- Web Modeler: http://localhost:8070
 - Zeebe Gateway: localhost:26500
 
-### Identity and Messaging
+### Backend Services
 
-- Keycloak: http://localhost:8080
+- Workflow Service: http://localhost:8085
+- Integration Service: http://localhost:8089
+
+### Identity and Utilities
+
+- Keycloak: http://localhost:8080/auth
 - RabbitMQ UI: http://localhost:15672
 - RabbitMQ AMQP: localhost:5672
-
-### Storage and Search
-
 - MinIO API: http://localhost:9000
 - MinIO Console: http://localhost:9001
 - Elasticsearch: http://localhost:9200
@@ -59,11 +60,15 @@ To remove volumes as well:
 ## 5. Useful Checks
 
 ```bash
+curl http://localhost:8088
+curl http://localhost:8086
 curl http://localhost:8083
 curl http://localhost:8084
-curl http://localhost:8081
-curl http://localhost:8082
-curl http://localhost:8080
+curl http://localhost:8087
+curl http://localhost:8070
+curl http://localhost:8085/actuator/health
+curl http://localhost:8089/actuator/health
+curl http://localhost:8080/auth
 curl http://localhost:9000/minio/health/live
 curl http://localhost:9200
 ```
@@ -72,5 +77,7 @@ curl http://localhost:9200
 
 - The local stack is intended for development only
 - PostgreSQL uses the `bpm` database
-- Workflow Service and Integration Service are built from the Dockerfiles under `backend/`
+- Camunda runs in self-managed full stack mode
+- If you already have an existing `postgres_data` volume, remove it once so the Keycloak database/user init script can run
 - MinIO, PostgreSQL, Elasticsearch, and RabbitMQ use Docker volumes for persistence
+- Workflow Service and Integration Service are built from the Dockerfiles under `backend/`

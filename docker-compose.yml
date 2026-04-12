@@ -1,5 +1,6 @@
-services:
+version: "3.8"
 
+services:
   # -----------------------------
   # POSTGRES
   # -----------------------------
@@ -14,53 +15,241 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d bpm"]
+      test: ["CMD-SHELL", "pg_isready -d bpm -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   # -----------------------------
-  # CAMUNDA 8 (Self-managed stack)
+  # ELASTICSEARCH
   # -----------------------------
-  zeebe:
-    image: camunda/zeebe:8.5.0
-    container_name: zeebe
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.14
+    container_name: elasticsearch
     environment:
-      - ZEEBE_BROKER_GATEWAY_ENABLE=true
-      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME=io.camunda.zeebe.exporter.ElasticsearchExporter
-      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch:9200
+      - node.name=elasticsearch
+      - cluster.name=elasticsearch
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - network.host=0.0.0.0
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.license.self_generated.type=basic
+      - ingest.geoip.downloader.enabled=false
+      
+      # 3. Đảm bảo shard mới luôn được gán ngay lập tức
+      - cluster.routing.allocation.node_initial_primaries_recoveries=4
+
     ports:
-      - "26500:26500"
-      - "9600:9600"
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  # -----------------------------
+  # KEYCLOAK
+  # -----------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.0
+    container_name: keycloak
+    command: start-dev
+    ports:
+      - "8080:8080"
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/bpm
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+
+    restart: on-failure
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; grep -q 'HTTP/1.1 200 OK' <&3",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # -----------------------------
+  # CAMUNDA IDENTITY
+  # -----------------------------
+  identity:
+    image: camunda/identity:8.8.0
+    container_name: identity
+    environment:
+      SERVER_PORT: 8084
+
+      IDENTITY_DATABASE_HOST: postgres
+      IDENTITY_DATABASE_PORT: 5432
+      IDENTITY_DATABASE_NAME: bpm
+      IDENTITY_DATABASE_USERNAME: postgres
+      IDENTITY_DATABASE_PASSWORD: postgres
+      IDENTITY_RETRY_DELAY: 5000
+      IDENTITY_RETRY_ATTEMPTS: 20
+
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_HOST: keycloak
+      HOST: localhost
+
+      VALUES_KEYCLOAK_INIT_ORCHESTRATION_SECRET: orchestration-secret
+      VALUES_KEYCLOAK_INIT_CONSOLE_SECRET: console-secret
+      VALUES_KEYCLOAK_INIT_OPTIMIZE_SECRET: optimize-secret
+      VALUES_KEYCLOAK_INIT_CONNECTORS_SECRET: connectors-secret
+
+      management.endpoints.web.exposure.include: health
+      management.endpoint.health.probes.enabled: "true"
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8082/actuator/health",
+        ]
+      interval: 5s
+      timeout: 15s
+      retries: 30
+      start_period: 60s
+    restart: on-failure
+    volumes:
+      - "./.identity/application.yaml:/app/application.yaml"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  orchestration:
+    image: camunda/camunda:8.8.0
+    container_name: orchestrator
+    environment:
+      # --- General Settings ---
+      - CAMUNDA_OPERATE_ENABLED=true
+      - CAMUNDA_TASKLIST_ENABLED=true
+      - CAMUNDA_ZEEBE_ENABLED=true
+      - CAMUNDA_IDENTITY_ENABLED=true
+
+      # --- Identity & Keycloak Connection ---
+      - CAMUNDA_IDENTITY_BASE_URL=http://identity:8084
+      - CAMUNDA_KEYCLOAK_URL=http://keycloak:8080
+      - CAMUNDA_KEYCLOAK_REALM=camunda-platform
+      #
+      # --- CAMUNDA DATA SECONDARY STORAGE (Elasticsearch) ---
+      - CAMUNDA_DATA_SECONDARY_STORAGE_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - CAMUNDA_OPERATE_ELASTICSEARCH_CLUSTERNAME=elasticsearch
+      - CAMUNDA_TASKLIST_ELASTICSEARCH_URL=http://elasticsearch:9200
+
+      # --- Security Credentials (matching your Identity setup) ---
+      - ZEEBE_CLIENT_ID=zeebe
+      - ZEEBE_CLIENT_SECRET=zecret
+    ports:
+      - "26500:26500" # Zeebe Gateway (gRPC)
+      - "8081:8081" # Operate UI
+      - "8082:8082" # Tasklist UI
     depends_on:
       elasticsearch:
         condition: service_healthy
+      identity:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://localhost:8081/actuator/health || exit 1",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
 
-  operate:
-    image: camunda/operate:8.5.0
-    container_name: operate
+  # -----------------------------
+  # CONNECTORS
+  # -----------------------------
+  # connectors:
+  #   image: camunda/connectors-bundle:8.8.0
+  #   container_name: connectors
+  #   environment:
+  #     CAMUNDA_CLIENT_GRPCADDRESS: http://orchestration:26500
+  #     CAMUNDA_CLIENT_RESTADDRESS: http://orchestration:8088
+
+  #     CAMUNDA_CLIENT_AUTH_TOKENURL: http://keycloak:8080/realms/camunda-platform/protocol/openid-connect/token
+  #     CAMUNDA_CLIENT_AUTH_CLIENTID: connectors
+  #     CAMUNDA_CLIENT_AUTH_CLIENTSECRET: connectors-secret
+  #   ports:
+  #     - "8086:8080"
+  #   restart: unless-stopped
+  #   depends_on:
+  #     orchestration:
+  #       condition: service_healthy
+
+  # -----------------------------
+  # MINIO
+  # -----------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
     environment:
-      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=zeebe:26500
-      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
     ports:
-      - "8081:8080"
-    depends_on:
-      - zeebe
-      - elasticsearch
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
 
-  tasklist:
-    image: camunda/tasklist:8.5.0
-    container_name: tasklist
+  # -----------------------------
+  # RABBITMQ
+  # -----------------------------
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
     environment:
-      - CAMUNDA_TASKLIST_ZEEBE_GATEWAYADDRESS=zeebe:26500
-      - CAMUNDA_TASKLIST_ELASTICSEARCH_URL=http://elasticsearch:9200
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - "8082:8080"
-    depends_on:
-      - zeebe
-      - elasticsearch
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
+  # -----------------------------
+  # BUSINESS SERVICES
+  # -----------------------------
   workflow-service:
     build:
       context: ./backend/workflow-service
@@ -76,19 +265,19 @@ services:
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
       CAMUNDA_CLIENT_MODE: self-managed
-      CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500
-      CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080
+      CAMUNDA_CLIENT_GRPC_ADDRESS: http://orchestration:26500
+      CAMUNDA_CLIENT_REST_ADDRESS: http://orchestration:8080
       CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
       CAMUNDA_CLIENT_AUTH_METHOD: none
     ports:
-      - "8083:8080"
+      - "8085:8080"
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
-        condition: service_started
-      zeebe:
-        condition: service_started
+        condition: service_healthy
+      orchestration:
+        condition: service_healthy
 
   integration-service:
     build:
@@ -102,80 +291,17 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_SHOW_SQL: "false"
     ports:
-      - "8084:8080"
+      - "8089:8080"
     depends_on:
       postgres:
         condition: service_healthy
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
-
-  # -----------------------------
-  # KEYCLOAK
-  # -----------------------------
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    container_name: keycloak
-    command: start-dev
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_DB=postgres
-      - KC_DB_URL_HOST=postgres
-      - KC_DB_URL_DATABASE=bpm
-      - KC_DB_USERNAME=postgres
-      - KC_DB_PASSWORD=postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # -----------------------------
-  # MINIO
-  # -----------------------------
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    command: server /data --console-address ":9001"
-    environment:
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD=minio123
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
-
-  # -----------------------------
-  # RABBITMQ
-  # -----------------------------
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
 
 # -----------------------------
 # VOLUMES
 # -----------------------------
 volumes:
   postgres_data:
-  minio_data:
   es_data:
+  orchestration_data:
+  minio_data:
   rabbitmq_data:

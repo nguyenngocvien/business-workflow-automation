@@ -16,7 +16,7 @@ The codebase is split into these main areas:
 - `backend/integration-service`: connector and integration logic for external systems
 - `frontend`: user-facing application
 - `infra/k8s`: Kubernetes manifests that mirror the local stack
-- `docker-compose.yml`: local development stack for all infrastructure services
+- `docker-compose.yml`: local development stack for all infrastructure and application services
 
 ## Main Components
 
@@ -50,7 +50,7 @@ The local stack includes:
 - MinIO for object storage
 - Keycloak for identity and authentication
 - Elasticsearch for Camunda search and indexing
-- Zeebe, Operate, and Tasklist for workflow orchestration and monitoring
+- Camunda Orchestration, Optimize, Identity, Console, Connectors, and Web Modeler
 
 ## Runtime Flow
 
@@ -60,8 +60,8 @@ Typical request flow looks like this:
 2. The frontend calls the workflow service or integration service.
 3. The backend service persists business data in PostgreSQL.
 4. If needed, the backend publishes messages to RabbitMQ or stores files in MinIO.
-5. Workflow orchestration is handled by Camunda components through Zeebe.
-6. Operate and Tasklist are used to inspect and manage workflow state.
+5. Workflow orchestration is handled by the Camunda Orchestration service through Zeebe.
+6. Operate and Tasklist are available through the orchestration UI.
 
 ## Data Ownership
 
@@ -83,8 +83,8 @@ Both are intended to expose the same logical services so the development setup s
 
 - Local database defaults use `postgres` / `postgres`
 - The shared workflow database name in compose is `bpm`
-- Keycloak runs in development mode
-- Camunda services are configured for a self-managed local stack
+- Keycloak is configured for the Camunda identity stack
+- Camunda services are configured for a self-managed full stack local setup
 
 ## Suggested Diagram
 
