@@ -1,6 +1,5 @@
-version: "3.8"
-
 services:
+
   # -----------------------------
   # POSTGRES
   # -----------------------------
@@ -8,16 +7,20 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     environment:
-      POSTGRES_DB: bpm
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      # Init multiple databases via entrypoint script
+      POSTGRES_MULTIPLE_DATABASES: bpm,keycloak
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro  # see init-db.sh
     restart: unless-stopped
+    networks:
+      - workflow_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d bpm -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -26,55 +29,70 @@ services:
   # ELASTICSEARCH
   # -----------------------------
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.14
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     container_name: elasticsearch
+    restart: unless-stopped
     environment:
-      - node.name=elasticsearch
-      - cluster.name=elasticsearch
       - discovery.type=single-node
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
       - xpack.security.enabled=false
-      - network.host=0.0.0.0
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.transport.ssl.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - xpack.license.self_generated.type=basic
-      - ingest.geoip.downloader.enabled=false
-      
-      # 3. Đảm bảo shard mới luôn được gán ngay lập tức
-      - cluster.routing.allocation.node_initial_primaries_recoveries=4
-
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9200:9200"
+      - "9300:9300"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
-    restart: unless-stopped
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - workflow_net
     healthcheck:
-      test:
-        ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # -----------------------------
+  # KIBANA
+  # -----------------------------
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    container_name: kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - workflow_net
 
   # -----------------------------
   # KEYCLOAK
   # -----------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.0
+    image: quay.io/keycloak/keycloak:26.0.0
     container_name: keycloak
     command: start-dev
     ports:
       - "8080:8080"
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/bpm
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak   # FIX: DB riêng cho Keycloak
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: postgres
-
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
-
     restart: on-failure
+    networks:
+      - workflow_net                                          # FIX: thêm network
     healthcheck:
       test:
         [
@@ -91,122 +109,59 @@ services:
       postgres:
         condition: service_healthy
 
-  # -----------------------------
-  # CAMUNDA IDENTITY
-  # -----------------------------
-  identity:
-    image: camunda/identity:8.8.0
-    container_name: identity
+  # ─────────────────────────────────────────
+  # ZEEBE — workflow engine (broker)
+  # ─────────────────────────────────────────
+  zeebe:
+    image: camunda/zeebe:8.5.0
+    container_name: zeebe
+    restart: unless-stopped
     environment:
-      SERVER_PORT: 8084
-
-      IDENTITY_DATABASE_HOST: postgres
-      IDENTITY_DATABASE_PORT: 5432
-      IDENTITY_DATABASE_NAME: bpm
-      IDENTITY_DATABASE_USERNAME: postgres
-      IDENTITY_DATABASE_PASSWORD: postgres
-      IDENTITY_RETRY_DELAY: 5000
-      IDENTITY_RETRY_ATTEMPTS: 20
-
-      KEYCLOAK_ADMIN_USERNAME: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KEYCLOAK_HOST: keycloak
-      HOST: localhost
-
-      VALUES_KEYCLOAK_INIT_ORCHESTRATION_SECRET: orchestration-secret
-      VALUES_KEYCLOAK_INIT_CONSOLE_SECRET: console-secret
-      VALUES_KEYCLOAK_INIT_OPTIMIZE_SECRET: optimize-secret
-      VALUES_KEYCLOAK_INIT_CONNECTORS_SECRET: connectors-secret
-
-      management.endpoints.web.exposure.include: health
-      management.endpoint.health.probes.enabled: "true"
+      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME=io.camunda.zeebe.exporter.ElasticsearchExporter
+      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL=http://elasticsearch:9200
+      - ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_BULK_SIZE=1
+      - ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_MODE=none
+      - ZEEBE_BROKER_NETWORK_HOST=0.0.0.0
     ports:
-      - "8084:8084"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "-q",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8082/actuator/health",
-        ]
-      interval: 5s
-      timeout: 15s
-      retries: 30
-      start_period: 60s
-    restart: on-failure
+      - "26500:26500"   # gRPC gateway (clients / workers)
+      - "9600:9600"     # monitoring / REST
+      - "8088:8080"     # management API
     volumes:
-      - "./.identity/application.yaml:/app/application.yaml"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      keycloak:
-        condition: service_healthy
-
-  orchestration:
-    image: camunda/camunda:8.8.0
-    container_name: orchestrator
-    environment:
-      # --- General Settings ---
-      - CAMUNDA_OPERATE_ENABLED=true
-      - CAMUNDA_TASKLIST_ENABLED=true
-      - CAMUNDA_ZEEBE_ENABLED=true
-      - CAMUNDA_IDENTITY_ENABLED=true
-
-      # --- Identity & Keycloak Connection ---
-      - CAMUNDA_IDENTITY_BASE_URL=http://identity:8084
-      - CAMUNDA_KEYCLOAK_URL=http://keycloak:8080
-      - CAMUNDA_KEYCLOAK_REALM=camunda-platform
-      #
-      # --- CAMUNDA DATA SECONDARY STORAGE (Elasticsearch) ---
-      - CAMUNDA_DATA_SECONDARY_STORAGE_ELASTICSEARCH_URL=http://elasticsearch:9200
-      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
-      - CAMUNDA_OPERATE_ELASTICSEARCH_CLUSTERNAME=elasticsearch
-      - CAMUNDA_TASKLIST_ELASTICSEARCH_URL=http://elasticsearch:9200
-
-      # --- Security Credentials (matching your Identity setup) ---
-      - ZEEBE_CLIENT_ID=zeebe
-      - ZEEBE_CLIENT_SECRET=zecret
-    ports:
-      - "26500:26500" # Zeebe Gateway (gRPC)
-      - "8081:8081" # Operate UI
-      - "8082:8082" # Tasklist UI
+      - zeebe_data:/usr/local/zeebe/data
     depends_on:
       elasticsearch:
         condition: service_healthy
-      identity:
-        condition: service_healthy
+    networks:
+      - workflow_net
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -q --spider http://localhost:8081/actuator/health || exit 1",
-        ]
-      interval: 20s
-      timeout: 5s
-      retries: 5
+      # test: ["CMD-SHELL", "wget -qO- http://localhost:9600/actuator/health/readiness | grep -q UP"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9600/actuator/health/readiness || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
-  # -----------------------------
-  # CONNECTORS
-  # -----------------------------
-  # connectors:
-  #   image: camunda/connectors-bundle:8.8.0
-  #   container_name: connectors
-  #   environment:
-  #     CAMUNDA_CLIENT_GRPCADDRESS: http://orchestration:26500
-  #     CAMUNDA_CLIENT_RESTADDRESS: http://orchestration:8088
-
-  #     CAMUNDA_CLIENT_AUTH_TOKENURL: http://keycloak:8080/realms/camunda-platform/protocol/openid-connect/token
-  #     CAMUNDA_CLIENT_AUTH_CLIENTID: connectors
-  #     CAMUNDA_CLIENT_AUTH_CLIENTSECRET: connectors-secret
-  #   ports:
-  #     - "8086:8080"
-  #   restart: unless-stopped
-  #   depends_on:
-  #     orchestration:
-  #       condition: service_healthy
+  # ─────────────────────────────────────────
+  # OPERATE — monitor & manage process instances
+  # ─────────────────────────────────────────
+  operate:
+    image: camunda/operate:8.5.0
+    container_name: operate
+    restart: unless-stopped
+    environment:
+      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=zeebe:26500
+      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
+      - SPRING_PROFILES_ACTIVE=dev
+    ports:
+      - "8081:8080"
+    depends_on:
+      zeebe:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - workflow_net
 
   # -----------------------------
   # MINIO
@@ -224,6 +179,14 @@ services:
     volumes:
       - minio_data:/data
     restart: unless-stopped
+    networks:
+      - workflow_net                                          # FIX: thêm network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # -----------------------------
   # RABBITMQ
@@ -240,6 +203,8 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
+    networks:
+      - workflow_net                                          # FIX: thêm network
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
       interval: 10s
@@ -248,7 +213,7 @@ services:
       start_period: 20s
 
   # -----------------------------
-  # BUSINESS SERVICES
+  # WORKFLOW SERVICE
   # -----------------------------
   workflow-service:
     build:
@@ -265,20 +230,27 @@ services:
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
       CAMUNDA_CLIENT_MODE: self-managed
-      CAMUNDA_CLIENT_GRPC_ADDRESS: http://orchestration:26500
-      CAMUNDA_CLIENT_REST_ADDRESS: http://orchestration:8080
+      CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500        # FIX: orchestration → zeebe
+      CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080         # FIX: orchestration → zeebe
       CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
       CAMUNDA_CLIENT_AUTH_METHOD: none
     ports:
       - "8085:8080"
+    networks:
+      - workflow_net                                          # FIX: thêm network
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      orchestration:
+      zeebe:                                                 # FIX: orchestration → zeebe
+        condition: service_healthy
+      keycloak:                                              # FIX: thêm dependency Keycloak
         condition: service_healthy
 
+  # -----------------------------
+  # INTEGRATION SERVICE
+  # -----------------------------
   integration-service:
     build:
       context: ./backend/integration-service
@@ -292,8 +264,12 @@ services:
       SPRING_JPA_SHOW_SQL: "false"
     ports:
       - "8089:8080"
+    networks:
+      - workflow_net                                          # FIX: thêm network
     depends_on:
       postgres:
+        condition: service_healthy
+      keycloak:                                              # FIX: thêm dependency Keycloak
         condition: service_healthy
 
 # -----------------------------
@@ -301,7 +277,14 @@ services:
 # -----------------------------
 volumes:
   postgres_data:
-  es_data:
-  orchestration_data:
+  elasticsearch_data:                                        # FIX: đổi tên từ es_data
+  zeebe_data:                                                # FIX: đổi tên từ orchestration_data
   minio_data:
   rabbitmq_data:
+
+# -----------------------------
+# NETWORKS
+# -----------------------------
+networks:
+  workflow_net:                                               # FIX: khai báo network còn thiếu
+    driver: bridge
