@@ -1,0 +1,138 @@
+server:
+  port: 8080 # Gateway Port
+  error:
+    whitelabel:
+      enabled: false
+    include-message: always
+    include-binding-errors: always
+    include-exception: false
+
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:5173
+    allowed-origin-patterns:
+      - http://localhost:*
+      - http://127.0.0.1:*
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - Accept
+      - Origin
+      - X-Requested-With
+    exposed-headers:
+      - Authorization
+      - Location
+    allow-credentials: true
+    max-age: 3600
+  request-logging:
+    routes:
+      - path-prefix: /identity
+        service-name: IDENTITY-SERVICE
+        target-uri: lb://IDENTITY-SERVICE
+      - path-prefix: /document
+        service-name: DOCUMENT-SERVICE
+        target-uri: lb://DOCUMENT-SERVICE
+      - path-prefix: /workflow
+        service-name: WORKFLOW-SERVICE
+        target-uri: lb://WORKFLOW-SERVICE
+      - path-prefix: /integration
+        service-name: INTEGRATION-SERVICE
+        target-uri: lb://INTEGRATION-SERVICE
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls-primary-name: Identity Service
+    urls:
+      - name: Identity Service
+        url: /identity/v3/api-docs
+      - name: Document Service
+        url: /document/v3/api-docs
+      - name: Workflow Service
+        url: /workflow/v3/api-docs
+      - name: Integration Service
+        url: /integration/v3/api-docs
+
+spring:
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # URL of Realm in Keycloak
+          issuer-uri: http://localhost:8080/realms/my-realm
+          # Or jwk-set-uri for better performance
+          jwk-set-uri: http://localhost:8080/realms/my-realm/protocol/openid-connect/certs
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay # Forward Token from Gateway to sub service
+      routes:
+        # 1. Identity Service
+        - id: identity-service
+          uri: lb://IDENTITY-SERVICE # use Load Balancer for Eureka
+          predicates:
+            - Path=/identity/**
+          filters:
+            - StripPrefix=1 # remove /identity when send to service identity service
+
+        # 2. Document Service
+        - id: document-service
+          uri: lb://DOCUMENT-SERVICE
+          predicates:
+            - Path=/document/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: documentServiceCircuitBreaker
+                fallbackUri: forward:/fallback/document-service
+
+        # 3. Workflow Service
+        - id: workflow-service
+          uri: lb://WORKFLOW-SERVICE
+          predicates:
+            - Path=/workflow/**
+          filters:
+            - StripPrefix=1
+
+        # 4. Integration Service
+        - id: integration-service
+          uri: lb://INTEGRATION-SERVICE
+          predicates:
+            - Path=/integration/**
+          filters:
+            - StripPrefix=1
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      documentServiceCircuitBreaker:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+  timelimiter:
+    instances:
+      documentServiceCircuitBreaker:
+        timeout-duration: 3s
+
+# Config Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
