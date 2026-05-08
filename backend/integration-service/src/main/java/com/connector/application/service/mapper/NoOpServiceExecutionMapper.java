@@ -2,9 +2,9 @@ package com.connector.application.service.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.connector.application.dto.request.ExecuteServiceRequest;
-import com.connector.application.dto.response.ExecuteServiceResponse;
-import com.connector.domain.entity.EcService;
+import com.connector.application.command.ExecuteServiceCommand;
+import com.connector.application.result.ExecuteServiceResult;
+import com.connector.domain.entity.ServiceEntity;
 import com.connector.domain.enums.ServiceType;
 
 @Component
@@ -21,17 +21,17 @@ public class NoOpServiceExecutionMapper implements ServiceExecutionMapper {
     }
 
     @Override
-    public ExecuteServiceRequest mapRequest(EcService service, ExecuteServiceRequest request) {
+    public ExecuteServiceCommand mapRequest(ServiceEntity service, ExecuteServiceCommand request) {
         return request;
     }
 
     @Override
-    public ExecuteServiceResponse mapResponse(EcService service, ExecuteServiceResponse response) {
+    public ExecuteServiceResult mapResponse(ServiceEntity service, ExecuteServiceResult response) {
         return response;
     }
 
     @Override
-    public boolean supports(EcService service) {
+    public boolean supports(ServiceEntity service) {
         return false;
     }
 }

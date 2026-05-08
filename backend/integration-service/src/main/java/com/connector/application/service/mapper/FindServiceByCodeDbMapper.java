@@ -3,9 +3,9 @@ package com.connector.application.service.mapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.connector.application.dto.request.ExecuteServiceRequest;
-import com.connector.application.dto.response.ExecuteServiceResponse;
-import com.connector.domain.entity.EcService;
+import com.connector.application.command.ExecuteServiceCommand;
+import com.connector.application.result.ExecuteServiceResult;
+import com.connector.domain.entity.ServiceEntity;
 import com.connector.domain.enums.ServiceType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +32,14 @@ public class FindServiceByCodeDbMapper implements ServiceExecutionMapper {
     }
 
     @Override
-    public ExecuteServiceRequest mapRequest(EcService service, ExecuteServiceRequest request) {
-        JsonNode payload = request != null ? request.payload() : null;
+    public ExecuteServiceCommand mapRequest(ServiceEntity service, ExecuteServiceCommand command) {
+
+        if (command == null) {
+            throw new IllegalArgumentException("command must not be null");
+        }
+
+        JsonNode payload = command.payload();
+
         String serviceCode = text(payload, "serviceCode");
         if (!StringUtils.hasText(serviceCode)) {
             throw new IllegalArgumentException("payload.serviceCode is required for FIND_SERVICE_BY_CODE");
@@ -44,15 +50,17 @@ public class FindServiceByCodeDbMapper implements ServiceExecutionMapper {
         params.put("serviceCode", serviceCode);
         mappedPayload.set("params", params);
 
-        return new ExecuteServiceRequest(
-            request != null ? request.headers() : null,
-            mappedPayload
-        );
+        return new ExecuteServiceCommand(
+                command.appId(),
+                command.serviceCode(),
+                command.serviceVersion(),
+                command.headers(),
+                mappedPayload);
     }
 
     @Override
-    public ExecuteServiceResponse mapResponse(EcService service, ExecuteServiceResponse response) {
-        JsonNode body = response.body();
+    public ExecuteServiceResult mapResponse(ServiceEntity service, ExecuteServiceResult result) {
+        JsonNode body = result.body();
         JsonNode firstRow = extractFirstRow(body);
 
         ObjectNode mappedBody = objectMapper.createObjectNode();
@@ -63,16 +71,15 @@ public class FindServiceByCodeDbMapper implements ServiceExecutionMapper {
             mappedBody.putNull("service");
         }
 
-        return new ExecuteServiceResponse(
-            response.serviceId(),
-            response.appId(),
-            response.serviceCode(),
-            response.serviceVersion(),
-            response.serviceType(),
-            response.statusCode(),
-            response.responseHeaders(),
-            mappedBody
-        );
+        return new ExecuteServiceResult(
+                result.serviceId(),
+                result.appId(),
+                result.serviceCode(),
+                result.serviceVersion(),
+                result.serviceType(),
+                result.statusCode(),
+                result.responseHeaders(),
+                mappedBody);
     }
 
     private JsonNode extractFirstRow(JsonNode body) {
