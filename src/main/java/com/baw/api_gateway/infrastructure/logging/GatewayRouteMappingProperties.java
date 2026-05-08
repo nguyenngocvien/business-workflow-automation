@@ -3,9 +3,7 @@ package com.baw.api_gateway.infrastructure.logging;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "app.request-logging")
 public record GatewayRouteMappingProperties(
         List<RouteMapping> routes

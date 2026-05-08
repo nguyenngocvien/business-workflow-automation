@@ -3,9 +3,7 @@ package com.baw.api_gateway.infrastructure.config;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "app.cors")
 public record GatewayCorsProperties(
         List<String> allowedOrigins,
