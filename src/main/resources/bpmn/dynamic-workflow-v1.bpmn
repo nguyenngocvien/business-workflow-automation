@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+    id="Definitions_DynamicWorkflow_v3"
+    targetNamespace="http://bpmn.io/schema/bpmn">
+
+    <bpmn:message id="Message_TaskCompleted" name="USER_TASK_COMPLETED" />
+
+    <bpmn:process id="dynamic-workflow-v1" name="Dynamic Workflow v1" isExecutable="true">
+
+        <!-- Start -->
+        <bpmn:startEvent id="StartEvent" name="Start">
+            <bpmn:outgoing>Flow_1</bpmn:outgoing>
+        </bpmn:startEvent>
+
+        <!-- Get First Step -->
+        <bpmn:serviceTask id="GetFirstStep" name="Get First Step">
+            <bpmn:extensionElements>
+                <zeebe:taskDefinition type="get-first-step" retries="3" />
+            </bpmn:extensionElements>
+            <bpmn:incoming>Flow_1</bpmn:incoming>
+            <bpmn:outgoing>Flow_2</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <!-- Has First Step -->
+        <bpmn:exclusiveGateway id="Gateway_HasFirstStep" name="Has First Step?">
+            <bpmn:incoming>Flow_2</bpmn:incoming>
+            <bpmn:outgoing>Flow_3</bpmn:outgoing>
+            <bpmn:outgoing>Flow_End_1</bpmn:outgoing>
+        </bpmn:exclusiveGateway>
+
+        <!-- Create Task -->
+        <bpmn:serviceTask id="CreateTask" name="Create Task">
+            <bpmn:extensionElements>
+                <zeebe:taskDefinition type="create-task" retries="3" />
+            </bpmn:extensionElements>
+            <bpmn:incoming>Flow_3</bpmn:incoming>
+            <bpmn:incoming>Flow_LoopBack</bpmn:incoming>
+            <bpmn:outgoing>Flow_4</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <!-- Wait -->
+        <bpmn:intermediateCatchEvent id="WaitTaskComplete" name="Wait Task Complete">
+            <bpmn:incoming>Flow_4</bpmn:incoming>
+            <bpmn:outgoing>Flow_5</bpmn:outgoing>
+            <bpmn:messageEventDefinition messageRef="Message_TaskCompleted" />
+            <bpmn:extensionElements>
+                <zeebe:subscription correlationKey="= taskId" />
+            </bpmn:extensionElements>
+        </bpmn:intermediateCatchEvent>
+
+        <!-- Complete Task + Get Next -->
+        <bpmn:serviceTask id="CompleteTask" name="Complete Task and Resolve Next Step">
+            <bpmn:extensionElements>
+                <zeebe:taskDefinition type="complete-task" retries="3" />
+            </bpmn:extensionElements>
+            <bpmn:incoming>Flow_5</bpmn:incoming>
+            <bpmn:outgoing>Flow_6</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <!-- Has Next Step -->
+        <bpmn:exclusiveGateway id="Gateway_HasNextStep" name="Has Next Step?">
+            <bpmn:incoming>Flow_6</bpmn:incoming>
+            <bpmn:outgoing>Flow_LoopBack</bpmn:outgoing>
+            <bpmn:outgoing>Flow_End_2</bpmn:outgoing>
+        </bpmn:exclusiveGateway>
+
+        <!-- End -->
+        <bpmn:endEvent id="EndEvent" name="End">
+            <bpmn:incoming>Flow_End_1</bpmn:incoming>
+            <bpmn:incoming>Flow_End_2</bpmn:incoming>
+        </bpmn:endEvent>
+
+        <!-- Flows -->
+        <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent" targetRef="GetFirstStep" />
+        <bpmn:sequenceFlow id="Flow_2" sourceRef="GetFirstStep" targetRef="Gateway_HasFirstStep" />
+
+        <!-- First step exists -->
+        <bpmn:sequenceFlow id="Flow_3" sourceRef="Gateway_HasFirstStep" targetRef="CreateTask">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">
+                = hasNextTask = true
+            </bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+        <!-- No first step -->
+        <bpmn:sequenceFlow id="Flow_End_1" sourceRef="Gateway_HasFirstStep" targetRef="EndEvent">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">
+                = hasNextTask = false
+            </bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+        <bpmn:sequenceFlow id="Flow_4" sourceRef="CreateTask" targetRef="WaitTaskComplete" />
+        <bpmn:sequenceFlow id="Flow_5" sourceRef="WaitTaskComplete" targetRef="CompleteTask" />
+        <bpmn:sequenceFlow id="Flow_6" sourceRef="CompleteTask" targetRef="Gateway_HasNextStep" />
+
+        <!-- Loop -->
+        <bpmn:sequenceFlow id="Flow_LoopBack" sourceRef="Gateway_HasNextStep" targetRef="CreateTask">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">
+                = hasNextTask = true
+            </bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+        <!-- No next -->
+        <bpmn:sequenceFlow id="Flow_End_2" sourceRef="Gateway_HasNextStep" targetRef="EndEvent">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">
+                = hasNextTask = false
+            </bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+    </bpmn:process>
+
+</bpmn:definitions>

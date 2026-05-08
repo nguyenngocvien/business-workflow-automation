@@ -50,7 +50,7 @@ public class UserTask {
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "claimed_at")
@@ -58,4 +58,11 @@ public class UserTask {
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

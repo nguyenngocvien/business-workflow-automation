@@ -8,7 +8,7 @@ import com.workflow.application.usecase.result.WorkflowDefinitionResult;
 import com.workflow.application.usecase.result.WorkflowDefinitionDeploymentResult;
 import java.util.List;
 
-public interface ProcessDefinitionUseCase {
+public interface WorkflowDefinitionUseCase {
 
     WorkflowDefinitionResult deployDefinition(DeployWorkflowDefinitionCommand command);
 
@@ -21,4 +21,6 @@ public interface ProcessDefinitionUseCase {
     WorkflowDefinitionResult getDefinition(Long definitionId);
 
     List<WorkflowDefinitionResult> getDefinitionsByWorkflowKey(String workflowKey);
+
+    boolean hasFirstStep(String processInstanceId);
 }

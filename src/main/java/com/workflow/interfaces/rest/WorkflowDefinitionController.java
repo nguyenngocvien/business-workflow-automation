@@ -1,6 +1,6 @@
 package com.workflow.interfaces.rest;
 
-import com.workflow.application.usecase.ProcessDefinitionUseCase;
+import com.workflow.application.usecase.WorkflowDefinitionUseCase;
 import com.workflow.application.usecase.command.DeployWorkflowBpmnCommand;
 import com.workflow.application.usecase.command.DeployWorkflowDefinitionCommand;
 import com.workflow.application.usecase.command.StepDefinitionCommand;
@@ -32,11 +32,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/workflow-definitions")
 @Tag(name = "Workflow Definition", description = "APIs for workflow definition management")
-public class ProcessDefinitionController {
+public class WorkflowDefinitionController {
 
-    private final ProcessDefinitionUseCase workflowDefinitionUseCase;
+    private final WorkflowDefinitionUseCase workflowDefinitionUseCase;
 
-    public ProcessDefinitionController(ProcessDefinitionUseCase workflowDefinitionUseCase) {
+    public WorkflowDefinitionController(WorkflowDefinitionUseCase workflowDefinitionUseCase) {
         this.workflowDefinitionUseCase = workflowDefinitionUseCase;
     }
 

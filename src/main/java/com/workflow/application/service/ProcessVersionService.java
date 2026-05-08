@@ -11,6 +11,7 @@ import com.workflow.application.exception.BusinessException;
 import com.workflow.application.exception.ResourceNotFoundException;
 import com.workflow.application.usecase.ProcessVersionUseCase;
 import com.workflow.application.usecase.command.CreateProcessVersionCommand;
+import com.workflow.application.usecase.result.DeploymentResult;
 import com.workflow.application.usecase.result.ProcessDeployResult;
 import com.workflow.application.usecase.result.ProcessVersionResult;
 import com.workflow.domain.entity.ProcessDefinition;
@@ -74,7 +75,7 @@ public class ProcessVersionService implements ProcessVersionUseCase {
                 .filter(activeVersion -> !Objects.equals(activeVersion.getId(), processVersion.getId()))
                 .forEach(activeVersion -> activeVersion.setStatus(DeployStatus.DEPRECATED));
 
-        CamundaDeployService.DeploymentResult deploymentResult = camundaDeployService.deployBpmn(
+        DeploymentResult deploymentResult = camundaDeployService.deployBpmn(
                 definition.getProcessKey(),
                 processVersion.getVersion(),
                 processVersion.getBpmnXml());

@@ -2,7 +2,11 @@ package com.workflow.domain.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "process_deployments")
 public class ProcessDeployment {
@@ -30,6 +34,4 @@ public class ProcessDeployment {
 
     @Column(name = "environment", length = 50)
     private String environment;
-
-    // getters/setters
 }

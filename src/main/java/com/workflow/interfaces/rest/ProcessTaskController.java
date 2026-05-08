@@ -1,21 +1,19 @@
 package com.workflow.interfaces.rest;
 
-import com.workflow.application.usecase.ProcessTaskUseCase;
 import com.workflow.application.usecase.command.ClaimTaskByCandidateCommand;
 import com.workflow.application.usecase.command.ClaimTaskCommand;
 import com.workflow.application.usecase.command.CompleteTaskCommand;
 import com.workflow.application.usecase.command.CreateWorkflowTaskIdentityLinkCommand;
 import com.workflow.application.usecase.command.ReassignTaskCommand;
-import com.workflow.application.usecase.command.SaveTaskDataCommand;
-import com.workflow.application.usecase.result.ClaimableTaskResult;
 import com.workflow.application.usecase.result.WorkflowTaskIdentityLinkResult;
+import com.workflow.application.usecase.UserTaskUseCase;
+import com.workflow.application.usecase.result.ClaimableTaskResult;
 import com.workflow.application.usecase.result.WorkflowTaskResult;
 import com.workflow.interfaces.rest.request.ClaimTaskByCandidateRequest;
 import com.workflow.interfaces.rest.request.ClaimTaskRequest;
 import com.workflow.interfaces.rest.request.CompleteTaskRequest;
 import com.workflow.interfaces.rest.request.CreateWorkflowTaskIdentityLinkRequest;
 import com.workflow.interfaces.rest.request.ReassignTaskRequest;
-import com.workflow.interfaces.rest.request.SaveTaskDataRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,11 +35,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "User Tasks", description = "APIs for claiming, reassigning, and completing user tasks")
 public class ProcessTaskController {
 
-    private final ProcessTaskUseCase processTaskUseCase;
+    private final UserTaskUseCase processTaskUseCase;
 
-    public ProcessTaskController(
-        ProcessTaskUseCase processTaskUseCase) 
-    {
+    public ProcessTaskController(UserTaskUseCase processTaskUseCase) {
         this.processTaskUseCase = processTaskUseCase;
     }
 
@@ -60,6 +56,7 @@ public class ProcessTaskController {
             .actionBy(request.actionBy())
             .comment(request.comment())
             .build();
+
         return processTaskUseCase.claimTask(command);
     }
 
@@ -95,19 +92,8 @@ public class ProcessTaskController {
             .comment(request.comment())
             .data(request.data())
             .build();
-        return processTaskUseCase.completeTask(command);
-    }
 
-    @PatchMapping("/{taskId}/data")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Save task data", description = "Save task data without completing the task")
-    public void saveTaskData(@PathVariable Long taskId, @Valid @RequestBody SaveTaskDataRequest request) {
-        SaveTaskDataCommand command = SaveTaskDataCommand.builder()
-            .taskId(taskId)
-            .changedBy(request.changedBy())
-            .data(request.data())
-            .build();
-        processTaskUseCase.saveTaskData(command);
+        return processTaskUseCase.completeTask(command);
     }
 
     @GetMapping("/{taskId}/identity-links")
