@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <include file="tables/001-users.sql" relativeToChangelogFile="true"/>
+    <include file="tables/002-identity-providers.sql" relativeToChangelogFile="true"/>
+    <include file="tables/003-groups.sql" relativeToChangelogFile="true"/>
+    <include file="tables/004-roles.sql" relativeToChangelogFile="true"/>
+    <include file="tables/005-permissions.sql" relativeToChangelogFile="true"/>
+    <include file="tables/006-departments.sql" relativeToChangelogFile="true"/>
+    <include file="tables/007-user-external-mappings.sql" relativeToChangelogFile="true"/>
+    <include file="tables/008-user-groups.sql" relativeToChangelogFile="true"/>
+    <include file="tables/009-role-permissions.sql" relativeToChangelogFile="true"/>
+    <include file="tables/010-user-roles.sql" relativeToChangelogFile="true"/>
+    <include file="tables/011-group-roles.sql" relativeToChangelogFile="true"/>
+    <include file="tables/012-user-departments.sql" relativeToChangelogFile="true"/>
+    <include file="tables/013-delegations.sql" relativeToChangelogFile="true"/>
+    <include file="tables/014-sync-jobs.sql" relativeToChangelogFile="true"/>
+    <include file="tables/015-audit-logs.sql" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

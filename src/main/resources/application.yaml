@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: identity
+  datasource:
+    url: jdbc:postgresql://localhost:5432/identity_db
+    username: admin
+    password: admin123
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true # On/Off liquibase
+    default-schema: public
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/your-realm
+
+# Config for Keycloak Admin Client
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: your-realm
+  client-id: admin-cli
+  client-secret: your-client-secret
