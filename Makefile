@@ -14,8 +14,8 @@ help:
 pull-api-gateway:
 	git subtree pull --prefix backend/api-gateway https://github.com/nguyenngocvien/api-gateway.git main --squash
 
-pull-service-discovery:
-	git subtree pull --prefix backend/service-discovery https://github.com/nguyenngocvien/service-discovery.git main --squash
+pull-discovery-server:
+	git subtree pull --prefix backend/discovery-server https://github.com/nguyenngocvien/discovery-server.git main --squash
 
 pull-identity-service:
 	git subtree pull --prefix backend/identity-service https://github.com/nguyenngocvien/identity-service.git main --squash
