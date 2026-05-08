@@ -28,3 +28,6 @@ pull-integration-service:
 
 pull-document-service:
 	git subtree pull --prefix backend/document-service https://github.com/nguyenngocvien/e-document.git Java17 --squash
+
+pull-notification-service:
+	git subtree pull --prefix backend/notification-service https://github.com/nguyenngocvien/notification-service.git main --squash

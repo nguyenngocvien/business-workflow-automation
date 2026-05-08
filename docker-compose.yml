@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       # Init multiple databases via entrypoint script
-      POSTGRES_MULTIPLE_DATABASES: bpm,keycloak
+      POSTGRES_MULTIPLE_DATABASES: bpm,keycloak,edocument
     ports:
       - "5432:5432"
     volumes:
@@ -84,7 +84,7 @@ services:
       - "8080:8080"
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak   # FIX: DB riêng cho Keycloak
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: postgres
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -92,7 +92,7 @@ services:
       KC_HEALTH_ENABLED: "true"
     restart: on-failure
     networks:
-      - workflow_net                                          # FIX: thêm network
+      - workflow_net
     healthcheck:
       test:
         [
@@ -180,7 +180,7 @@ services:
       - minio_data:/data
     restart: unless-stopped
     networks:
-      - workflow_net                                          # FIX: thêm network
+      - workflow_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
@@ -204,13 +204,49 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
     networks:
-      - workflow_net                                          # FIX: thêm network
+      - workflow_net
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
+
+  # -----------------------------
+  # DISCOVERY SERVER
+  # -----------------------------
+  discovery-server:
+    build:
+      context: ./backend/discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - workflow_net
+
+  # -----------------------------
+  # API GATEWAY
+  # -----------------------------
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8080
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    ports:
+      - "8088:8080"
+    depends_on:
+      - discovery-server
+      - keycloak
+    networks:
+      - workflow_net
 
   # -----------------------------
   # WORKFLOW SERVICE
@@ -230,22 +266,22 @@ services:
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
       CAMUNDA_CLIENT_MODE: self-managed
-      CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500        # FIX: orchestration → zeebe
-      CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080         # FIX: orchestration → zeebe
+      CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500
+      CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080
       CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
       CAMUNDA_CLIENT_AUTH_METHOD: none
     ports:
       - "8085:8080"
     networks:
-      - workflow_net                                          # FIX: thêm network
+      - workflow_net
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      zeebe:                                                 # FIX: orchestration → zeebe
+      zeebe:
         condition: service_healthy
-      keycloak:                                              # FIX: thêm dependency Keycloak
+      keycloak:
         condition: service_healthy
 
   # -----------------------------
@@ -265,20 +301,47 @@ services:
     ports:
       - "8089:8080"
     networks:
-      - workflow_net                                          # FIX: thêm network
+      - workflow_net
     depends_on:
       postgres:
         condition: service_healthy
-      keycloak:                                              # FIX: thêm dependency Keycloak
+      keycloak:
         condition: service_healthy
+
+  # -----------------------------
+  # DOCUMENT SERVICE
+  # -----------------------------
+  document-service:
+    build:
+      context: ./backend/document-service
+      dockerfile: Dockerfile
+    container_name: document-service
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/edocument
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    ports:
+      - "8086:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - workflow_net
 
 # -----------------------------
 # VOLUMES
 # -----------------------------
 volumes:
   postgres_data:
-  elasticsearch_data:                                        # FIX: đổi tên từ es_data
-  zeebe_data:                                                # FIX: đổi tên từ orchestration_data
+  elasticsearch_data:
+  zeebe_data:
   minio_data:
   rabbitmq_data:
 
@@ -286,5 +349,5 @@ volumes:
 # NETWORKS
 # -----------------------------
 networks:
-  workflow_net:                                               # FIX: khai báo network còn thiếu
+  workflow_net:
     driver: bridge
