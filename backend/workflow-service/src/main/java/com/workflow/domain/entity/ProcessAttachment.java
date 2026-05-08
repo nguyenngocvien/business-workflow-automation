@@ -1,9 +1,14 @@
 package com.workflow.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "process_attachment")
 public class ProcessAttachment {
 

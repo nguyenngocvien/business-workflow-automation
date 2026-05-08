@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/processes")
-@Tag(name = "Workflow Runtime", description = "APIs for workflow runtime, task processing, and search")
+@Tag(name = "Process Instances", description = "APIs for workflow runtime, task processing, and search")
 public class ProcessInstanceController {
 
     private final ProcessInstanceUseCase processInstanceUseCase;
@@ -32,7 +32,7 @@ public class ProcessInstanceController {
         this.processInstanceUseCase = processInstanceUseCase;
     }
 
-    @PostMapping("/start")
+    @PostMapping("/startProcess")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Start process", description = "Start a new process instance using the latest active definition for the workflow key")
     public ProcessInstanceResult startProcess(@Valid @RequestBody StartProcessRequest request) {

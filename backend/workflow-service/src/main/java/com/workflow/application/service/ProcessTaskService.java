@@ -1,16 +1,15 @@
 package com.workflow.application.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.workflow.application.exception.BusinessException;
 import com.workflow.application.exception.ResourceNotFoundException;
-import com.workflow.application.usecase.ProcessTaskUseCase;
+import com.workflow.application.port.out.serializer.JsonSerializer;
+import com.workflow.application.usecase.UserTaskUseCase;
 import com.workflow.application.usecase.command.ClaimTaskByCandidateCommand;
 import com.workflow.application.usecase.command.ClaimTaskCommand;
 import com.workflow.application.usecase.command.CompleteTaskCommand;
+import com.workflow.application.usecase.command.CreateTaskCommand;
 import com.workflow.application.usecase.command.CreateWorkflowTaskIdentityLinkCommand;
 import com.workflow.application.usecase.command.ReassignTaskCommand;
-import com.workflow.application.usecase.command.SaveTaskDataCommand;
 import com.workflow.application.usecase.result.ClaimableTaskResult;
 import com.workflow.application.usecase.result.WorkflowTaskIdentityLinkResult;
 import com.workflow.application.usecase.result.WorkflowTaskResult;
@@ -22,54 +21,88 @@ import com.workflow.domain.entity.ProcessTaskIdentityLink;
 import com.workflow.domain.entity.UserTask;
 import com.workflow.domain.entity.UserTaskAssignmentHistory;
 import com.workflow.domain.repository.ProcessHistoryRepository;
+import com.workflow.domain.repository.ProcessInstanceRepository;
 import com.workflow.domain.repository.ProcessTaskAssignmentHistoryRepository;
 import com.workflow.domain.repository.ProcessTaskDataHistoryRepository;
 import com.workflow.domain.repository.ProcessTaskDataRepository;
 import com.workflow.domain.repository.ProcessTaskIdentityLinkRepository;
 import com.workflow.domain.repository.ProcessTaskRepository;
-import com.workflow.infrastructure.camunda.CamundaTaskService;
-import io.camunda.tasklist.dto.Task;
-import io.camunda.tasklist.exception.TaskListException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class ProcessTaskService implements ProcessTaskUseCase {
+public class ProcessTaskService implements UserTaskUseCase {
 
     private static final Set<String> ALLOWED_LINK_TYPES = Set.of("CANDIDATE", "ASSIGNEE", "OWNER", "PARTICIPANT");
 
+    private final ProcessInstanceRepository processInstanceRepository;
     private final ProcessTaskRepository processTaskRepository;
     private final ProcessTaskIdentityLinkRepository processTaskIdentityLinkRepository;
     private final ProcessTaskDataRepository processTaskDataRepository;
     private final ProcessTaskDataHistoryRepository processTaskDataHistoryRepository;
     private final ProcessTaskAssignmentHistoryRepository processTaskAssignmentHistoryRepository;
     private final ProcessHistoryRepository processHistoryRepository;
-    private final CamundaTaskService camundaTaskService;
-    private final ObjectMapper objectMapper;
+    private final JsonSerializer jsonSerializer;
 
     public ProcessTaskService(
+            ProcessInstanceRepository processInstanceRepository,
             ProcessTaskRepository processTaskRepository,
             ProcessTaskIdentityLinkRepository processTaskIdentityLinkRepository,
             ProcessTaskDataRepository processTaskDataRepository,
             ProcessTaskDataHistoryRepository processTaskDataHistoryRepository,
             ProcessTaskAssignmentHistoryRepository processTaskAssignmentHistoryRepository,
             ProcessHistoryRepository processHistoryRepository,
-            CamundaTaskService camundaTaskService,
-            ObjectMapper objectMapper) {
+            JsonSerializer jsonSerializer) {
+        this.processInstanceRepository = processInstanceRepository;
         this.processTaskRepository = processTaskRepository;
         this.processTaskIdentityLinkRepository = processTaskIdentityLinkRepository;
         this.processTaskDataRepository = processTaskDataRepository;
         this.processTaskDataHistoryRepository = processTaskDataHistoryRepository;
         this.processTaskAssignmentHistoryRepository = processTaskAssignmentHistoryRepository;
         this.processHistoryRepository = processHistoryRepository;
-        this.camundaTaskService = camundaTaskService;
-        this.objectMapper = objectMapper;
+        this.jsonSerializer = jsonSerializer;
+    }
+
+    @Override
+    public WorkflowTaskResult createTask(CreateTaskCommand command) {
+        if (command == null) {
+            throw new BusinessException("Create task command is required");
+        }
+        if (command.taskId() == null) {
+            throw new BusinessException("taskId is required");
+        }
+        if (command.processInstanceId() == null) {
+            throw new BusinessException("processInstanceId is required");
+        }
+
+        ProcessInstance processInstance = processInstanceRepository.findById(command.processInstanceId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Process instance not found with id=" + command.processInstanceId()));
+
+        UserTask task = new UserTask();
+        task.setProcessInstance(processInstance);
+        task.setTaskId(command.taskId().toString());
+        task.setTaskName(command.taskName());
+        task.setTaskCode(command.taskCode());
+        task.setAssignee(command.assignee());
+        task.setCandidateGroup(command.candidateGroup());
+        task.setOwner(command.owner());
+        task.setStatus(command.status());
+        task.setPriority(command.priority());
+        task.setDueDate(command.dueDate());
+        task.setCreatedAt(command.createdAt() == null ? LocalDateTime.now() : command.createdAt());
+
+        saveTaskData(task, command.data(), firstNonBlank(command.owner(), command.assignee(), "SYSTEM"));
+        saveInitialIdentityLinks(task, command);
+
+        return toResult(processTaskRepository.save(task));
     }
 
     @Override
@@ -79,9 +112,7 @@ public class ProcessTaskService implements ProcessTaskUseCase {
             throw new BusinessException("username is required");
         }
 
-        Set<String> pendingTaskIds = getPendingCamundaTaskIds();
         return processTaskRepository.findAll().stream()
-                .filter(task -> pendingTaskIds.contains(task.getTaskId()))
                 .filter(task -> isClaimableForUsername(task, username))
                 .map(task -> toClaimableResult(task, username))
                 .toList();
@@ -89,18 +120,19 @@ public class ProcessTaskService implements ProcessTaskUseCase {
 
     @Override
     public WorkflowTaskResult claimTask(ClaimTaskCommand command) {
-        validateClaimCommand(command == null ? null : command.taskId(), command == null ? null : command.assignee(), command == null ? null : command.actionBy());
+        validateClaimCommand(command == null ? null : command.taskId(), command == null ? null : command.assignee(),
+                command == null ? null : command.actionBy());
         UserTask task = getTask(command.taskId());
         ensureTaskCanBeModified(task);
 
-        claimInCamunda(task.getTaskId(), command.assignee());
         String previousAssignee = task.getAssignee();
         task.setAssignee(command.assignee());
         task.setOwner(command.actionBy());
         task.setStatus("ASSIGNED");
         task.setClaimedAt(LocalDateTime.now());
 
-        saveAssignmentHistory(task, "CLAIM", previousAssignee, command.assignee(), null, null, command.actionBy(), command.comment());
+        saveAssignmentHistory(task, "CLAIM", previousAssignee, command.assignee(), null, null, command.actionBy(),
+                command.comment());
         removeCandidateIdentityLinks(task);
         saveProcessHistory(task, "CLAIM", command.actionBy(), command.comment());
         return toResult(processTaskRepository.save(task));
@@ -124,14 +156,14 @@ public class ProcessTaskService implements ProcessTaskUseCase {
             throw new BusinessException("Task is not claimable by user " + command.username());
         }
 
-        claimInCamunda(task.getTaskId(), command.username());
         String previousAssignee = task.getAssignee();
         task.setAssignee(command.username());
         task.setOwner(command.username());
         task.setStatus("ASSIGNED");
         task.setClaimedAt(LocalDateTime.now());
 
-        saveAssignmentHistory(task, "CLAIM_BY_CANDIDATE", previousAssignee, command.username(), null, null, command.username(), command.comment());
+        saveAssignmentHistory(task, "CLAIM_BY_CANDIDATE", previousAssignee, command.username(), null, null,
+                command.username(), command.comment());
         removeCandidateIdentityLinks(task);
         saveProcessHistory(task, "CLAIM_BY_CANDIDATE", command.username(), command.comment());
         return toResult(processTaskRepository.save(task));
@@ -139,11 +171,11 @@ public class ProcessTaskService implements ProcessTaskUseCase {
 
     @Override
     public WorkflowTaskResult reassignTask(ReassignTaskCommand command) {
-        validateClaimCommand(command == null ? null : command.taskId(), command == null ? null : command.assignee(), command == null ? null : command.actionBy());
+        validateClaimCommand(command == null ? null : command.taskId(), command == null ? null : command.assignee(),
+                command == null ? null : command.actionBy());
         UserTask task = getTask(command.taskId());
         ensureTaskCanBeModified(task);
 
-        claimInCamunda(task.getTaskId(), command.assignee());
         String previousAssignee = task.getAssignee();
         task.setAssignee(command.assignee());
         task.setStatus("ASSIGNED");
@@ -151,7 +183,8 @@ public class ProcessTaskService implements ProcessTaskUseCase {
             task.setClaimedAt(LocalDateTime.now());
         }
 
-        saveAssignmentHistory(task, "REASSIGN", previousAssignee, command.assignee(), null, null, command.actionBy(), command.comment());
+        saveAssignmentHistory(task, "REASSIGN", previousAssignee, command.assignee(), null, null, command.actionBy(),
+                command.comment());
         saveProcessHistory(task, "REASSIGN", command.actionBy(), command.comment());
         return toResult(processTaskRepository.save(task));
     }
@@ -172,58 +205,15 @@ public class ProcessTaskService implements ProcessTaskUseCase {
         ensureTaskCanBeModified(task);
 
         if (command.data() != null && !command.data().isEmpty()) {
-            saveDraftInCamunda(task.getTaskId(), command.data());
-            saveTaskData(SaveTaskDataCommand.builder()
-                    .taskId(command.taskId())
-                    .changedBy(command.actionBy())
-                    .data(command.data())
-                    .build());
+            saveTaskData(task, command.data(), command.actionBy());
         }
 
-        completeInCamunda(task.getTaskId(), command.data());
         task.setStatus("COMPLETED");
         task.setCompletedAt(LocalDateTime.now());
-        saveAssignmentHistory(task, "COMPLETE", task.getAssignee(), task.getAssignee(), null, null, command.actionBy(), command.comment());
+        saveAssignmentHistory(task, "COMPLETE", task.getAssignee(), task.getAssignee(), null, null, command.actionBy(),
+                command.comment());
         saveProcessHistory(task, "COMPLETE", command.actionBy(), command.comment());
         return toResult(processTaskRepository.save(task));
-    }
-
-    @Override
-    public void saveTaskData(SaveTaskDataCommand command) {
-        if (command == null) {
-            throw new BusinessException("Save task data command is required");
-        }
-        if (command.taskId() == null) {
-            throw new BusinessException("taskId is required");
-        }
-
-        UserTask task = getTask(command.taskId());
-        String dataJson = serialize(command.data());
-        ProcessData taskData = processTaskDataRepository.findByTask_Id(command.taskId())
-                .orElseGet(() -> {
-                    ProcessData created = new ProcessData();
-                    created.setTask(task);
-                    created.setCreatedAt(LocalDateTime.now());
-                    return created;
-                });
-        taskData.setDataJson(dataJson);
-        taskData.setUpdatedAt(LocalDateTime.now());
-        processTaskDataRepository.save(taskData);
-
-        Integer version = processTaskDataHistoryRepository.findAll().stream()
-                .filter(history -> history.getTask() != null && command.taskId().equals(history.getTask().getId()))
-                .map(ProcessTaskDataHistory::getVersion)
-                .filter(value -> value != null)
-                .max(Integer::compareTo)
-                .orElse(0) + 1;
-
-        ProcessTaskDataHistory history = new ProcessTaskDataHistory();
-        history.setTask(task);
-        history.setDataJson(dataJson);
-        history.setChangedBy(command.changedBy());
-        history.setChangedAt(LocalDateTime.now());
-        history.setVersion(version);
-        processTaskDataHistoryRepository.save(history);
     }
 
     @Override
@@ -254,25 +244,45 @@ public class ProcessTaskService implements ProcessTaskUseCase {
     public void deleteTaskIdentityLink(Long identityLinkId) {
         requireIdentityLinkId(identityLinkId);
         ProcessTaskIdentityLink identityLink = processTaskIdentityLinkRepository.findById(identityLinkId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task identity link not found with id=" + identityLinkId));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Task identity link not found with id=" + identityLinkId));
         processTaskIdentityLinkRepository.delete(identityLink);
+    }
+
+    private void saveTaskData(UserTask task, Map<String, Object> data, String changedBy) {
+
+        String dataJson = serialize(data);
+        ProcessData taskData = processTaskDataRepository.findByTask_Id(task.getId())
+                .orElseGet(() -> {
+                    ProcessData created = new ProcessData();
+                    created.setTask(task);
+                    created.setCreatedAt(LocalDateTime.now());
+                    return created;
+                });
+        taskData.setDataJson(dataJson);
+        taskData.setUpdatedAt(LocalDateTime.now());
+        processTaskDataRepository.save(taskData);
+
+        Integer version = processTaskDataHistoryRepository.findAll().stream()
+                .filter(history -> history.getTask() != null && task.getId().equals(history.getTask().getId()))
+                .map(ProcessTaskDataHistory::getVersion)
+                .filter(value -> value != null)
+                .max(Integer::compareTo)
+                .orElse(0) + 1;
+
+        ProcessTaskDataHistory history = new ProcessTaskDataHistory();
+        history.setTask(task);
+        history.setDataJson(dataJson);
+        history.setChangedBy(changedBy);
+        history.setChangedAt(LocalDateTime.now());
+        history.setVersion(version);
+        processTaskDataHistoryRepository.save(history);
     }
 
     private UserTask getTask(Long taskId) {
         UserTask task = processTaskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id=" + taskId));
-        ensureTaskExistsInCamunda(task.getTaskId());
         return task;
-    }
-
-    private Set<String> getPendingCamundaTaskIds() {
-        try {
-            return camundaTaskService.getPendingTasks().stream()
-                    .map(Task::getId)
-                    .collect(Collectors.toSet());
-        } catch (TaskListException exception) {
-            throw new BusinessException("Unable to load pending tasks from Camunda");
-        }
     }
 
     private void validateClaimCommand(Long taskId, String assignee, String actionBy) {
@@ -364,7 +374,8 @@ public class ProcessTaskService implements ProcessTaskUseCase {
                 .taskId(task.getId())
                 .workflowInstanceId(processInstance == null ? null : processInstance.getId())
                 .businessKey(processInstance == null ? null : processInstance.getBusinessKey())
-                .workflowStatus(processInstance == null || processInstance.getStatus() == null ? null : processInstance.getStatus().name())
+                .workflowStatus(processInstance == null || processInstance.getStatus() == null ? null
+                        : processInstance.getStatus().name())
                 .currentStepCode(processInstance == null ? null : processInstance.getCurrentStepCode())
                 .taskName(task.getTaskName())
                 .taskCode(task.getTaskCode())
@@ -392,7 +403,8 @@ public class ProcessTaskService implements ProcessTaskUseCase {
 
     private String resolveCandidateSourceType(UserTask task, String username) {
         String normalizedUsername = normalize(username);
-        if (normalizedUsername.equals(normalize(task.getAssignee())) || normalizedUsername.equals(normalize(task.getOwner()))) {
+        if (normalizedUsername.equals(normalize(task.getAssignee()))
+                || normalizedUsername.equals(normalize(task.getOwner()))) {
             return "DIRECT";
         }
         if (normalizedUsername.equals(normalize(task.getCandidateGroup()))) {
@@ -444,47 +456,57 @@ public class ProcessTaskService implements ProcessTaskUseCase {
         history.setNote(note);
         processHistoryRepository.save(history);
     }
+    
+    private void saveInitialIdentityLinks(UserTask task, CreateTaskCommand command) {
+        saveIdentityLinkIfPresent(task, command.assignee(), "ASSIGNEE", true);
+        saveIdentityLinkIfPresent(task, command.owner(), "OWNER", true);
+        saveIdentityLinkIfPresent(task, command.candidateGroup(), "CANDIDATE", false);
+    }
+
+    private void saveIdentityLinkIfPresent(UserTask task, String value, String type, boolean userLink) {
+        Long parsedValue = parseLong(value);
+        if (parsedValue == null) {
+            return;
+        }
+
+        ProcessTaskIdentityLink identityLink = new ProcessTaskIdentityLink();
+        identityLink.setTask(task);
+        identityLink.setType(type);
+        identityLink.setCreatedAt(LocalDateTime.now());
+        if (userLink) {
+            identityLink.setUserId(parsedValue);
+        } else {
+            identityLink.setGroupId(parsedValue);
+        }
+        processTaskIdentityLinkRepository.save(identityLink);
+    }
+
+    private Long parseLong(String value) {
+        if (isBlank(value)) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+
+    private String firstNonBlank(String first, String second, String fallback) {
+        if (!isBlank(first)) {
+            return first;
+        }
+        if (!isBlank(second)) {
+            return second;
+        }
+        return fallback;
+    }
 
     private String serialize(Map<String, Object> data) {
         try {
-            return objectMapper.writeValueAsString(data == null ? Map.of() : data);
-        } catch (JsonProcessingException exception) {
-            throw new BusinessException("Unable to serialize task data");
-        }
-    }
-
-    private void claimInCamunda(String taskId, String assignee) {
-        try {
-            camundaTaskService.claimTask(taskId, assignee);
-        } catch (TaskListException exception) {
-            throw new BusinessException("Unable to claim task in Camunda");
-        }
-    }
-
-    private void completeInCamunda(String taskId, Map<String, Object> variables) {
-        try {
-            camundaTaskService.completeTask(taskId, variables == null ? Map.of() : variables);
-        } catch (TaskListException exception) {
-            throw new BusinessException("Unable to complete task in Camunda");
-        }
-    }
-
-    private void saveDraftInCamunda(String taskId, Map<String, Object> variables) {
-        try {
-            camundaTaskService.saveTaskData(taskId, variables == null ? Map.of() : variables);
-        } catch (TaskListException exception) {
-            throw new BusinessException("Unable to save draft variables in Camunda");
-        }
-    }
-
-    private void ensureTaskExistsInCamunda(String taskId) {
-        if (isBlank(taskId)) {
-            throw new BusinessException("Camunda taskId is required");
-        }
-        try {
-            camundaTaskService.getTask(taskId);
-        } catch (TaskListException exception) {
-            throw new ResourceNotFoundException("Camunda task not found with id=" + taskId);
+            return jsonSerializer.toJson(data == null ? Map.of() : data);
+        } catch (RuntimeException ex) {
+            throw new BusinessException("Unable to serialize task data", ex);
         }
     }
 

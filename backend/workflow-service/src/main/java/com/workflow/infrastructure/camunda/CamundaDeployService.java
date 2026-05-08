@@ -5,11 +5,14 @@ import io.camunda.client.api.response.DeploymentEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import com.workflow.application.port.out.DeploymentService;
+import com.workflow.application.usecase.result.DeploymentResult;
+
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Service
-public class CamundaDeployService {
+public class CamundaDeployService implements DeploymentService {
 
     private final CamundaClient camundaClient;
 
@@ -46,13 +49,5 @@ public class CamundaDeployService {
                 .processDefinitionKey(deployedProcess.getProcessDefinitionKey())
                 .camundaVersion(String.valueOf(deployedProcess.getVersion()))
                 .build();
-    }
-
-    @lombok.Builder
-    @lombok.Data
-    public static class DeploymentResult {
-        private String deploymentKey;
-        private long processDefinitionKey;
-        private String camundaVersion;
     }
 }

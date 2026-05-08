@@ -83,11 +83,6 @@
 			<version>8.9.0</version>
 		</dependency>
 		<dependency>
-			<groupId>io.camunda</groupId>
-			<artifactId>camunda-tasklist-client-java</artifactId>
-			<version>8.8.3</version>
-		</dependency>
-		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>

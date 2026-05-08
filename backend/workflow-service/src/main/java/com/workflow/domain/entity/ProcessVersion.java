@@ -31,8 +31,7 @@ public class ProcessVersion {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Lob
-    @Column(name = "bpmn_xml", nullable = false)
+    @Column(name = "bpmn_xml", columnDefinition = "TEXT")
     private String bpmnXml;
 
     @Enumerated(EnumType.STRING)
@@ -48,8 +47,7 @@ public class ProcessVersion {
     @Column(name = "deployment_id", length = 255)
     private String deploymentId;
 
-    @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "created_at", nullable = false)

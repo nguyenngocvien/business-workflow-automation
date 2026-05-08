@@ -3,16 +3,18 @@ package com.workflow.application.usecase;
 import com.workflow.application.usecase.command.ClaimTaskByCandidateCommand;
 import com.workflow.application.usecase.command.ClaimTaskCommand;
 import com.workflow.application.usecase.command.CompleteTaskCommand;
+import com.workflow.application.usecase.command.CreateTaskCommand;
 import com.workflow.application.usecase.command.CreateWorkflowTaskIdentityLinkCommand;
 import com.workflow.application.usecase.command.ReassignTaskCommand;
-import com.workflow.application.usecase.command.SaveTaskDataCommand;
 import com.workflow.application.usecase.result.ClaimableTaskResult;
 import com.workflow.application.usecase.result.WorkflowTaskIdentityLinkResult;
 import com.workflow.application.usecase.result.WorkflowTaskResult;
 
 import java.util.List;
 
-public interface ProcessTaskUseCase {
+public interface UserTaskUseCase {
+
+    WorkflowTaskResult createTask(CreateTaskCommand command);
 
     List<ClaimableTaskResult> getClaimableTasks(String username);
 
@@ -23,8 +25,6 @@ public interface ProcessTaskUseCase {
     WorkflowTaskResult reassignTask(ReassignTaskCommand command);
 
     WorkflowTaskResult completeTask(CompleteTaskCommand command);
-
-    void saveTaskData(SaveTaskDataCommand command);
 
     WorkflowTaskIdentityLinkResult createTaskIdentityLink(CreateWorkflowTaskIdentityLinkCommand command);
 
