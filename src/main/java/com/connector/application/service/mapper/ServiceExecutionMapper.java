@@ -1,8 +1,8 @@
 package com.connector.application.service.mapper;
 
-import com.connector.application.dto.request.ExecuteServiceRequest;
-import com.connector.application.dto.response.ExecuteServiceResponse;
-import com.connector.domain.entity.EcService;
+import com.connector.application.command.ExecuteServiceCommand;
+import com.connector.application.result.ExecuteServiceResult;
+import com.connector.domain.entity.ServiceEntity;
 import com.connector.domain.enums.ServiceType;
 
 public interface ServiceExecutionMapper {
@@ -11,11 +11,11 @@ public interface ServiceExecutionMapper {
 
     String supportedServiceCode();
 
-    ExecuteServiceRequest mapRequest(EcService service, ExecuteServiceRequest request);
+    ExecuteServiceCommand mapRequest(ServiceEntity service, ExecuteServiceCommand request);
 
-    ExecuteServiceResponse mapResponse(EcService service, ExecuteServiceResponse response);
+    ExecuteServiceResult mapResponse(ServiceEntity service, ExecuteServiceResult response);
 
-    default boolean supports(EcService service) {
+    default boolean supports(ServiceEntity service) {
         if (service == null || service.getServiceType() == null || service.getServiceCode() == null) {
             return false;
         }
