@@ -249,6 +249,32 @@ services:
       - workflow_net
 
   # -----------------------------
+  # IDENTITY SERVICE
+  # -----------------------------
+  identity-service:
+    build:
+      context: ./backend/identity-service
+      dockerfile: Dockerfile
+    container_name: identity-service
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/identity_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/your-realm
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    ports:
+      - "8087:8081"
+    depends_on:
+      - discovery-server
+      - keycloak
+      - postgres
+    networks:
+      - workflow_net
+
+  # -----------------------------
   # WORKFLOW SERVICE
   # -----------------------------
   workflow-service:
