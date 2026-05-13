@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       # Init multiple databases via entrypoint script
-      POSTGRES_MULTIPLE_DATABASES: bpm,keycloak,edocument
+      POSTGRES_MULTIPLE_DATABASES: bpm,keycloak,edocument,identity_db
     ports:
       - "5432:5432"
     volumes:
