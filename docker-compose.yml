@@ -26,6 +26,27 @@ services:
       retries: 10
 
   # -----------------------------
+  # PGADMIN
+  # -----------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.test
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DISABLE_POSTFIX: "true"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - workflow_net
+
+  # -----------------------------
   # ELASTICSEARCH
   # -----------------------------
   elasticsearch:
@@ -366,6 +387,7 @@ services:
 # -----------------------------
 volumes:
   postgres_data:
+  pgadmin_data:
   elasticsearch_data:
   zeebe_data:
   minio_data:
