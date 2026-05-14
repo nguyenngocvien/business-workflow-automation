@@ -146,7 +146,7 @@ services:
     ports:
       - "26500:26500"   # gRPC gateway (clients / workers)
       - "9600:9600"     # monitoring / REST
-      - "8088:8080"     # management API
+      - "8090:8080"     # management API
     volumes:
       - zeebe_data:/usr/local/zeebe/data
     depends_on:
