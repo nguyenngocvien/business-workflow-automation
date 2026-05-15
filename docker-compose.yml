@@ -258,9 +258,9 @@ services:
     restart: unless-stopped
     environment:
       SERVER_PORT: 8080
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
+      JWT_JWK_SET_URI: http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs
+      EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
     ports:
       - "8080:8080"
     depends_on:
@@ -280,12 +280,15 @@ services:
     restart: unless-stopped
     environment:
       SERVER_PORT: 8081
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/identity_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/your-realm
+      DB_URL: jdbc:postgresql://postgres:5432/identity_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      KEYCLOAK_REALM: my-realm
+      KEYCLOAK_CLIENT_ID: admin-cli
+      KEYCLOAK_CLIENT_SECRET: your-client-secret
+      EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
     ports:
       - "8081:8081"
     depends_on:
