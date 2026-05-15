@@ -1,21 +1,18 @@
 package com.baw.api_gateway.infrastructure.exception;
 
-import java.io.IOException;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import reactor.core.publisher.Mono;
+
 @Component
-public class GatewayAccessDeniedHandler implements AccessDeniedHandler {
+public class GatewayAccessDeniedHandler implements ServerAccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
 
@@ -24,17 +21,21 @@ public class GatewayAccessDeniedHandler implements AccessDeniedHandler {
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException)
-            throws IOException, ServletException {
+    public Mono<Void> handle(ServerWebExchange exchange, AccessDeniedException accessDeniedException) {
         ApiErrorResponse body = JsonErrorResponseFactory.create(
                 HttpStatus.FORBIDDEN,
                 "Forbidden",
                 accessDeniedException.getMessage(),
-                request
+                exchange.getRequest().getPath().value()
         );
 
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getOutputStream(), body);
+        try {
+            byte[] bytes = objectMapper.writeValueAsBytes(body);
+            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+            exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(bytes)));
+        } catch (Exception ex) {
+            return Mono.error(ex);
+        }
     }
 }

@@ -1,21 +1,18 @@
 package com.baw.api_gateway.infrastructure.exception;
 
-import java.io.IOException;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import reactor.core.publisher.Mono;
+
 @Component
-public class GatewayAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class GatewayAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
 
@@ -24,21 +21,21 @@ public class GatewayAuthenticationEntryPoint implements AuthenticationEntryPoint
     }
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
+    public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException authException) {
         ApiErrorResponse body = JsonErrorResponseFactory.create(
                 HttpStatus.UNAUTHORIZED,
                 "Unauthorized",
                 authException.getMessage(),
-                request
+                exchange.getRequest().getPath().value()
         );
 
-        write(response, HttpStatus.UNAUTHORIZED, body);
-    }
-
-    private void write(HttpServletResponse response, HttpStatus status, ApiErrorResponse body) throws IOException {
-        response.setStatus(status.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getOutputStream(), body);
+        try {
+            byte[] bytes = objectMapper.writeValueAsBytes(body);
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(bytes)));
+        } catch (Exception ex) {
+            return Mono.error(ex);
+        }
     }
 }
