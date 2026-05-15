@@ -102,7 +102,7 @@ services:
     container_name: keycloak
     command: start-dev
     ports:
-      - "8080:8080"
+      - "8180:8080"
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
@@ -262,7 +262,7 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     ports:
-      - "8088:8080"
+      - "8080:8080"
     depends_on:
       - discovery-server
       - keycloak
