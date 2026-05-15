@@ -287,7 +287,7 @@ services:
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
     ports:
-      - "8087:8081"
+      - "8081:8081"
     depends_on:
       - discovery-server
       - keycloak
