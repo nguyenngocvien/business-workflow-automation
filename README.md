@@ -38,19 +38,32 @@ The service uses PostgreSQL for persistence, Liquibase for schema management, Sp
 
 Default runtime settings are defined in [`src/main/resources/application.yaml`](src/main/resources/application.yaml).
 
-Important defaults:
+Environment variables supported by the application:
 
-- application port: `8081`
-- database URL: `jdbc:postgresql://localhost:5432/identity_db`
-- database user: `postgres`
-- database password: `postgres`
-- JWT issuer: `http://localhost:8080/realms/your-realm`
-- Eureka registry: `http://localhost:8761/eureka/`
-- Keycloak auth server: `http://localhost:8080`
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_ISSUER_URI`
+- `SERVER_PORT`
+- `EUREKA_DEFAULT_ZONE`
+- `KEYCLOAK_AUTH_SERVER_URL`
+- `KEYCLOAK_REALM`
+- `KEYCLOAK_CLIENT_ID`
+- `KEYCLOAK_CLIENT_SECRET`
 
-Update these values before running against your own environment.
+See [`.env.example`](.env.example) for the default local values.
 
 ## Run Locally
+
+Create a local `.env` file from the example and set any secrets or host-specific values:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then load those variables in your shell or IDE before starting the app.
+
+Using the Maven Wrapper:
 
 Start the application with the Maven Wrapper:
 
@@ -70,6 +83,22 @@ Package and run the jar:
 ./mvnw clean package
 java -jar target/identity-0.0.1-SNAPSHOT.jar
 ```
+
+## Run In Docker
+
+Build the image:
+
+```bash
+docker build -t identity-service .
+```
+
+Run the container with the env file and map the app port:
+
+```bash
+docker run --rm --env-file .env -e SERVER_PORT=8080 -p 8080:8080 identity-service
+```
+
+The `SERVER_PORT=8080` override keeps the container aligned with the `EXPOSE 8080` setting in the Dockerfile.
 
 ## API Documentation
 
