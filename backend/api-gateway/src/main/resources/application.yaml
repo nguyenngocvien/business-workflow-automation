@@ -77,9 +77,36 @@ spring:
           jwk-set-uri: http://localhost:8080/realms/my-realm/protocol/openid-connect/certs
   cloud:
     gateway:
-      default-filters:
-        - TokenRelay # Forward Token from Gateway to sub service
       routes:
+        # Swagger / OpenAPI docs should be reachable without relaying the user token.
+        - id: identity-service-api-docs
+          uri: lb://IDENTITY-SERVICE
+          predicates:
+            - Path=/identity/v3/api-docs,/identity/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: document-service-api-docs
+          uri: lb://DOCUMENT-SERVICE
+          predicates:
+            - Path=/document/v3/api-docs,/document/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: workflow-service-api-docs
+          uri: lb://WORKFLOW-SERVICE
+          predicates:
+            - Path=/workflow/v3/api-docs,/workflow/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: integration-service-api-docs
+          uri: lb://INTEGRATION-SERVICE
+          predicates:
+            - Path=/integration/v3/api-docs,/integration/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
         # 1. Identity Service
         - id: identity-service
           uri: lb://IDENTITY-SERVICE # use Load Balancer for Eureka
@@ -87,6 +114,7 @@ spring:
             - Path=/identity/**
           filters:
             - StripPrefix=1 # remove /identity when send to service identity service
+            - TokenRelay # Forward Token from Gateway to sub service
 
         # 2. Document Service
         - id: document-service
@@ -95,6 +123,7 @@ spring:
             - Path=/document/**
           filters:
             - StripPrefix=1
+            - TokenRelay
             - name: CircuitBreaker
               args:
                 name: documentServiceCircuitBreaker
@@ -107,6 +136,7 @@ spring:
             - Path=/workflow/**
           filters:
             - StripPrefix=1
+            - TokenRelay
 
         # 4. Integration Service
         - id: integration-service
@@ -115,6 +145,7 @@ spring:
             - Path=/integration/**
           filters:
             - StripPrefix=1
+            - TokenRelay
 
 resilience4j:
   circuitbreaker:

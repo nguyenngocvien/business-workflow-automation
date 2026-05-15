@@ -41,9 +41,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/fallback/**",
                                 "/identity/v3/api-docs",
+                                "/identity/v3/api-docs/**",
                                 "/document/v3/api-docs",
+                                "/document/v3/api-docs/**",
                                 "/workflow/v3/api-docs",
-                                "/integration/v3/api-docs"
+                                "/workflow/v3/api-docs/**",
+                                "/integration/v3/api-docs",
+                                "/integration/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
