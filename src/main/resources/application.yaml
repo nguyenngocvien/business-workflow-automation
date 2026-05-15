@@ -1,5 +1,5 @@
 server:
-  port: 8089 # Gateway Port
+  port: 8080 # Gateway Port
   error:
     whitelabel:
       enabled: false
@@ -72,9 +72,9 @@ spring:
       resourceserver:
         jwt:
           # URL of Realm in Keycloak
-          issuer-uri: http://localhost:8080/realms/my-realm
+          issuer-uri: http://localhost:8180/realms/my-realm
           # Or jwk-set-uri for better performance
-          jwk-set-uri: http://localhost:8080/realms/my-realm/protocol/openid-connect/certs
+          jwk-set-uri: http://localhost:8180/realms/my-realm/protocol/openid-connect/certs
   cloud:
     gateway:
       routes:
@@ -82,58 +82,30 @@ spring:
         - id: identity-service-api-docs
           uri: lb://IDENTITY-SERVICE
           predicates:
-            - Path=/identity/v3/api-docs
+            - Path=/identity/v3/api-docs, /identity/v3/api-docs/**
           filters:
             - SetPath=/v3/api-docs
-
-        - id: identity-service-api-docs-config
-          uri: lb://IDENTITY-SERVICE
-          predicates:
-            - Path=/identity/v3/api-docs/swagger-config
-          filters:
-            - SetPath=/v3/api-docs/swagger-config
 
         - id: document-service-api-docs
           uri: lb://DOCUMENT-SERVICE
           predicates:
-            - Path=/document/v3/api-docs
+            - Path=/document/v3/api-docs, /document/v3/api-docs/**
           filters:
             - SetPath=/v3/api-docs
-
-        - id: document-service-api-docs-config
-          uri: lb://DOCUMENT-SERVICE
-          predicates:
-            - Path=/document/v3/api-docs/swagger-config
-          filters:
-            - SetPath=/v3/api-docs/swagger-config
 
         - id: workflow-service-api-docs
           uri: lb://WORKFLOW-SERVICE
           predicates:
-            - Path=/workflow/v3/api-docs
+            - Path=/workflow/v3/api-docs, /workflow/v3/api-docs/**
           filters:
             - SetPath=/v3/api-docs
-
-        - id: workflow-service-api-docs-config
-          uri: lb://WORKFLOW-SERVICE
-          predicates:
-            - Path=/workflow/v3/api-docs/swagger-config
-          filters:
-            - SetPath=/v3/api-docs/swagger-config
 
         - id: integration-service-api-docs
           uri: lb://INTEGRATION-SERVICE
           predicates:
-            - Path=/integration/v3/api-docs
+            - Path=/integration/v3/api-docs, /integration/v3/api-docs/**
           filters:
             - SetPath=/v3/api-docs
-
-        - id: integration-service-api-docs-config
-          uri: lb://INTEGRATION-SERVICE
-          predicates:
-            - Path=/integration/v3/api-docs/swagger-config
-          filters:
-            - SetPath=/v3/api-docs/swagger-config
 
         # 1. Identity Service
         - id: identity-service
