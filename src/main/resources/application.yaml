@@ -36,17 +36,17 @@ app:
   request-logging:
     routes:
       - path-prefix: /identity
-        service-name: IDENTITY-SERVICE
-        target-uri: lb://IDENTITY-SERVICE
+        service-name: identity-service
+        target-uri: lb://identity-service
       - path-prefix: /document
-        service-name: DOCUMENT-SERVICE
-        target-uri: lb://DOCUMENT-SERVICE
+        service-name: document-service
+        target-uri: lb://document-service
       - path-prefix: /workflow
-        service-name: WORKFLOW-SERVICE
-        target-uri: lb://WORKFLOW-SERVICE
+        service-name: workflow-service
+        target-uri: lb://workflow-service
       - path-prefix: /integration
-        service-name: INTEGRATION-SERVICE
-        target-uri: lb://INTEGRATION-SERVICE
+        service-name: integration-service
+        target-uri: lb://integration-service
 
 springdoc:
   swagger-ui:
@@ -72,80 +72,54 @@ spring:
       resourceserver:
         jwt:
           # URL of Realm in Keycloak
-          issuer-uri: ${JWT_ISSUER_URI:http://keycloak:8080/realms/my-realm}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/my-realm}
           # Or jwk-set-uri for better performance
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8180/realms/my-realm/protocol/openid-connect/certs}
   cloud:
     gateway:
-      routes:
-        # Swagger / OpenAPI docs should be reachable without relaying the user token.
-        - id: identity-service-api-docs
-          uri: lb://IDENTITY-SERVICE
-          predicates:
-            - Path=/identity/v3/api-docs, /identity/v3/api-docs/**
-          filters:
-            - StripPrefix=1
+      server:
+        webflux:
+          routes:
+            # 1. Identity Service
+            - id: identity-service
+              # uri: lb://identity-service # use Load Balancer for Eureka
+              uri: http://localhost:8081 # direct URL for testing without Eureka
+              predicates:
+                - Path=/identity/**
+              filters:
+                - StripPrefix=1
+                - TokenRelay # Forward Token from Gateway to sub service
 
-        - id: document-service-api-docs
-          uri: lb://DOCUMENT-SERVICE
-          predicates:
-            - Path=/document/v3/api-docs, /document/v3/api-docs/**
-          filters:
-            - StripPrefix=1
+            # 2. Document Service
+            - id: document-service
+              uri: lb://document-service
+              predicates:
+                - Path=/document/**
+              filters:
+                - StripPrefix=1
+                - TokenRelay
+                - name: CircuitBreaker
+                  args:
+                    name: documentServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/document-service
 
-        - id: workflow-service-api-docs
-          uri: lb://WORKFLOW-SERVICE
-          predicates:
-            - Path=/workflow/v3/api-docs, /workflow/v3/api-docs/**
-          filters:
-            - StripPrefix=1
+            # 3. Workflow Service
+            - id: workflow-service
+              uri: lb://workflow-service
+              predicates:
+                - Path=/workflow/**
+              filters:
+                - StripPrefix=1
+                - TokenRelay
 
-        - id: integration-service-api-docs
-          uri: lb://INTEGRATION-SERVICE
-          predicates:
-            - Path=/integration/v3/api-docs, /integration/v3/api-docs/**
-          filters:
-            - StripPrefix=1
-
-        # 1. Identity Service
-        - id: identity-service
-          uri: lb://IDENTITY-SERVICE # use Load Balancer for Eureka
-          predicates:
-            - Path=/identity/**
-          filters:
-            - StripPrefix=1 # remove /identity when send to service identity service
-            - TokenRelay # Forward Token from Gateway to sub service
-
-        # 2. Document Service
-        - id: document-service
-          uri: lb://DOCUMENT-SERVICE
-          predicates:
-            - Path=/document/**
-          filters:
-            - StripPrefix=1
-            - TokenRelay
-            - name: CircuitBreaker
-              args:
-                name: documentServiceCircuitBreaker
-                fallbackUri: forward:/fallback/document-service
-
-        # 3. Workflow Service
-        - id: workflow-service
-          uri: lb://WORKFLOW-SERVICE
-          predicates:
-            - Path=/workflow/**
-          filters:
-            - StripPrefix=1
-            - TokenRelay
-
-        # 4. Integration Service
-        - id: integration-service
-          uri: lb://INTEGRATION-SERVICE
-          predicates:
-            - Path=/integration/**
-          filters:
-            - StripPrefix=1
-            - TokenRelay
+            # 4. Integration Service
+            - id: integration-service
+              uri: lb://integration-service
+              predicates:
+                - Path=/integration/**
+              filters:
+                - StripPrefix=1
+                - TokenRelay
 
 resilience4j:
   circuitbreaker:
@@ -167,3 +141,11 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+
+# logging:
+#   level:
+#     org.springframework.cloud.gateway: DEBUG
+#     org.springframework.http.server.reactive: DEBUG
+#     org.springframework.web.reactive: DEBUG
+#     reactor.ipc.netty: DEBUG
+#     reactor.netty: DEBUG
