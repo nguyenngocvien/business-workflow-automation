@@ -82,8 +82,7 @@ spring:
           routes:
             # 1. Identity Service
             - id: identity-service
-              # uri: lb://identity-service # use Load Balancer for Eureka
-              uri: http://localhost:8081 # direct URL for testing without Eureka
+              uri: lb://identity-service # use Load Balancer for Eureka
               predicates:
                 - Path=/identity/**
               filters:
