@@ -1,179 +1,141 @@
-# Local Development Stack - README
+# Business Workflow Automation
 
-This setup provides a complete local environment including:
+Local development stack for the business workflow automation platform.
 
-* Camunda Orchestration, Optimize, Identity, Console, Connectors, Web Modeler
-* Workflow Service
-* Integration Service
-* Keycloak (IAM)
-* PostgreSQL
-* MinIO (S3-compatible storage)
-* RabbitMQ (message broker)
+The root `docker-compose.yml` brings up the following services:
 
----
+- PostgreSQL
+- pgAdmin
+- Elasticsearch
+- Kibana
+- Keycloak
+- Zeebe
+- Operate
+- MinIO
+- RabbitMQ
+- Discovery Server
+- API Gateway
+- Identity Service
+- Workflow Service
+- Integration Service
+- Document Service
 
 ## Prerequisites
 
-* Docker
-* Docker Compose (v2+ recommended)
-
----
+- Docker
+- Docker Compose v2, or the legacy `docker-compose` CLI
 
 ## Start the stack
+
+Use the helper script:
 
 ```bash
 ./scripts/start.sh
 ```
 
-Check containers:
+Or run Compose directly:
 
 ```bash
-docker ps
+docker compose up -d --build
 ```
 
----
-
-## Services Overview
-
-### Camunda Platform Components
-
-| Service       | URL                   | Description                   |
-| ------------- | --------------------- | ----------------------------- |
-| Orchestration  | http://localhost:8088 | Runtime, Operate, and Tasklist |
-| Connectors     | http://localhost:8086 | Connector runtime              |
-| Optimize       | http://localhost:8083 | Process analytics              |
-| Identity       | http://localhost:8084 | Camunda identity service       |
-| Console        | http://localhost:8087 | Platform administration UI     |
-| Web Modeler    | http://localhost:8070 | Modeler UI                     |
-| Zeebe Gateway  | localhost:26500      | gRPC endpoint for clients      |
-
-### Backend Services
-
-| Service            | URL                   | Description                          |
-| ------------------ | --------------------- | ------------------------------------ |
-| Workflow Service    | http://localhost:8085 | Workflow runtime and task APIs       |
-| Integration Service | http://localhost:8089 | Connector and integration APIs       |
-
----
-
-### Identity (Keycloak)
-
-| Service                | URL                        |
-| ---------------------- | -------------------------- |
-| Keycloak Admin Console | http://localhost:8080/auth |
-
-**Default credentials:**
-
-```
-username: admin
-password: admin_password
-```
-
----
-
-### Object Storage (MinIO)
-
-| Service       | URL                   |
-| ------------- | --------------------- |
-| MinIO API     | http://localhost:9000 |
-| MinIO Console | http://localhost:9001 |
-
-**Default credentials:**
-
-```
-username: minio
-password: minio123
-```
-
----
-
-### Messaging (RabbitMQ)
-
-| Service     | URL                    |
-| ----------- | ---------------------- |
-| RabbitMQ UI | http://localhost:15672 |
-| AMQP Port   | localhost:5672         |
-
-**Default credentials:**
-
-```
-username: guest
-password: guest
-```
-
----
-
-### Elasticsearch (internal use)
-
-| Service       | URL                   |
-| ------------- | --------------------- |
-| Elasticsearch | http://localhost:9200 |
-
-Used internally by Camunda components.
-
----
-
-## Quick Health Checks
+To start only selected services, pass them to the script:
 
 ```bash
-# Orchestration Gateway
-nc -z localhost 26500
-
-# Elasticsearch
-curl http://localhost:9200
-
-# Keycloak
-curl http://localhost:8080/auth
-
-# MinIO
-curl http://localhost:9000/minio/health/live
-
-# RabbitMQ
-curl http://localhost:15672
-
-# Workflow Service
-curl http://localhost:8085/actuator/health
-
-# Integration Service
-curl http://localhost:8089/actuator/health
+./scripts/start.sh postgres keycloak api-gateway
 ```
 
----
-
-## Useful Commands
-
-### Stop services
+## Stop the stack
 
 ```bash
 ./scripts/stop.sh
 ```
 
-### Stop and remove volumes
+To remove volumes as well:
 
 ```bash
 ./scripts/stop.sh -v
 ```
 
-### View logs
+## Services and ports
 
-```bash
-docker compose logs -f
+| Service | Host URL / Port | Notes |
+| --- | --- | --- |
+| API Gateway | http://localhost:8080 | Routes requests into the backend stack |
+| Identity Service | http://localhost:8081 | Spring Boot service |
+| Workflow Service | http://localhost:8085 | Workflow runtime and APIs |
+| Document Service | http://localhost:8086 | Document storage API |
+| Integration Service | http://localhost:8089 | Integration APIs |
+| Discovery Server | http://localhost:8761 | Eureka registry |
+| Keycloak | http://localhost:8180 | Admin console on the standard Keycloak port inside the container |
+| PostgreSQL | localhost:5432 | `postgres` / `postgres` |
+| pgAdmin | http://localhost:5050 | `admin@example.com` / `admin` |
+| Elasticsearch | http://localhost:9200 | Used by Zeebe and Kibana |
+| Kibana | http://localhost:5601 | Elasticsearch UI |
+| Zeebe Gateway | localhost:26500 | gRPC endpoint for workflow clients |
+| Zeebe Monitoring | http://localhost:9600 | Health and monitoring endpoint |
+| Zeebe Management API | http://localhost:8090 | Container port 8080 mapped to host 8090 |
+| Operate | http://localhost:8081 | Process monitoring UI |
+| MinIO API | http://localhost:9000 | `minio` / `minio123` |
+| MinIO Console | http://localhost:9001 | Same MinIO credentials |
+| RabbitMQ | http://localhost:15672 | `guest` / `guest` |
+
+## Default credentials
+
+### PostgreSQL
+
+```text
+username: postgres
+password: postgres
 ```
 
-### Restart a service
+The Compose file initializes these databases:
 
-```bash
-docker compose restart <service-name>
+- `bpm`
+- `keycloak`
+- `edocument`
+- `identity_db`
+
+### Keycloak
+
+```text
+username: admin
+password: admin
 ```
 
----
+### pgAdmin
+
+```text
+username: admin@example.com
+password: admin
+```
+
+### MinIO
+
+```text
+username: minio
+password: minio123
+```
+
+### RabbitMQ
+
+```text
+username: guest
+password: guest
+```
 
 ## Notes
 
-* This setup is intended for **local development only**
-* PostgreSQL uses the `bpm` database
-* Keycloak is configured for the Camunda identity stack
-* If you already have an existing `postgres_data` volume, remove it once so the Keycloak database/user init script can run
-* MinIO, PostgreSQL, Elasticsearch, and RabbitMQ use Docker volumes for persistence
-* Camunda is running in **self-managed full stack mode**
-* Workflow Service and Integration Service run from the Dockerfiles in `backend/`
+- This stack is intended for local development only.
+- `docker-compose.yml` maps both `operate` and `identity-service` to host port `8081`. If you run the full stack exactly as defined, that port conflict will need to be resolved before both services can bind successfully.
+- `api-gateway`, `identity-service`, `workflow-service`, `integration-service`, `document-service`, and `discovery-server` are built from the Dockerfiles in `backend/`.
+- The startup script uses `docker compose up -d --build` when Docker Compose v2 is available, and falls back to `docker-compose` if needed.
+- Persistent data is stored in Docker volumes for PostgreSQL, pgAdmin, Elasticsearch, Zeebe, MinIO, and RabbitMQ.
+
+## Helpful Commands
+
+```bash
+docker compose ps
+docker compose logs -f
+docker compose restart api-gateway
+```
