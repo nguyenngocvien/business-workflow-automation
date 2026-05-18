@@ -342,17 +342,29 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bpm
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://discovery-server:8761/eureka/
       EUREKA_PREFER_IP_ADDRESS: "true"
+
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+
       CAMUNDA_CLIENT_MODE: self-managed
       CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500
       CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080
       CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
-      CAMUNDA_CLIENT_AUTH_METHOD: none
+      CAMUNDA_CLIENT_AUTH_METHOD: none      
+      CAMUNDA_CLIENT_AUTH_ENABLED: "false"
+
+      WORKFLOW_PROVIDER: camunda
+
+      IBM_BPM_BASE_URL: http://ibm-baw:9080/bpm
+      IBM_BPM_USERNAME: admin
+      IBM_BPM_PASSWORD: password
+
+      SPRING_SECURITY_USER_NAME: admin
+      SPRING_SECURITY_USER_PASSWORD: admin123
     ports:
       - "8083:8083"
     networks:
