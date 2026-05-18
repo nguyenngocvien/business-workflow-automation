@@ -107,7 +107,7 @@ CREATE TABLE ec_job_execution (
 );
 
 CREATE TABLE ec_log (
-    id                          BIGSERIAL,
+    id                          BIGSERIAL PRIMARY KEY,
     service_id                  BIGINT,
 
     trace_id                    VARCHAR(100),
@@ -131,33 +131,11 @@ CREATE TABLE ec_log (
 
     created_at                  TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    PRIMARY KEY (id, request_time),
-
     CONSTRAINT fk_log_service
         FOREIGN KEY (service_id)
         REFERENCES ec_service(id)
         ON DELETE SET NULL
-)
-PARTITION BY RANGE (request_time);
-
-CREATE TABLE ec_log_default PARTITION OF ec_log DEFAULT;
-
-CREATE OR REPLACE FUNCTION create_ec_log_partition(p_date DATE)
-RETURNS VOID AS $$
-DECLARE
-    partition_name TEXT;
-BEGIN
-    partition_name := 'ec_log_' || TO_CHAR(p_date, 'YYYYMMDD');
-
-    EXECUTE format(
-        'CREATE TABLE IF NOT EXISTS %I PARTITION OF ec_log
-        FOR VALUES FROM (%L) TO (%L)',
-        partition_name,
-        p_date,
-        p_date + INTERVAL '1 day'
-    );
-END;
-$$ LANGUAGE plpgsql;
+);
 
 CREATE OR REPLACE FUNCTION set_duration_ms()
 RETURNS TRIGGER AS $$
