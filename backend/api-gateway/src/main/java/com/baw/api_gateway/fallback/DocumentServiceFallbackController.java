@@ -1,4 +1,4 @@
-package com.baw.api_gateway.infrastructure.fallback;
+package com.baw.api_gateway.fallback;
 
 import java.time.OffsetDateTime;
 
@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baw.api_gateway.infrastructure.exception.ApiErrorResponse;
+import com.baw.api_gateway.exception.ApiErrorResponse;
 
 @RestController
 @RequestMapping(path = "/fallback/document-service", produces = MediaType.APPLICATION_JSON_VALUE)

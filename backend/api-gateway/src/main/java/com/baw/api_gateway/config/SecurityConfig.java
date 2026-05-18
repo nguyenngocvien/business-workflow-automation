@@ -1,4 +1,4 @@
-package com.baw.api_gateway.infrastructure.config;
+package com.baw.api_gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +13,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.http.HttpMethod;
 import reactor.core.publisher.Mono;
 
-import com.baw.api_gateway.infrastructure.exception.GatewayAccessDeniedHandler;
-import com.baw.api_gateway.infrastructure.exception.GatewayAuthenticationEntryPoint;
-import com.baw.api_gateway.infrastructure.security.KeycloakJwtGrantedAuthoritiesConverter;
+import com.baw.api_gateway.exception.GatewayAccessDeniedHandler;
+import com.baw.api_gateway.exception.GatewayAuthenticationEntryPoint;
+import com.baw.api_gateway.security.KeycloakJwtGrantedAuthoritiesConverter;
 
 @Configuration
 public class SecurityConfig {
