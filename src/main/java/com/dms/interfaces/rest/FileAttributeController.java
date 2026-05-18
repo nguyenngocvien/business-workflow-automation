@@ -16,10 +16,12 @@ import com.dms.interfaces.rest.request.AddOptionRequest;
 import com.dms.interfaces.rest.request.CreateFileAttributeRequest;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/file-attributes")
+@Tag(name = "File Attributes")
 @RequiredArgsConstructor
 public class FileAttributeController {
 

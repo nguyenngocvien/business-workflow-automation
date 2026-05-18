@@ -27,10 +27,12 @@ import com.dms.interfaces.rest.request.InitiateMultipartRequest;
 import com.dms.interfaces.rest.request.PresignedPartRequest;
 import com.dms.interfaces.rest.request.PresignedUploadRequest;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/files")
+@Tag(name = "Files")
 @RequiredArgsConstructor
 public class FileController {
 
