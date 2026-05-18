@@ -299,6 +299,37 @@ services:
       - workflow_net
 
   # -----------------------------
+  # CONNECTOR SERVICE
+  # -----------------------------
+  connector-service:
+    build:
+      context: ./backend/integration-service
+      dockerfile: Dockerfile
+    container_name: connector-service
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bpm
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_SHOW_SQL: "false"
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      APP_CRYPTO_KEY: 1234567890123456
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: your-email@gmail.com
+      MAIL_PASSWORD: your-app-password
+    ports:
+      - "8082:8082"
+    networks:
+      - workflow_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  # -----------------------------
   # WORKFLOW SERVICE
   # -----------------------------
   workflow-service:
@@ -330,37 +361,6 @@ services:
       rabbitmq:
         condition: service_healthy
       zeebe:
-        condition: service_healthy
-      keycloak:
-        condition: service_healthy
-
-  # -----------------------------
-  # INTEGRATION SERVICE
-  # -----------------------------
-  integration-service:
-    build:
-      context: ./backend/integration-service
-      dockerfile: Dockerfile
-    container_name: integration-service
-    environment:
-      SERVER_PORT: 8081
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bpm
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_SHOW_SQL: "false"
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-      APP_CRYPTO_KEY: 1234567890123456
-      MAIL_HOST: smtp.gmail.com
-      MAIL_PORT: 587
-      MAIL_USERNAME: your-email@gmail.com
-      MAIL_PASSWORD: your-app-password
-    ports:
-      - "8089:8080"
-    networks:
-      - workflow_net
-    depends_on:
-      postgres:
         condition: service_healthy
       keycloak:
         condition: service_healthy
