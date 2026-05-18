@@ -45,8 +45,8 @@ app:
         service-name: workflow-service
         target-uri: lb://workflow-service
       - path-prefix: /integration
-        service-name: integration-service
-        target-uri: lb://integration-service
+        service-name: connector-service
+        target-uri: lb://connector-service
 
 springdoc:
   swagger-ui:
@@ -60,8 +60,8 @@ springdoc:
         url: /document/v3/api-docs
       - name: Workflow Service
         url: /workflow/v3/api-docs
-      - name: Integration Service
-        url: /integration/v3/api-docs
+      - name: Connector Service
+        url: /connector/v3/api-docs
 
 spring:
   application:
@@ -112,10 +112,10 @@ spring:
                 - TokenRelay
 
             # 4. Integration Service
-            - id: integration-service
-              uri: lb://integration-service
+            - id: connector-service
+              uri: lb://connector-service
               predicates:
-                - Path=/integration/**
+                - Path=/connector/**
               filters:
                 - StripPrefix=1
                 - TokenRelay

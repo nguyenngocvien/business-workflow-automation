@@ -45,8 +45,8 @@ public class SecurityConfig {
 								"/document/v3/api-docs/**",
 								"/workflow/v3/api-docs",
 								"/workflow/v3/api-docs/**",
-								"/integration/v3/api-docs",
-								"/integration/v3/api-docs/**")
+								"/connector/v3/api-docs",
+								"/connector/v3/api-docs/**")
 						.permitAll()
 						.anyExchange().authenticated())
 				.oauth2ResourceServer(oauth2 -> oauth2
