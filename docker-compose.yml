@@ -338,7 +338,7 @@ services:
       dockerfile: Dockerfile
     container_name: workflow-service
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 8083
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bpm
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -354,7 +354,7 @@ services:
       CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
       CAMUNDA_CLIENT_AUTH_METHOD: none
     ports:
-      - "8085:8080"
+      - "8083:8083"
     networks:
       - workflow_net
     depends_on:
@@ -377,7 +377,7 @@ services:
     container_name: document-service
     restart: unless-stopped
     environment:
-      SERVER_PORT: 8081
+      SERVER_PORT: 8084
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/edocument
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -387,7 +387,7 @@ services:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
     ports:
-      - "8086:8081"
+      - "8084:8084"
     depends_on:
       postgres:
         condition: service_healthy

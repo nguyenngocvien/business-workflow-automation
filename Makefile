@@ -23,8 +23,8 @@ pull-identity-service:
 pull-workflow-service:
 	git subtree pull --prefix backend/workflow-service https://github.com/nguyenngocvien/e-workflow.git main --squash
 
-pull-integration-service:
-	git subtree pull --prefix backend/integration-service https://github.com/nguyenngocvien/e-connector.git Java17 --squash
+pull-connector-service:
+	git subtree pull --prefix backend/connector-service https://github.com/nguyenngocvien/e-connector.git Java17 --squash
 
 pull-document-service:
 	git subtree pull --prefix backend/document-service https://github.com/nguyenngocvien/e-document.git Java17 --squash
