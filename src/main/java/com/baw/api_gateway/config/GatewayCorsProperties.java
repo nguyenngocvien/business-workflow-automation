@@ -1,4 +1,4 @@
-package com.baw.api_gateway.infrastructure.config;
+package com.baw.api_gateway.config;
 
 import java.util.List;
 

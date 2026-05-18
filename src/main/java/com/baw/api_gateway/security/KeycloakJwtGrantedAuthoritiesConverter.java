@@ -1,4 +1,4 @@
-package com.baw.api_gateway.infrastructure.security;
+package com.baw.api_gateway.security;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package com.baw.api_gateway.infrastructure.exception;
+package com.baw.api_gateway.exception;
 
 import java.time.OffsetDateTime;
 

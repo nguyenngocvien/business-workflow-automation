@@ -1,4 +1,4 @@
-package com.baw.api_gateway.infrastructure.logging;
+package com.baw.api_gateway.logging;
 
 import java.util.Comparator;
 import java.util.List;
