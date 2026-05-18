@@ -10,10 +10,12 @@ import com.dms.application.usecase.FileAttributeValueUseCase;
 import com.dms.interfaces.rest.request.FileAttributeValuesRequest;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/files")
+@Tag(name = "File Attribute Values")
 @RequiredArgsConstructor
 public class FileAttributeValueController {
 

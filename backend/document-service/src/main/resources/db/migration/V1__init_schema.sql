@@ -154,7 +154,7 @@ CREATE TABLE file_attribute_values (
         ON DELETE CASCADE,
 
     -- mỗi file chỉ có 1 value cho 1 attribute
-    CONSTRAINT uk_file_attr UNIQUE (file_id, attribute_id),
+    CONSTRAINT uk_file_attr_value UNIQUE (file_id, attribute_id),
 
     -- đảm bảo chỉ có 1 value được set
     CONSTRAINT chk_single_value CHECK (
@@ -164,31 +164,43 @@ CREATE TABLE file_attribute_values (
         (CASE WHEN value_date IS NOT NULL THEN 1 ELSE 0 END) +
         (CASE WHEN option_id IS NOT NULL THEN 1 ELSE 0 END)
         = 1
-    ),
-
-    CONSTRAINT chk_attr_type_match
-    CHECK (
-        (value_string IS NOT NULL AND attribute_id IN (
-            SELECT id FROM file_attributes WHERE data_type = 'string'
-        ))
-        OR
-        (value_number IS NOT NULL AND attribute_id IN (
-            SELECT id FROM file_attributes WHERE data_type = 'number'
-        ))
-        OR
-        (value_boolean IS NOT NULL AND attribute_id IN (
-            SELECT id FROM file_attributes WHERE data_type = 'boolean'
-        ))
-        OR
-        (value_date IS NOT NULL AND attribute_id IN (
-            SELECT id FROM file_attributes WHERE data_type = 'date'
-        ))
-        OR
-        (option_id IS NOT NULL AND attribute_id IN (
-            SELECT id FROM file_attributes WHERE data_type = 'list'
-        ))
-    );
+    )
 );
+
+CREATE OR REPLACE FUNCTION validate_file_attribute_value_type()
+RETURNS TRIGGER AS $$
+DECLARE
+    attr_type attribute_data_type;
+BEGIN
+    SELECT data_type
+    INTO attr_type
+    FROM file_attributes
+    WHERE id = NEW.attribute_id;
+
+    IF attr_type IS NULL THEN
+        RAISE EXCEPTION 'Unknown attribute_id %', NEW.attribute_id;
+    END IF;
+
+    IF NEW.value_string IS NOT NULL AND attr_type <> 'string' THEN
+        RAISE EXCEPTION 'Attribute % expects string values', NEW.attribute_id;
+    ELSIF NEW.value_number IS NOT NULL AND attr_type <> 'number' THEN
+        RAISE EXCEPTION 'Attribute % expects number values', NEW.attribute_id;
+    ELSIF NEW.value_boolean IS NOT NULL AND attr_type <> 'boolean' THEN
+        RAISE EXCEPTION 'Attribute % expects boolean values', NEW.attribute_id;
+    ELSIF NEW.value_date IS NOT NULL AND attr_type <> 'date' THEN
+        RAISE EXCEPTION 'Attribute % expects date values', NEW.attribute_id;
+    ELSIF NEW.option_id IS NOT NULL AND attr_type <> 'list' THEN
+        RAISE EXCEPTION 'Attribute % expects list values', NEW.attribute_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_file_attribute_value_type
+BEFORE INSERT OR UPDATE ON file_attribute_values
+FOR EACH ROW
+EXECUTE FUNCTION validate_file_attribute_value_type();
 
 -- =========================
 -- 7. FILE VERSIONS
