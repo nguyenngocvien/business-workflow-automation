@@ -175,7 +175,7 @@ services:
       - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
       - SPRING_PROFILES_ACTIVE=dev
     ports:
-      - "8081:8080"
+      - "8088:8080"
     depends_on:
       zeebe:
         condition: service_healthy

@@ -1,97 +1,78 @@
 # Architecture Overview
 
-This repository is organized as a workflow automation platform with two backend services, a frontend, and a shared local infrastructure stack.
+This repository is a local-first workflow automation platform built around a shared infrastructure stack and several Spring Boot backend services.
 
-## System Goals
+## Goals
 
-- Manage workflow definitions and workflow runtime
-- Integrate with external systems through connector-style services
-- Provide local development infrastructure for persistence, messaging, identity, and workflow orchestration
+- Run workflow orchestration with Camunda Zeebe
+- Expose business APIs through a gateway
+- Centralize identity with Keycloak
+- Persist business, identity, and connector data in PostgreSQL
+- Store documents and binary payloads in MinIO
+- Support asynchronous jobs and integration-style processing with RabbitMQ
 
-## High-Level Layout
+## Runtime Layers
 
-The codebase is split into these main areas:
+### 1. Shared Infrastructure
 
-- `backend/workflow-service`: workflow runtime, task handling, and business workflow persistence
-- `backend/connector-service`: connector and integration logic for external systems
-- `frontend`: user-facing application
-- `infra/k8s`: Kubernetes manifests that mirror the local stack
-- `docker-compose.yml`: local development stack for all infrastructure and application services
+The local stack provides these shared services:
 
-## Main Components
+- PostgreSQL for relational persistence
+- Keycloak for authentication and JWT issuance
+- RabbitMQ for asynchronous messaging
+- MinIO for object storage
+- Elasticsearch for Zeebe and Operate indexing/search
+- Zeebe for workflow execution
+- Operate for process monitoring
+- pgAdmin and Kibana for operational access
 
-### 1. Workflow Service
+### 2. Application Services
 
-The workflow service is the core business backend. It is responsible for:
+The backend application layer is split into dedicated services:
 
-- workflow definition management
-- workflow execution and step progression
-- task assignment, claiming, reassignment, and completion
-- audit/history data for process tracking
-
-It uses PostgreSQL for persistence and Flyway for schema migration.
-
-### 2. Connector Service
-
-The connector service is responsible for external integrations and connector-related logic. It typically acts as a bridge between workflow events and third-party systems such as APIs, storage, or messaging endpoints.
-
-It also uses PostgreSQL and Flyway for database-backed configuration and runtime data.
+- `api-gateway`: public entry point for backend APIs
+- `discovery-server`: service registry for service-to-service discovery
+- `identity-service`: user, role, and access management
+- `workflow-service`: workflow runtime, tasks, and process data
+- `connector-service`: external integration, email, database, and job execution logic
+- `document-service`: file metadata, versions, and MinIO-backed storage access
 
 ### 3. Frontend
 
-The frontend provides the user interface for interacting with the platform. It is expected to communicate with the backend services through HTTP APIs.
-
-### 4. Infrastructure Stack
-
-The local stack includes:
-
-- PostgreSQL for relational data
-- RabbitMQ for asynchronous messaging
-- MinIO for object storage
-- Keycloak for identity and authentication
-- Elasticsearch for Camunda search and indexing
-- Camunda Orchestration, Optimize, Identity, Console, Connectors, and Web Modeler
-
-## Runtime Flow
-
-Typical request flow looks like this:
-
-1. A user interacts with the frontend.
-2. The frontend calls the workflow service or integration service.
-3. The backend service persists business data in PostgreSQL.
-4. If needed, the backend publishes messages to RabbitMQ or stores files in MinIO.
-5. Workflow orchestration is handled by the Camunda Orchestration service through Zeebe.
-6. Operate and Tasklist are available through the orchestration UI.
+The frontend is the user-facing admin portal (`frontend/admin-portal`) and talks to the backend through HTTP APIs, usually via the gateway.
 
 ## Data Ownership
 
-- PostgreSQL owns transactional business data
-- MinIO owns binary or document-like artifacts
-- RabbitMQ carries asynchronous events and jobs
-- Elasticsearch stores Camunda workflow indexing data
+- PostgreSQL owns transactional and configuration data
+- MinIO owns binary file content and upload artifacts
+- RabbitMQ carries background jobs and asynchronous integration events
+- Elasticsearch stores Camunda workflow search/index data
 
-## Environment Strategy
+## Request Flow
 
-The repository supports two infrastructure styles:
+The typical request path is:
 
-- `docker-compose.yml` for fast local development
-- `infra/k8s` for Kubernetes-based deployment
+1. A user interacts with the frontend.
+2. The frontend sends API requests to `api-gateway` or directly to a service during local development.
+3. The gateway routes requests to the relevant backend service.
+4. The service persists data in PostgreSQL or stores files in MinIO.
+5. The workflow service talks to Zeebe for orchestration and uses RabbitMQ for async work where needed.
+6. Operate observes running workflows through Elasticsearch and Zeebe.
 
-Both are intended to expose the same logical services so the development setup stays close to deployment behavior.
+## Deployment Modes
 
-## Configuration Notes
+The repository supports three infrastructure entry points:
 
-- Local database defaults use `postgres` / `postgres`
-- The shared workflow database name in compose is `bpm`
-- Keycloak is configured for the Camunda identity stack
-- Camunda services are configured for a self-managed full stack local setup
+- `docker-compose.yml` for local development
+- `infra/k8s` for Kubernetes manifests and overlays
+- `infra/helm` for Helm-based installation scaffolding
 
-## Suggested Diagram
+The Kubernetes base mirrors the shared infra stack. The Helm chart is currently a thin wrapper that defines the namespace and configuration values, so the Compose stack remains the most complete runtime definition in the repo.
 
-If you want to add a visual architecture diagram later, a good layout would be:
+## Important Notes
 
-- Frontend at the top
-- Workflow Service and Integration Service in the middle
-- PostgreSQL, RabbitMQ, MinIO, Keycloak, and Camunda services at the bottom
-
-That diagram should show the backend services as the main application layer and the infrastructure components as shared dependencies.
+- The Compose stack is intended for development, not production.
+- PostgreSQL is initialized with multiple databases, including `bpm`, `keycloak`, `edocument`, `identity_db`, and `connector`.
+- `identity-service` is exposed on host port `8081`.
+- `operate` is exposed on host port `8088`.
+- `docs/architecture.md` should be treated as the canonical high-level description of the current repo structure, not the older `integration-service` naming that appears in some stale notes.

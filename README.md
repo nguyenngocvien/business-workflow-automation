@@ -14,11 +14,10 @@ The root `docker-compose.yml` brings up the following services:
 - MinIO
 - RabbitMQ
 - Discovery Server
-- Config Server
 - API Gateway
 - Identity Service
+- Connector Service
 - Workflow Service
-- Integration Service
 - Document Service
 
 ## Prerequisites
@@ -49,7 +48,7 @@ Use the helper script:
 Or run Compose directly:
 
 ```bash
-docker compose up -d --build
+docker compose -f docker-compose.yml up -d --build --remove-orphans
 ```
 
 To start only selected services, pass them to the script:
@@ -76,11 +75,10 @@ To remove volumes as well:
 | --- | --- | --- |
 | API Gateway | http://localhost:8080 | Routes requests into the backend stack |
 | Identity Service | http://localhost:8081 | Spring Boot service |
-| Workflow Service | http://localhost:8085 | Workflow runtime and APIs |
-| Document Service | http://localhost:8086 | Document storage API |
-| Integration Service | http://localhost:8089 | Integration APIs |
+| Connector Service | http://localhost:8082 | Integration APIs |
+| Workflow Service | http://localhost:8083 | Workflow runtime and APIs |
+| Document Service | http://localhost:8084 | Document storage API |
 | Discovery Server | http://localhost:8761 | Eureka registry |
-| Config Server | http://localhost:8888 | Spring Cloud Config server |
 | Keycloak | http://localhost:8180 | Admin console on the standard Keycloak port inside the container |
 | PostgreSQL | localhost:5432 | `postgres` / `postgres` |
 | pgAdmin | http://localhost:5050 | `admin@example.com` / `admin` |
@@ -89,7 +87,7 @@ To remove volumes as well:
 | Zeebe Gateway | localhost:26500 | gRPC endpoint for workflow clients |
 | Zeebe Monitoring | http://localhost:9600 | Health and monitoring endpoint |
 | Zeebe Management API | http://localhost:8090 | Container port 8080 mapped to host 8090 |
-| Operate | http://localhost:8081 | Process monitoring UI |
+| Operate | http://localhost:8088 | Process monitoring UI |
 | MinIO API | http://localhost:9000 | `minio` / `minio123` |
 | MinIO Console | http://localhost:9001 | Same MinIO credentials |
 | RabbitMQ | http://localhost:15672 | `guest` / `guest` |
@@ -109,6 +107,7 @@ The Compose file initializes these databases:
 - `keycloak`
 - `edocument`
 - `identity_db`
+- `connector`
 
 ### Keycloak
 
@@ -141,9 +140,9 @@ password: guest
 ## Notes
 
 - This stack is intended for local development only.
-- `docker-compose.yml` maps both `operate` and `identity-service` to host port `8081`. If you run the full stack exactly as defined, that port conflict will need to be resolved before both services can bind successfully.
+- `identity-service` is exposed on host port `8081`, and `operate` is exposed on host port `8088`.
 - `api-gateway`, `identity-service`, `workflow-service`, `connector-service`, `document-service`, and `discovery-server` are built from the Dockerfiles in `backend/`.
-- The startup script uses `docker compose up -d --build` when Docker Compose v2 is available, and falls back to `docker-compose` if needed.
+- The startup script uses `docker compose -f docker-compose.yml up -d --build --remove-orphans` when Docker Compose v2 is available, and falls back to `docker-compose` if needed.
 - Persistent data is stored in Docker volumes for PostgreSQL, pgAdmin, Elasticsearch, Zeebe, MinIO, and RabbitMQ.
 
 ## Helpful Commands

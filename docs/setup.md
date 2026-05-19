@@ -3,81 +3,97 @@
 ## 1. Prerequisites
 
 - Docker
-- Docker Compose v2+
+- Docker Compose v2, or the legacy `docker-compose` CLI
 
-## 2. Start the stack
+## 2. Configure Environment
 
-From the repository root:
+From the repository root, copy the sample env file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then edit `.env` if you need to override ports, credentials, or external endpoints.
+
+## 3. Start the Stack
+
+Start the full stack:
 
 ```bash
 ./scripts/start.sh
 ```
 
-If you want to start a specific Compose service, pass the service name:
+Start a subset of services:
 
 ```bash
-./scripts/start.sh workflow-service
+./scripts/start.sh postgres keycloak api-gateway workflow-service
 ```
 
-## 3. Stop the stack
+The script runs `docker compose -f docker-compose.yml up -d --build --remove-orphans` from the repository root and falls back to `docker-compose` when needed.
+
+## 4. Stop the Stack
+
+Stop the full stack:
 
 ```bash
 ./scripts/stop.sh
 ```
 
-To remove volumes as well:
+Stop and remove volumes:
 
 ```bash
 ./scripts/stop.sh -v
 ```
 
-## 4. Access URLs
+## 5. Access URLs
 
-### Camunda Platform
+### Application Services
 
-- Orchestration: http://localhost:8088
-- Connectors: http://localhost:8086
-- Optimize: http://localhost:8083
-- Identity: http://localhost:8084
-- Console: http://localhost:8087
-- Web Modeler: http://localhost:8070
+- API Gateway: http://localhost:8080
+- Identity Service: http://localhost:8081
+- Connector Service: http://localhost:8082
+- Workflow Service: http://localhost:8083
+- Document Service: http://localhost:8084
+- Discovery Server: http://localhost:8761
+
+### Shared Infrastructure
+
+- Keycloak: http://localhost:8180
+- pgAdmin: http://localhost:5050
+- PostgreSQL: localhost:5432
+- Elasticsearch: http://localhost:9200
+- Kibana: http://localhost:5601
 - Zeebe Gateway: localhost:26500
-
-### Backend Services
-
-- Workflow Service: http://localhost:8085
-- Integration Service: http://localhost:8089
-
-### Identity and Utilities
-
-- Keycloak: http://localhost:8080/auth
-- RabbitMQ UI: http://localhost:15672
-- RabbitMQ AMQP: localhost:5672
+- Zeebe Monitoring: http://localhost:9600
+- Zeebe Management API: http://localhost:8090
+- Operate: http://localhost:8088
 - MinIO API: http://localhost:9000
 - MinIO Console: http://localhost:9001
-- Elasticsearch: http://localhost:9200
+- RabbitMQ Management UI: http://localhost:15672
+- RabbitMQ AMQP: localhost:5672
 
-## 5. Useful Checks
+## 6. Useful Checks
 
 ```bash
+curl http://localhost:8080
+curl http://localhost:8081/actuator/health
+curl http://localhost:8082/actuator/health
+curl http://localhost:8083/actuator/health
+curl http://localhost:8084/actuator/health
 curl http://localhost:8088
-curl http://localhost:8086
-curl http://localhost:8083
-curl http://localhost:8084
-curl http://localhost:8087
-curl http://localhost:8070
-curl http://localhost:8085/actuator/health
-curl http://localhost:8089/actuator/health
-curl http://localhost:8080/auth
+curl http://localhost:8761
+curl http://localhost:8180
 curl http://localhost:9000/minio/health/live
 curl http://localhost:9200
 ```
 
-## 6. Notes
+## 7. Notes
 
-- The local stack is intended for development only
-- PostgreSQL uses the `bpm` database
-- Camunda runs in self-managed full stack mode
-- If you already have an existing `postgres_data` volume, remove it once so the Keycloak database/user init script can run
-- MinIO, PostgreSQL, Elasticsearch, and RabbitMQ use Docker volumes for persistence
-- Workflow Service and Integration Service are built from the Dockerfiles under `backend/`
+- The local stack is development-only.
+- PostgreSQL is initialized with multiple databases, including `bpm`, `keycloak`, `edocument`, `identity_db`, and `connector`.
+- `identity-service` runs on host port `8081`.
+- `operate` runs on host port `8088`.
+- `workflow-service` uses PostgreSQL, RabbitMQ, Zeebe, and Keycloak.
+- `document-service` uses PostgreSQL and MinIO.
+- `connector-service` uses PostgreSQL and the shared mail/database integration stack.
+- `docker-compose.yml` is the source of truth for service dependencies and ports.

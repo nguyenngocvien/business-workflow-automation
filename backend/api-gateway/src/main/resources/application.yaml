@@ -44,7 +44,7 @@ app:
       - path-prefix: /workflow
         service-name: workflow-service
         target-uri: lb://workflow-service
-      - path-prefix: /integration
+      - path-prefix: /connector
         service-name: connector-service
         target-uri: lb://connector-service
 
@@ -111,7 +111,7 @@ spring:
                 - StripPrefix=1
                 - TokenRelay
 
-            # 4. Integration Service
+            # 4. Connector Service
             - id: connector-service
               uri: lb://connector-service
               predicates:
