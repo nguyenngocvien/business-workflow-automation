@@ -6,6 +6,8 @@ spring:
       server:
         git:
           uri: ${CONFIG_REPO_URI:https://github.com/nguyenngocvien/baw-config-repo.git}
+          username: ${CONFIG_REPO_USERNAME:x-access-token}
+          password: ${CONFIG_REPO_PASSWORD:}
 
 eureka:
   client:
