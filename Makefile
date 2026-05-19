@@ -14,9 +14,6 @@ help:
 pull-discovery-server:
 	git subtree pull --prefix backend/discovery-server https://github.com/nguyenngocvien/discovery-server.git main --squash
 
-pull-config-server:
-	git subtree pull --prefix backend/config-server https://github.com/nguyenngocvien/config-server.git main --squash
-
 pull-api-gateway:
 	git subtree pull --prefix backend/api-gateway https://github.com/nguyenngocvien/api-gateway.git main --squash
 

@@ -142,7 +142,7 @@ password: guest
 
 - This stack is intended for local development only.
 - `docker-compose.yml` maps both `operate` and `identity-service` to host port `8081`. If you run the full stack exactly as defined, that port conflict will need to be resolved before both services can bind successfully.
-- `api-gateway`, `identity-service`, `workflow-service`, `integration-service`, `document-service`, `discovery-server`, and `config-server` are built from the Dockerfiles in `backend/`.
+- `api-gateway`, `identity-service`, `workflow-service`, `integration-service`, `document-service`, and `discovery-server` are built from the Dockerfiles in `backend/`.
 - The startup script uses `docker compose up -d --build` when Docker Compose v2 is available, and falls back to `docker-compose` if needed.
 - Persistent data is stored in Docker volumes for PostgreSQL, pgAdmin, Elasticsearch, Zeebe, MinIO, and RabbitMQ.
 
