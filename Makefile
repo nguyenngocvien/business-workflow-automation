@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help pull-api-gateway pull-service-discovery pull-identity-service pull-workflow-service pull-integration-service pull-document-service
+.PHONY: help pull-api-gateway pull-service-discovery pull-identity-service pull-workflow-service pull-connector-service pull-document-service
 
 help:
 	@echo "Available targets:"
@@ -8,7 +8,7 @@ help:
 	@echo "  make pull-service-discovery      Pull service-discovery into backend/workflow-service"
 	@echo "  make pull-identity-service       Pull identity-service into backend/workflow-service"
 	@echo "  make pull-workflow-service       Pull e-workflow into backend/workflow-service"
-	@echo "  make pull-integration-service    Pull e-connector into backend/integration-service"
+	@echo "  make pull-connector-service    Pull e-connector into backend/connector-service"
 	@echo "  make pull-document-service       Pull e-document into backend/document-service"
 
 pull-discovery-server:

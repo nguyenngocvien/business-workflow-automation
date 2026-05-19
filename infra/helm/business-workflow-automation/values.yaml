@@ -45,5 +45,5 @@ workflowService:
 
 integrationService:
   enabled: true
-  image: integration-service:local
+  image: connector-service:local
   servicePort: 8084

@@ -13,7 +13,7 @@ This repository is organized as a workflow automation platform with two backend 
 The codebase is split into these main areas:
 
 - `backend/workflow-service`: workflow runtime, task handling, and business workflow persistence
-- `backend/integration-service`: connector and integration logic for external systems
+- `backend/connector-service`: connector and integration logic for external systems
 - `frontend`: user-facing application
 - `infra/k8s`: Kubernetes manifests that mirror the local stack
 - `docker-compose.yml`: local development stack for all infrastructure and application services
@@ -31,9 +31,9 @@ The workflow service is the core business backend. It is responsible for:
 
 It uses PostgreSQL for persistence and Flyway for schema migration.
 
-### 2. Integration Service
+### 2. Connector Service
 
-The integration service is responsible for external integrations and connector-related logic. It typically acts as a bridge between workflow events and third-party systems such as APIs, storage, or messaging endpoints.
+The connector service is responsible for external integrations and connector-related logic. It typically acts as a bridge between workflow events and third-party systems such as APIs, storage, or messaging endpoints.
 
 It also uses PostgreSQL and Flyway for database-backed configuration and runtime data.
 

@@ -72,7 +72,7 @@ Current gateway routes are configured in `src/main/resources/application.yaml`:
 - `/identity/**` -> `lb://IDENTITY-SERVICE`
 - `/document/**` -> `lb://DOCUMENT-SERVICE`
 - `/workflow/**` -> `lb://WORKFLOW-SERVICE`
-- `/integration/**` -> `lb://INTEGRATION-SERVICE`
+- `/connector/**` -> `lb://CONNECTOR-SERVICE`
 
 The gateway strips the first path segment before forwarding the request.
 
