@@ -11,11 +11,14 @@ help:
 	@echo "  make pull-integration-service    Pull e-connector into backend/integration-service"
 	@echo "  make pull-document-service       Pull e-document into backend/document-service"
 
-pull-api-gateway:
-	git subtree pull --prefix backend/api-gateway https://github.com/nguyenngocvien/api-gateway.git main --squash
-
 pull-discovery-server:
 	git subtree pull --prefix backend/discovery-server https://github.com/nguyenngocvien/discovery-server.git main --squash
+
+pull-config-server:
+	git subtree pull --prefix backend/config-server https://github.com/nguyenngocvien/config-server.git main --squash
+
+pull-api-gateway:
+	git subtree pull --prefix backend/api-gateway https://github.com/nguyenngocvien/api-gateway.git main --squash
 
 pull-identity-service:
 	git subtree pull --prefix backend/identity-service https://github.com/nguyenngocvien/identity-service.git main --squash
