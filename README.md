@@ -14,6 +14,7 @@ The root `docker-compose.yml` brings up the following services:
 - MinIO
 - RabbitMQ
 - Discovery Server
+- Config Server
 - API Gateway
 - Identity Service
 - Workflow Service
@@ -79,6 +80,7 @@ To remove volumes as well:
 | Document Service | http://localhost:8086 | Document storage API |
 | Integration Service | http://localhost:8089 | Integration APIs |
 | Discovery Server | http://localhost:8761 | Eureka registry |
+| Config Server | http://localhost:8888 | Spring Cloud Config server |
 | Keycloak | http://localhost:8180 | Admin console on the standard Keycloak port inside the container |
 | PostgreSQL | localhost:5432 | `postgres` / `postgres` |
 | pgAdmin | http://localhost:5050 | `admin@example.com` / `admin` |
@@ -140,7 +142,7 @@ password: guest
 
 - This stack is intended for local development only.
 - `docker-compose.yml` maps both `operate` and `identity-service` to host port `8081`. If you run the full stack exactly as defined, that port conflict will need to be resolved before both services can bind successfully.
-- `api-gateway`, `identity-service`, `workflow-service`, `integration-service`, `document-service`, and `discovery-server` are built from the Dockerfiles in `backend/`.
+- `api-gateway`, `identity-service`, `workflow-service`, `integration-service`, `document-service`, `discovery-server`, and `config-server` are built from the Dockerfiles in `backend/`.
 - The startup script uses `docker compose up -d --build` when Docker Compose v2 is available, and falls back to `docker-compose` if needed.
 - Persistent data is stored in Docker volumes for PostgreSQL, pgAdmin, Elasticsearch, Zeebe, MinIO, and RabbitMQ.
 
