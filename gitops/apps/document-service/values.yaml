@@ -1,0 +1,23 @@
+replicaCount: 1
+
+image:
+  repository: viennn/document-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8081
+
+containerPort: 8081
+
+env:
+  SPRING_PROFILES_ACTIVE: local
+  SERVER_PORT: "8081"
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/edocument
+  SPRING_DATASOURCE_USERNAME: postgres
+  SPRING_DATASOURCE_PASSWORD: postgres
+  EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
+  MINIO_URL: http://minio:9000
+  MINIO_ACCESS_KEY: minio
+  MINIO_SECRET_KEY: minio123

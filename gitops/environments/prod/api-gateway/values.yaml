@@ -3,3 +3,6 @@ image:
 
 env:
   SPRING_PROFILES_ACTIVE: prod
+
+ingress:
+  host: gateway.example.com

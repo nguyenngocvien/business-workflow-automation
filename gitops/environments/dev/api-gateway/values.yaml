@@ -3,3 +3,6 @@ image:
 
 env:
   SPRING_PROFILES_ACTIVE: dev
+
+ingress:
+  host: gateway.dev.localtest.me

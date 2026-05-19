@@ -1,0 +1,11 @@
+rabbitmq:
+  auth:
+    username: guest
+    password: guest
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  service:
+    type: ClusterIP

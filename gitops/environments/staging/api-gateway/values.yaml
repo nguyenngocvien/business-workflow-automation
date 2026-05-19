@@ -1,0 +1,8 @@
+image:
+  tag: staging
+
+env:
+  SPRING_PROFILES_ACTIVE: staging
+
+ingress:
+  host: gateway.staging.localtest.me

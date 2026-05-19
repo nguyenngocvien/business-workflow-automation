@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: backend-services
+  namespace: argocd
+spec:
+  description: Backend application services for business-workflow-automation
+  sourceRepos:
+    - https://github.com/nguyenngocvien/business-workflow-automation.git
+  destinations:
+    - namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

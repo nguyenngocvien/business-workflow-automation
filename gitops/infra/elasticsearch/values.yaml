@@ -1,0 +1,16 @@
+elasticsearch:
+  master:
+    replicaCount: 1
+
+    persistence:
+      enabled: true
+      size: 20Gi
+
+  data:
+    replicaCount: 1
+
+  coordinating:
+    replicaCount: 1
+
+  ingest:
+    replicaCount: 1

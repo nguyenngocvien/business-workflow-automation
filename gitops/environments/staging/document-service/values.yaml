@@ -1,0 +1,5 @@
+image:
+  tag: staging
+
+env:
+  SPRING_PROFILES_ACTIVE: staging

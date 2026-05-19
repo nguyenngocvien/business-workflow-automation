@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: viennn/identity-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8081
+
+containerPort: 8081
+
+env:
+  SPRING_PROFILES_ACTIVE: local
+  SERVER_PORT: "8081"
+  DB_URL: jdbc:postgresql://postgres:5432/identity_db
+  DB_USERNAME: postgres
+  DB_PASSWORD: postgres
+  JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
+  EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
+  KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+  KEYCLOAK_REALM: my-realm
+  KEYCLOAK_CLIENT_ID: admin-cli
+  KEYCLOAK_CLIENT_SECRET: your-client-secret
