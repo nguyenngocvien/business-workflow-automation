@@ -1,0 +1,8 @@
+replicaCount: 3
+
+image:
+  repository: viennn/identity-service
+  tag: 1.0.0
+
+env:
+  SPRING_PROFILES_ACTIVE: prod
