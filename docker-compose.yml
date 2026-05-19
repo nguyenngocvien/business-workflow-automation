@@ -7,10 +7,10 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       # Init multiple databases via entrypoint script
-      POSTGRES_MULTIPLE_DATABASES: bpm,keycloak,edocument,identity_db,connector
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_MULTIPLE_DATABASES:-bpm,keycloak,edocument,identity_db,connector}
     ports:
       - "5432:5432"
     volumes:
@@ -33,8 +33,8 @@ services:
     container_name: pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_DISABLE_POSTFIX: "true"
     ports:
       - "5050:80"
@@ -106,10 +106,10 @@ services:
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: postgres
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-postgres}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-postgres}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HEALTH_ENABLED: "true"
     restart: on-failure
     networks:
@@ -192,8 +192,8 @@ services:
     container_name: minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio123
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio123}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -216,8 +216,8 @@ services:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -257,10 +257,10 @@ services:
     container_name: api-gateway
     restart: unless-stopped
     environment:
-      SERVER_PORT: 8080
-      JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
-      JWT_JWK_SET_URI: http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs
-      EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
+      SERVER_PORT: ${API_GATEWAY_SERVER_PORT:-8080}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/my-realm}
+      JWT_JWK_SET_URI: ${JWT_JWK_SET_URI:-http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE:-http://discovery-server:8761/eureka/}
     ports:
       - "8080:8080"
     depends_on:
@@ -279,16 +279,16 @@ services:
     container_name: identity-service
     restart: unless-stopped
     environment:
-      SERVER_PORT: 8081
-      DB_URL: jdbc:postgresql://postgres:5432/identity_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
-      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
-      KEYCLOAK_REALM: my-realm
-      KEYCLOAK_CLIENT_ID: admin-cli
-      KEYCLOAK_CLIENT_SECRET: your-client-secret
-      EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
+      SERVER_PORT: ${IDENTITY_SERVICE_SERVER_PORT:-8081}
+      DB_URL: ${IDENTITY_SERVICE_DB_URL:-jdbc:postgresql://postgres:5432/identity_db}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/my-realm}
+      KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-http://keycloak:8080}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-my-realm}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-admin-cli}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-your-client-secret}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE:-http://discovery-server:8761/eureka/}
     ports:
       - "8081:8081"
     depends_on:
@@ -307,18 +307,18 @@ services:
       dockerfile: Dockerfile
     container_name: connector-service
     environment:
-      SERVER_PORT: 8082
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bpm
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_SHOW_SQL: "false"
-      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
-      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-      APP_CRYPTO_KEY: 1234567890123456
-      MAIL_HOST: smtp.gmail.com
-      MAIL_PORT: 587
-      MAIL_USERNAME: your-email@gmail.com
-      MAIL_PASSWORD: your-app-password
+      SERVER_PORT: ${CONNECTOR_SERVICE_SERVER_PORT:-8082}
+      SPRING_DATASOURCE_URL: ${CONNECTOR_SERVICE_DB_URL:-jdbc:postgresql://postgres:5432/bpm}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-postgres}
+      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-false}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:-http://discovery-server:8761/eureka/}
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:-true}
+      APP_CRYPTO_KEY: ${APP_CRYPTO_KEY:-1234567890123456}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
     ports:
       - "8082:8082"
     networks:
@@ -338,33 +338,33 @@ services:
       dockerfile: Dockerfile
     container_name: workflow-service
     environment:
-      SERVER_PORT: 8083
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bpm
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://discovery-server:8761/eureka/
-      EUREKA_PREFER_IP_ADDRESS: "true"
+      SERVER_PORT: ${WORKFLOW_SERVICE_SERVER_PORT:-8083}
+      SPRING_DATASOURCE_URL: ${WORKFLOW_SERVICE_DB_URL:-jdbc:postgresql://postgres:5432/bpm}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-postgres}
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE:-http://discovery-server:8761/eureka/}
+      EUREKA_PREFER_IP_ADDRESS: ${EUREKA_PREFER_IP_ADDRESS:-true}
 
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST:-rabbitmq}
+      SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_DEFAULT_USER:-guest}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS:-guest}
 
-      CAMUNDA_CLIENT_MODE: self-managed
-      CAMUNDA_CLIENT_GRPC_ADDRESS: http://zeebe:26500
-      CAMUNDA_CLIENT_REST_ADDRESS: http://zeebe:8080
-      CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: "false"
-      CAMUNDA_CLIENT_AUTH_METHOD: none      
-      CAMUNDA_CLIENT_AUTH_ENABLED: "false"
+      CAMUNDA_CLIENT_MODE: ${CAMUNDA_CLIENT_MODE:-self-managed}
+      CAMUNDA_CLIENT_GRPC_ADDRESS: ${CAMUNDA_CLIENT_GRPC_ADDRESS:-http://zeebe:26500}
+      CAMUNDA_CLIENT_REST_ADDRESS: ${CAMUNDA_CLIENT_REST_ADDRESS:-http://zeebe:8080}
+      CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC: ${CAMUNDA_CLIENT_PREFER_REST_OVER_GRPC:-false}
+      CAMUNDA_CLIENT_AUTH_METHOD: ${CAMUNDA_CLIENT_AUTH_METHOD:-none}
+      CAMUNDA_CLIENT_AUTH_ENABLED: ${CAMUNDA_CLIENT_AUTH_ENABLED:-false}
 
-      WORKFLOW_PROVIDER: camunda
+      WORKFLOW_PROVIDER: ${WORKFLOW_PROVIDER:-camunda}
 
-      IBM_BPM_BASE_URL: http://ibm-baw:9080/bpm
-      IBM_BPM_USERNAME: admin
-      IBM_BPM_PASSWORD: password
+      IBM_BPM_BASE_URL: ${IBM_BPM_BASE_URL:-http://ibm-baw:9080/bpm}
+      IBM_BPM_USERNAME: ${IBM_BPM_USERNAME:-admin}
+      IBM_BPM_PASSWORD: ${IBM_BPM_PASSWORD:-password}
 
-      SPRING_SECURITY_USER_NAME: admin
-      SPRING_SECURITY_USER_PASSWORD: admin123
+      SPRING_SECURITY_USER_NAME: ${SPRING_SECURITY_USER_NAME:-admin}
+      SPRING_SECURITY_USER_PASSWORD: ${SPRING_SECURITY_USER_PASSWORD:-admin123}
     ports:
       - "8083:8083"
     networks:
@@ -389,15 +389,15 @@ services:
     container_name: document-service
     restart: unless-stopped
     environment:
-      SERVER_PORT: 8084
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/edocument
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
-      EUREKA_PREFER_IP_ADDRESS: "true"
-      MINIO_URL: http://minio:9000
-      MINIO_ACCESS_KEY: minio
-      MINIO_SECRET_KEY: minio123
+      SERVER_PORT: ${DOCUMENT_SERVICE_SERVER_PORT:-8084}
+      SPRING_DATASOURCE_URL: ${DOCUMENT_SERVICE_DB_URL:-jdbc:postgresql://postgres:5432/edocument}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-postgres}
+      EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE:-http://discovery-server:8761/eureka/}
+      EUREKA_PREFER_IP_ADDRESS: ${EUREKA_PREFER_IP_ADDRESS:-true}
+      MINIO_URL: ${MINIO_URL:-http://minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minio}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio123}
     ports:
       - "8084:8084"
     depends_on:

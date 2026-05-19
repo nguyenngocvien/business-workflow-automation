@@ -25,6 +25,18 @@ The root `docker-compose.yml` brings up the following services:
 - Docker
 - Docker Compose v2, or the legacy `docker-compose` CLI
 
+## Environment
+
+Docker Compose automatically reads a root `.env` file for variable substitution.
+
+Use the checked-in template to create your local environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then edit `.env` for any secrets or host-specific overrides before starting the stack.
+
 ## Start the stack
 
 Use the helper script:
