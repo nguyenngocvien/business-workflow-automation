@@ -1,0 +1,6 @@
+image:
+  repository: viennn/identity-service
+  tag: dev-001
+
+env:
+  SPRING_PROFILES_ACTIVE: dev
