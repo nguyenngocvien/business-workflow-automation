@@ -10,6 +10,9 @@ help:
 	@echo "  make pull-workflow-service       Pull e-workflow into backend/workflow-service"
 	@echo "  make pull-connector-service    Pull e-connector into backend/connector-service"
 	@echo "  make pull-document-service       Pull e-document into backend/document-service"
+	@echo "  make pull-notification-service   Pull notification-service into backend/notification-service"
+	@echo "  make pull-gitops                 Pull baw-gitops into gitops"
+	@echo "  make pull-all                    Pull all subtrees"
 
 pull-discovery-server:
 	git subtree pull --prefix backend/discovery-server https://github.com/nguyenngocvien/discovery-server.git main --squash
@@ -31,3 +34,8 @@ pull-document-service:
 
 pull-notification-service:
 	git subtree pull --prefix backend/notification-service https://github.com/nguyenngocvien/notification-service.git main --squash
+
+pull-gitops:
+	git subtree pull --prefix gitops https://github.com/nguyenngocvien/baw-gitops.git main --squash
+
+pull-all: pull-discovery-server pull-api-gateway pull-identity-service pull-workflow-service pull-connector-service pull-document-service pull-notification-service pull-gitops
