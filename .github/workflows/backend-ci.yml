@@ -1,0 +1,134 @@
+name: backend-ci
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend/**
+      - .github/workflows/backend-ci.yml
+      - .github/workflows/_build-and-push-update.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build service matrix
+        id: set-matrix
+        shell: bash
+        run: |
+          services=(
+            "api-gateway"
+            "connector-service"
+            "discovery-server"
+            "document-service"
+            "identity-service"
+            "notification-service"
+            "workflow-service"
+          )
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            changed_services=("${services[@]}")
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+            changed_services=()
+
+            for service in "${services[@]}"; do
+              if git diff --name-only "$base_sha" "$head_sha" -- "backend/$service/" | grep -q .; then
+                changed_services+=("$service")
+              fi
+            done
+          fi
+
+          if [[ ${#changed_services[@]} -eq 0 ]]; then
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+            echo 'has_changes=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          matrix_include="[]"
+          for service in "${changed_services[@]}"; do
+            build_context="./backend/$service"
+            gitops_values_path="gitops/environments/dev/$service/values.yaml"
+            matrix_include=$(jq \
+              --arg service_name "$service" \
+              --arg build_context "$build_context" \
+              --arg gitops_values_path "$gitops_values_path" \
+              '. + [{"service_name": $service_name, "build_context": $build_context, "gitops_values_path": $gitops_values_path}]' \
+              <<<"$matrix_include")
+          done
+
+          echo "matrix={\"include\":$matrix_include}" >> "$GITHUB_OUTPUT"
+          echo 'has_changes=true' >> "$GITHUB_OUTPUT"
+
+  build-images:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+    uses: ./.github/workflows/_build-and-push-update.yml
+    with:
+      service_name: ${{ matrix.service_name }}
+      build_context: ${{ matrix.build_context }}
+    secrets: inherit
+
+  update-gitops:
+    needs:
+      - detect-changes
+      - build-images
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Update GitOps values
+        env:
+          IMAGE_REPOSITORY: viennguyen12067/baw
+          MATRIX_JSON: ${{ needs.detect-changes.outputs.matrix }}
+          IMAGE_TAG_SUFFIX: ${{ github.sha }}
+        shell: bash
+        run: |
+          echo "$MATRIX_JSON" | jq -r '.include[] | @base64' | while read -r encoded; do
+            item=$(echo "$encoded" | base64 -d)
+            service_name=$(jq -r '.service_name' <<<"$item")
+            values_path=$(jq -r '.gitops_values_path' <<<"$item")
+            image_tag="${service_name}-${IMAGE_TAG_SUFFIX}"
+
+            IMAGE_TAG="$image_tag" yq -i '.image.repository = strenv(IMAGE_REPOSITORY) | .image.tag = strenv(IMAGE_TAG)' "$values_path"
+          done
+
+      - name: Commit and push GitOps update
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No GitOps changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gitops/environments/dev
+          git commit -m "ci: update dev images for changed backend services [skip ci]"
+          git push

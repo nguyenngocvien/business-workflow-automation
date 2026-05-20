@@ -1,0 +1,57 @@
+name: build-and-push-update
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        description: Service name used in the Docker tag and GitOps path.
+        required: true
+        type: string
+      build_context:
+        description: Docker build context for the service.
+        required: true
+        type: string
+      image_repository:
+        description: Docker Hub repository to publish to.
+        required: false
+        type: string
+        default: viennguyen12067/baw
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-push-update:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_REPOSITORY: ${{ inputs.image_repository }}
+      IMAGE_TAG: ${{ inputs.service_name }}-${{ github.sha }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.build_context }}
+          file: ${{ inputs.build_context }}/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}

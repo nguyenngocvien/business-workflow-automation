@@ -254,9 +254,9 @@ The charts expect service images to be built and published separately.
 
 For example:
 
-- `viennn/identity-service:dev`
-- `viennn/identity-service:staging`
-- `viennn/identity-service:prod`
+- `viennguyen12067/baw:identity-service-<sha>`
+- `viennguyen12067/baw:workflow-service-<sha>`
+- `viennguyen12067/baw:api-gateway-<sha>`
 
 If you use a different registry, update the `image.repository` value in the chart or the environment override file.
 

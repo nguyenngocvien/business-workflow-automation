@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/viennn/baw-gitops.git
+    repoURL: https://github.com/nguyenngocvien/baw-gitops.git
     targetRevision: main
     path: argocd/infra
 

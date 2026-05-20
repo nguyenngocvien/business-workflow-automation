@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: viennn/document-service
+  repository: viennguyen12067/baw
   tag: latest
   pullPolicy: IfNotPresent
 

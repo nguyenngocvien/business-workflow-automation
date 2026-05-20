@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: viennn/discovery-server
+  repository: viennguyen12067/baw
   tag: latest
   pullPolicy: IfNotPresent
 
