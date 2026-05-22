@@ -1,0 +1,128 @@
+{
+  "realm": "baw-prod",
+  "enabled": true,
+  "displayName": "Business Workflow Automation Prod",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "rememberMe": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "MANAGER",
+        "description": "Approves and supervises workflows"
+      },
+      {
+        "name": "USER",
+        "description": "Standard application user"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "api-gateway",
+      "name": "API Gateway",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://gateway.example.com",
+      "baseUrl": "https://gateway.example.com",
+      "redirectUris": [
+        "https://gateway.example.com/*"
+      ],
+      "webOrigins": [
+        "https://gateway.example.com"
+      ]
+    },
+    {
+      "clientId": "identity-service",
+      "name": "Identity Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "secret": "prod-identity-service-secret",
+      "clientAuthenticatorType": "client-secret",
+      "bearerOnly": false
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@prod.local",
+      "firstName": "Prod",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ProdAdmin123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "view-users",
+          "manage-users",
+          "query-users",
+          "view-realm",
+          "manage-realm"
+        ]
+      }
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "manager@prod.local",
+      "firstName": "Prod",
+      "lastName": "Manager",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ProdManager123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "MANAGER"
+      ]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user@prod.local",
+      "firstName": "Prod",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ProdUser123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER"
+      ]
+    }
+  ]
+}

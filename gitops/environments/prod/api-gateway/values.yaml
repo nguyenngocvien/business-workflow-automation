@@ -3,6 +3,8 @@ image:
 
 env:
   SPRING_PROFILES_ACTIVE: prod
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-prod
+  JWT_JWK_SET_URI: http://keycloak:8080/realms/baw-prod/protocol/openid-connect/certs
 
 ingress:
   host: gateway.example.com

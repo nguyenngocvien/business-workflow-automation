@@ -51,6 +51,8 @@ Environment variables supported by the application:
 - `KEYCLOAK_CLIENT_ID`
 - `KEYCLOAK_CLIENT_SECRET`
 
+The checked-in defaults point at the `baw-dev` realm and the `identity-service` client, which matches the local Compose and GitOps environment templates.
+
 See [`.env.example`](.env.example) for the default local values.
 
 ## Run Locally

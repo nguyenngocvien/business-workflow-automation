@@ -17,8 +17,17 @@ fi
 cd "$PROJECT_ROOT"
 
 echo "Stopping local stack from $PROJECT_ROOT"
-if [ "$#" -gt 0 ]; then
-  $COMPOSE_CMD -f "$COMPOSE_FILE" down --remove-orphans "$@"
+if [ -n "${COMPOSE_ENV_FILE:-}" ]; then
+  echo "Using env file: $COMPOSE_ENV_FILE"
+  if [ "$#" -gt 0 ]; then
+    $COMPOSE_CMD --env-file "$COMPOSE_ENV_FILE" -f "$COMPOSE_FILE" down --remove-orphans "$@"
+  else
+    $COMPOSE_CMD --env-file "$COMPOSE_ENV_FILE" -f "$COMPOSE_FILE" down --remove-orphans
+  fi
 else
-  $COMPOSE_CMD -f "$COMPOSE_FILE" down --remove-orphans
+  if [ "$#" -gt 0 ]; then
+    $COMPOSE_CMD -f "$COMPOSE_FILE" down --remove-orphans "$@"
+  else
+    $COMPOSE_CMD -f "$COMPOSE_FILE" down --remove-orphans
+  fi
 fi

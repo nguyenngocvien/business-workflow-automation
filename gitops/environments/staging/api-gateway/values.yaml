@@ -3,6 +3,8 @@ image:
 
 env:
   SPRING_PROFILES_ACTIVE: staging
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-staging
+  JWT_JWK_SET_URI: http://keycloak:8080/realms/baw-staging/protocol/openid-connect/certs
 
 ingress:
   host: gateway.staging.localtest.me

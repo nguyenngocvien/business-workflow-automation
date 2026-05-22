@@ -1,0 +1,6 @@
+realmImport:
+  file: dev-realm.json
+
+auth:
+  adminUser: admin
+  adminPassword: dev-admin

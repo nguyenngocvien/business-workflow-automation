@@ -100,7 +100,9 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.0
     container_name: keycloak
-    command: start-dev
+    command:
+      - start-dev
+      - --import-realm
     ports:
       - "8180:8080"
     environment:
@@ -109,9 +111,11 @@ services:
       KC_DB_USERNAME: ${KC_DB_USERNAME:-postgres}
       KC_DB_PASSWORD: ${KC_DB_PASSWORD:-postgres}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-dev-admin}
       KC_HEALTH_ENABLED: "true"
     restart: on-failure
+    volumes:
+      - ./gitops/infra/keycloak/files/${KEYCLOAK_IMPORT_FILE:-dev-realm.json}:/opt/keycloak/data/import/${KEYCLOAK_IMPORT_FILE:-dev-realm.json}:ro
     networks:
       - workflow_net
     healthcheck:
@@ -258,8 +262,8 @@ services:
     restart: unless-stopped
     environment:
       SERVER_PORT: ${API_GATEWAY_SERVER_PORT:-8080}
-      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/my-realm}
-      JWT_JWK_SET_URI: ${JWT_JWK_SET_URI:-http://keycloak:8080/realms/my-realm/protocol/openid-connect/certs}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/baw-dev}
+      JWT_JWK_SET_URI: ${JWT_JWK_SET_URI:-http://keycloak:8080/realms/baw-dev/protocol/openid-connect/certs}
       EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE:-http://discovery-server:8761/eureka/}
     ports:
       - "8080:8080"
@@ -283,11 +287,11 @@ services:
       DB_URL: ${IDENTITY_SERVICE_DB_URL:-jdbc:postgresql://postgres:5432/identity_db}
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/my-realm}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI:-http://keycloak:8080/realms/baw-dev}
       KEYCLOAK_AUTH_SERVER_URL: ${KEYCLOAK_AUTH_SERVER_URL:-http://keycloak:8080}
-      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-my-realm}
-      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-admin-cli}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-your-client-secret}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-baw-dev}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-identity-service}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-dev-identity-service-secret}
       EUREKA_DEFAULT_ZONE: ${EUREKA_DEFAULT_ZONE:-http://discovery-server:8761/eureka/}
     ports:
       - "8081:8081"

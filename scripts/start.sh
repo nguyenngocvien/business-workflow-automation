@@ -18,8 +18,17 @@ cd "$PROJECT_ROOT"
 
 echo "Starting local stack from $PROJECT_ROOT"
 echo "Using compose file: $COMPOSE_FILE"
-if [ "$#" -gt 0 ]; then
-  $COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build --remove-orphans "$@"
+if [ -n "${COMPOSE_ENV_FILE:-}" ]; then
+  echo "Using env file: $COMPOSE_ENV_FILE"
+  if [ "$#" -gt 0 ]; then
+    $COMPOSE_CMD --env-file "$COMPOSE_ENV_FILE" -f "$COMPOSE_FILE" up -d --build --remove-orphans "$@"
+  else
+    $COMPOSE_CMD --env-file "$COMPOSE_ENV_FILE" -f "$COMPOSE_FILE" up -d --build --remove-orphans
+  fi
 else
-  $COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build --remove-orphans
+  if [ "$#" -gt 0 ]; then
+    $COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build --remove-orphans "$@"
+  else
+    $COMPOSE_CMD -f "$COMPOSE_FILE" up -d --build --remove-orphans
+  fi
 fi

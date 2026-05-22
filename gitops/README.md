@@ -7,6 +7,7 @@ The layout is intentionally split into three layers:
 - `gitops/infra/` for shared cluster services such as PostgreSQL, Keycloak, RabbitMQ, MinIO, Elasticsearch, and Camunda components
 - `gitops/apps/` for one Helm chart per backend service
 - `gitops/argocd/` for Argo CD bootstrap and per-service Application manifests
+- `gitops/environments/` for per-environment overrides, including the Keycloak realm import file selection
 
 ## What Gets Deployed
 
@@ -41,6 +42,7 @@ gitops/
     Chart.yaml
     values.yaml
     templates/
+  infra/keycloak/files/
   environments/<env>/<service>/values.yaml
   argocd/
     project.yaml
@@ -89,6 +91,12 @@ This repo uses separate namespaces by environment:
 
 The Argo CD manifests are written to create or target those namespaces, depending on the environment file you apply.
 
+Keycloak is deployed per environment with its own imported realm definition:
+
+- `gitops/argocd/keycloak-dev.yaml`
+- `gitops/argocd/keycloak-staging.yaml`
+- `gitops/argocd/keycloak-prod.yaml`
+
 ## Shared Infrastructure
 
 The infra manifests live under `gitops/infra/`.
@@ -120,6 +128,27 @@ Each chart is deployed independently, which makes it easier to:
 - roll one service forward without touching the rest
 - tune replicas and tags per environment
 - keep service-specific config close to the service chart
+
+## Keycloak IAM As Code
+
+Keycloak realm data lives under `gitops/infra/keycloak/files/` and is imported during startup.
+
+The repository currently defines three environment-specific realms:
+
+- `baw-dev`
+- `baw-staging`
+- `baw-prod`
+
+Each realm file creates:
+
+- a realm
+- an `api-gateway` client
+- an `identity-service` client
+- realm roles for `ADMIN`, `MANAGER`, and `USER`
+- example users for each role
+
+When using Docker Compose, select the realm file with `KEYCLOAK_IMPORT_FILE` in your env file.
+When using Argo CD, select the matching `gitops/environments/<env>/keycloak/values.yaml` file through the environment-specific Keycloak Application.
 
 ## Environment Overrides
 

@@ -17,9 +17,9 @@ env:
   DB_URL: jdbc:postgresql://postgres:5432/identity_db
   DB_USERNAME: postgres
   DB_PASSWORD: postgres
-  JWT_ISSUER_URI: http://keycloak:8080/realms/my-realm
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-dev
   EUREKA_DEFAULT_ZONE: http://discovery-server:8761/eureka/
   KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
-  KEYCLOAK_REALM: my-realm
-  KEYCLOAK_CLIENT_ID: admin-cli
-  KEYCLOAK_CLIENT_SECRET: your-client-secret
+  KEYCLOAK_REALM: baw-dev
+  KEYCLOAK_CLIENT_ID: identity-service
+  KEYCLOAK_CLIENT_SECRET: dev-identity-service-secret

@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: keycloak-dev
+  namespace: argocd
+
+spec:
+  project: backend-services
+
+  source:
+    repoURL: https://github.com/nguyenngocvien/business-workflow-automation.git
+    targetRevision: main
+    path: gitops/infra/keycloak
+
+    helm:
+      valueFiles:
+        - ../../environments/dev/keycloak/values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

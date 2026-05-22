@@ -1,0 +1,6 @@
+realmImport:
+  file: staging-realm.json
+
+auth:
+  adminUser: admin
+  adminPassword: staging-admin

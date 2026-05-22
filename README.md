@@ -29,13 +29,27 @@ The root `docker-compose.yml` brings up the following services:
 
 Docker Compose automatically reads a root `.env` file for variable substitution.
 
-Use the checked-in template to create your local environment file:
+Use the checked-in template to create your local development environment file:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Then edit `.env` for any secrets or host-specific overrides before starting the stack.
+For staging or prod, use the matching template and point the helper script at it:
+
+```powershell
+Copy-Item .env.staging.example .env.staging
+Copy-Item .env.prod.example .env.prod
+```
+
+Then start with `COMPOSE_ENV_FILE` set to the profile you want, for example:
+
+```powershell
+$env:COMPOSE_ENV_FILE=".env.staging"
+./scripts/start.sh
+```
+
+The Keycloak realm import file is selected per environment through `KEYCLOAK_IMPORT_FILE`, so dev, staging, and prod can each use a separate realm, client, role, and user set.
 
 ## Start the stack
 
@@ -113,8 +127,16 @@ The Compose file initializes these databases:
 
 ```text
 username: admin
-password: admin
+password: dev-admin
 ```
+
+The committed environment templates import these realms:
+
+- `baw-dev`
+- `baw-staging`
+- `baw-prod`
+
+Each realm includes an `api-gateway` client, an `identity-service` client, and example `admin`, `manager`, and `user` accounts.
 
 ### pgAdmin
 

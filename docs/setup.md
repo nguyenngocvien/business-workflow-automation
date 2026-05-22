@@ -15,6 +15,8 @@ Copy-Item .env.example .env
 
 Then edit `.env` if you need to override ports, credentials, or external endpoints.
 
+If you want to run a different Compose profile, set `COMPOSE_ENV_FILE` to `.env.staging` or `.env.prod` after copying the matching example file.
+
 ## 3. Start the Stack
 
 Start the full stack:
@@ -91,6 +93,7 @@ curl http://localhost:9200
 
 - The local stack is development-only.
 - PostgreSQL is initialized with multiple databases, including `bpm`, `keycloak`, `edocument`, `identity_db`, and `connector`.
+- Keycloak imports an environment-specific realm definition from `gitops/infra/keycloak/files/`, so the dev, staging, and prod stacks do not share the same realm name or client secrets.
 - `identity-service` runs on host port `8081`.
 - `operate` runs on host port `8088`.
 - `workflow-service` uses PostgreSQL, RabbitMQ, Zeebe, and Keycloak.

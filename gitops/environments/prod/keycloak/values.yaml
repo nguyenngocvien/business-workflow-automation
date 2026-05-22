@@ -1,0 +1,6 @@
+realmImport:
+  file: prod-realm.json
+
+auth:
+  adminUser: admin
+  adminPassword: prod-admin

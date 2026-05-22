@@ -1,0 +1,128 @@
+{
+  "realm": "baw-staging",
+  "enabled": true,
+  "displayName": "Business Workflow Automation Staging",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "rememberMe": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "MANAGER",
+        "description": "Approves and supervises workflows"
+      },
+      {
+        "name": "USER",
+        "description": "Standard application user"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "api-gateway",
+      "name": "API Gateway",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://gateway.staging.localtest.me",
+      "baseUrl": "https://gateway.staging.localtest.me",
+      "redirectUris": [
+        "https://gateway.staging.localtest.me/*"
+      ],
+      "webOrigins": [
+        "https://gateway.staging.localtest.me"
+      ]
+    },
+    {
+      "clientId": "identity-service",
+      "name": "Identity Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "secret": "staging-identity-service-secret",
+      "clientAuthenticatorType": "client-secret",
+      "bearerOnly": false
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@staging.local",
+      "firstName": "Staging",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "StagingAdmin123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "view-users",
+          "manage-users",
+          "query-users",
+          "view-realm",
+          "manage-realm"
+        ]
+      }
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "manager@staging.local",
+      "firstName": "Staging",
+      "lastName": "Manager",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "StagingManager123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "MANAGER"
+      ]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user@staging.local",
+      "firstName": "Staging",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "StagingUser123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER"
+      ]
+    }
+  ]
+}

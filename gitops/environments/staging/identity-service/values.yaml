@@ -3,3 +3,8 @@ image:
 
 env:
   SPRING_PROFILES_ACTIVE: staging
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-staging
+  KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+  KEYCLOAK_REALM: baw-staging
+  KEYCLOAK_CLIENT_ID: identity-service
+  KEYCLOAK_CLIENT_SECRET: staging-identity-service-secret

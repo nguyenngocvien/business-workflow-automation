@@ -16,7 +16,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/your-realm}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/baw-dev}
 
 server:
   port: ${SERVER_PORT:8081}
@@ -34,7 +34,7 @@ eureka:
 
 # Config for Keycloak Admin Client
 keycloak:
-  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8080}
-  realm: ${KEYCLOAK_REALM:your-realm}
-  client-id: ${KEYCLOAK_CLIENT_ID:admin-cli}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:your-client-secret}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}
+  realm: ${KEYCLOAK_REALM:baw-dev}
+  client-id: ${KEYCLOAK_CLIENT_ID:identity-service}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:dev-identity-service-secret}

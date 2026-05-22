@@ -72,9 +72,9 @@ spring:
       resourceserver:
         jwt:
           # URL of Realm in Keycloak
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/my-realm}
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/baw-dev}
           # Or jwk-set-uri for better performance
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8180/realms/my-realm/protocol/openid-connect/certs}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8180/realms/baw-dev/protocol/openid-connect/certs}
   cloud:
     gateway:
       server:
