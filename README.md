@@ -19,6 +19,8 @@ The root `docker-compose.yml` brings up the following services:
 - Connector Service
 - Workflow Service
 - Document Service
+- Admin Portal
+- User Portal
 
 ## Prerequisites
 
@@ -92,6 +94,8 @@ To remove volumes as well:
 | Connector Service | http://localhost:8082 | Integration APIs |
 | Workflow Service | http://localhost:8083 | Workflow runtime and APIs |
 | Document Service | http://localhost:8084 | Document storage API |
+| Admin Portal | http://localhost:5173/e-connector/ | Nginx-served static build for the admin frontend |
+| User Portal | http://localhost:5174 | Nginx-served static build for the user frontend |
 | Discovery Server | http://localhost:8761 | Eureka registry |
 | Keycloak | http://localhost:8180 | Admin console on the standard Keycloak port inside the container |
 | PostgreSQL | localhost:5432 | `postgres` / `postgres` |
