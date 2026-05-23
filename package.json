@@ -8,11 +8,11 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "download:openapi": "node scripts/download-openapi.mjs",
-    "gen:api": "orval --config orval.config.js",
-    "gen:api:identity": "orval --config orval.config.js --project identity",
-    "gen:api:document": "orval --config orval.config.js --project document",
-    "gen:api:workflow": "orval --config orval.config.js --project workflow",
-    "gen:api:connector": "orval --config orval.config.js --project connector"
+    "gen:api": "orval --config orval.config.ts",
+    "gen:api:identity": "orval --config orval.config.ts --project identity",
+    "gen:api:document": "orval --config orval.config.ts --project document",
+    "gen:api:workflow": "orval --config orval.config.ts --project workflow",
+    "gen:api:connector": "orval --config orval.config.ts --project connector"
   },
   "dependencies": {
     "axios": "^1.7.9",
