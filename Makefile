@@ -35,6 +35,12 @@ pull-document-service:
 pull-notification-service:
 	git subtree pull --prefix backend/notification-service https://github.com/nguyenngocvien/notification-service.git main --squash
 
+pull-admin-portal:
+	git subtree pull --prefix frontend/admin-portal https://github.com/nguyenngocvien/admin-dashboard.git main --squash
+
+pull-user-portal:
+	git subtree pull --prefix frontend/user-portal https://github.com/nguyenngocvien/user-dashboard.git main --squash
+
 pull-gitops:
 	git subtree pull --prefix gitops https://github.com/nguyenngocvien/baw-gitops.git main --squash
 
