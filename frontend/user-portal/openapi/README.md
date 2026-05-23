@@ -7,7 +7,7 @@ Place the exported OpenAPI documents for each service in the matching folder:
 - `openapi/workflow/openapi.json`
 - `openapi/connector/openapi.json`
 
-`orval.config.js` is already pointed at these files.
+`orval.config.ts` is already pointed at these files.
 
 To download fresh specs from the backend, run:
 
