@@ -4,13 +4,40 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import * as axios from 'axios';
-import type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
+import findByIdMutator from '../../lib/orvalMutator';
+import updateMutator from '../../lib/orvalMutator';
+import deactivateMutator from '../../lib/orvalMutator';
+import findById1Mutator from '../../lib/orvalMutator';
+import update1Mutator from '../../lib/orvalMutator';
+import findById2Mutator from '../../lib/orvalMutator';
+import update2Mutator from '../../lib/orvalMutator';
+import findById3Mutator from '../../lib/orvalMutator';
+import update3Mutator from '../../lib/orvalMutator';
+import findAllMutator from '../../lib/orvalMutator';
+import createMutator from '../../lib/orvalMutator';
+import assignMutator from '../../lib/orvalMutator';
+import addMutator from '../../lib/orvalMutator';
+import findAll1Mutator from '../../lib/orvalMutator';
+import create1Mutator from '../../lib/orvalMutator';
+import grantMutator from '../../lib/orvalMutator';
+import findAll2Mutator from '../../lib/orvalMutator';
+import create2Mutator from '../../lib/orvalMutator';
+import findAll3Mutator from '../../lib/orvalMutator';
+import create3Mutator from '../../lib/orvalMutator';
+import findByUsernameMutator from '../../lib/orvalMutator';
+import findByExternalIdMutator from '../../lib/orvalMutator';
+import findMutator from '../../lib/orvalMutator';
+import revokeMutator from '../../lib/orvalMutator';
+import findByUserIdMutator from '../../lib/orvalMutator';
+import find1Mutator from '../../lib/orvalMutator';
+import removeMutator from '../../lib/orvalMutator';
+import findByUserId1Mutator from '../../lib/orvalMutator';
+import findByCodeMutator from '../../lib/orvalMutator';
+import find2Mutator from '../../lib/orvalMutator';
+import revoke1Mutator from '../../lib/orvalMutator';
+import findByRoleIdMutator from '../../lib/orvalMutator';
+import findByProviderCodeMutator from '../../lib/orvalMutator';
+import findByCode1Mutator from '../../lib/orvalMutator';
 export type UserUpdateRequestStatus = typeof UserUpdateRequestStatus[keyof typeof UserUpdateRequestStatus];
 
 
@@ -370,18 +397,22 @@ export interface GroupCreateRequest {
   source: GroupCreateRequestSource;
 }
 
-export const getOpenAPIDefinition = (axiosInstance: AxiosInstance = axios.default) => {
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+  export const getOpenAPIDefinition = () => {
 /**
  * Returns a single user by identifier
  * @summary Get a user by ID
  */
 const findById = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
-    return axiosInstance.get(
-      `/api/users/${id}`,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof findByIdMutator<UserResponse>>,) => {
+      return findByIdMutator<UserResponse>(
+      {url: `/api/users/${id}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Updates an existing user record
@@ -389,38 +420,41 @@ const findById = (
  */
 const update = (
     id: number,
-    userUpdateRequest: UserUpdateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
-    return axiosInstance.put(
-      `/api/users/${id}`,
-      userUpdateRequest,options
-    );
-  }
+    userUpdateRequest: UserUpdateRequest,
+ options?: SecondParameter<typeof updateMutator<UserResponse>>,) => {
+      return updateMutator<UserResponse>(
+      {url: `/api/users/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: userUpdateRequest
+    },
+      options);
+    }
 
 /**
  * Marks a user as inactive and deleted
  * @summary Deactivate a user
  */
 const deactivate = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
-    return axiosInstance.put(
-      `/api/users/${id}/deactivate`,
-      undefined,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof deactivateMutator<UserResponse>>,) => {
+      return deactivateMutator<UserResponse>(
+      {url: `/api/users/${id}/deactivate`, method: 'PUT'
+    },
+      options);
+    }
 
 /**
  * Returns a single role by identifier
  * @summary Get a role by ID
  */
 const findById1 = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RoleResponse>> => {
-    return axiosInstance.get(
-      `/api/roles/${id}`,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof findById1Mutator<RoleResponse>>,) => {
+      return findById1Mutator<RoleResponse>(
+      {url: `/api/roles/${id}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Updates an existing role record
@@ -428,25 +462,28 @@ const findById1 = (
  */
 const update1 = (
     id: number,
-    roleUpdateRequest: RoleUpdateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RoleResponse>> => {
-    return axiosInstance.put(
-      `/api/roles/${id}`,
-      roleUpdateRequest,options
-    );
-  }
+    roleUpdateRequest: RoleUpdateRequest,
+ options?: SecondParameter<typeof update1Mutator<RoleResponse>>,) => {
+      return update1Mutator<RoleResponse>(
+      {url: `/api/roles/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: roleUpdateRequest
+    },
+      options);
+    }
 
 /**
  * Returns a single identity provider by identifier
  * @summary Get an identity provider by ID
  */
 const findById2 = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<IdentityProviderResponse>> => {
-    return axiosInstance.get(
-      `/api/identity-providers/${id}`,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof findById2Mutator<IdentityProviderResponse>>,) => {
+      return findById2Mutator<IdentityProviderResponse>(
+      {url: `/api/identity-providers/${id}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Updates an existing identity provider record
@@ -454,25 +491,28 @@ const findById2 = (
  */
 const update2 = (
     id: number,
-    identityProviderUpdateRequest: IdentityProviderUpdateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<IdentityProviderResponse>> => {
-    return axiosInstance.put(
-      `/api/identity-providers/${id}`,
-      identityProviderUpdateRequest,options
-    );
-  }
+    identityProviderUpdateRequest: IdentityProviderUpdateRequest,
+ options?: SecondParameter<typeof update2Mutator<IdentityProviderResponse>>,) => {
+      return update2Mutator<IdentityProviderResponse>(
+      {url: `/api/identity-providers/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: identityProviderUpdateRequest
+    },
+      options);
+    }
 
 /**
  * Returns a single group by identifier
  * @summary Get a group by ID
  */
 const findById3 = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GroupResponse>> => {
-    return axiosInstance.get(
-      `/api/groups/${id}`,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof findById3Mutator<GroupResponse>>,) => {
+      return findById3Mutator<GroupResponse>(
+      {url: `/api/groups/${id}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Updates an existing group record
@@ -480,176 +520,198 @@ const findById3 = (
  */
 const update3 = (
     id: number,
-    groupUpdateRequest: GroupUpdateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GroupResponse>> => {
-    return axiosInstance.put(
-      `/api/groups/${id}`,
-      groupUpdateRequest,options
-    );
-  }
+    groupUpdateRequest: GroupUpdateRequest,
+ options?: SecondParameter<typeof update3Mutator<GroupResponse>>,) => {
+      return update3Mutator<GroupResponse>(
+      {url: `/api/groups/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: groupUpdateRequest
+    },
+      options);
+    }
 
 /**
  * Returns all users
  * @summary List users
  */
 const findAll = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse[]>> => {
-    return axiosInstance.get(
-      `/api/users`,options
-    );
-  }
+
+ options?: SecondParameter<typeof findAllMutator<UserResponse[]>>,) => {
+      return findAllMutator<UserResponse[]>(
+      {url: `/api/users`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Creates a new user record
  * @summary Create a user
  */
 const create = (
-    userCreateRequest: UserCreateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
-    return axiosInstance.post(
-      `/api/users`,
-      userCreateRequest,options
-    );
-  }
+    userCreateRequest: UserCreateRequest,
+ options?: SecondParameter<typeof createMutator<UserResponse>>,) => {
+      return createMutator<UserResponse>(
+      {url: `/api/users`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: userCreateRequest
+    },
+      options);
+    }
 
 /**
  * Creates a user-role assignment
  * @summary Assign a role to a user
  */
 const assign = (
-    assignUserRoleRequest: AssignUserRoleRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserRoleResponse>> => {
-    return axiosInstance.post(
-      `/api/user-roles`,
-      assignUserRoleRequest,options
-    );
-  }
+    assignUserRoleRequest: AssignUserRoleRequest,
+ options?: SecondParameter<typeof assignMutator<UserRoleResponse>>,) => {
+      return assignMutator<UserRoleResponse>(
+      {url: `/api/user-roles`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: assignUserRoleRequest
+    },
+      options);
+    }
 
 /**
  * Creates a user-group membership
  * @summary Add a user to a group
  */
 const add = (
-    addUserGroupRequest: AddUserGroupRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserGroupResponse>> => {
-    return axiosInstance.post(
-      `/api/user-groups`,
-      addUserGroupRequest,options
-    );
-  }
+    addUserGroupRequest: AddUserGroupRequest,
+ options?: SecondParameter<typeof addMutator<UserGroupResponse>>,) => {
+      return addMutator<UserGroupResponse>(
+      {url: `/api/user-groups`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addUserGroupRequest
+    },
+      options);
+    }
 
 /**
  * Returns all roles
  * @summary List roles
  */
 const findAll1 = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RoleResponse[]>> => {
-    return axiosInstance.get(
-      `/api/roles`,options
-    );
-  }
+
+ options?: SecondParameter<typeof findAll1Mutator<RoleResponse[]>>,) => {
+      return findAll1Mutator<RoleResponse[]>(
+      {url: `/api/roles`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Creates a new role record
  * @summary Create a role
  */
 const create1 = (
-    roleCreateRequest: RoleCreateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RoleResponse>> => {
-    return axiosInstance.post(
-      `/api/roles`,
-      roleCreateRequest,options
-    );
-  }
+    roleCreateRequest: RoleCreateRequest,
+ options?: SecondParameter<typeof create1Mutator<RoleResponse>>,) => {
+      return create1Mutator<RoleResponse>(
+      {url: `/api/roles`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: roleCreateRequest
+    },
+      options);
+    }
 
 /**
  * Creates a role-permission grant
  * @summary Grant a permission to a role
  */
 const grant = (
-    grantRolePermissionRequest: GrantRolePermissionRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RolePermissionResponse>> => {
-    return axiosInstance.post(
-      `/api/role-permissions`,
-      grantRolePermissionRequest,options
-    );
-  }
+    grantRolePermissionRequest: GrantRolePermissionRequest,
+ options?: SecondParameter<typeof grantMutator<RolePermissionResponse>>,) => {
+      return grantMutator<RolePermissionResponse>(
+      {url: `/api/role-permissions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: grantRolePermissionRequest
+    },
+      options);
+    }
 
 /**
  * Returns all identity providers
  * @summary List identity providers
  */
 const findAll2 = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<IdentityProviderResponse[]>> => {
-    return axiosInstance.get(
-      `/api/identity-providers`,options
-    );
-  }
+
+ options?: SecondParameter<typeof findAll2Mutator<IdentityProviderResponse[]>>,) => {
+      return findAll2Mutator<IdentityProviderResponse[]>(
+      {url: `/api/identity-providers`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Creates a new identity provider record
  * @summary Create an identity provider
  */
 const create2 = (
-    identityProviderCreateRequest: IdentityProviderCreateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<IdentityProviderResponse>> => {
-    return axiosInstance.post(
-      `/api/identity-providers`,
-      identityProviderCreateRequest,options
-    );
-  }
+    identityProviderCreateRequest: IdentityProviderCreateRequest,
+ options?: SecondParameter<typeof create2Mutator<IdentityProviderResponse>>,) => {
+      return create2Mutator<IdentityProviderResponse>(
+      {url: `/api/identity-providers`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: identityProviderCreateRequest
+    },
+      options);
+    }
 
 /**
  * Returns all groups
  * @summary List groups
  */
 const findAll3 = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GroupResponse[]>> => {
-    return axiosInstance.get(
-      `/api/groups`,options
-    );
-  }
+
+ options?: SecondParameter<typeof findAll3Mutator<GroupResponse[]>>,) => {
+      return findAll3Mutator<GroupResponse[]>(
+      {url: `/api/groups`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Creates a new group record
  * @summary Create a group
  */
 const create3 = (
-    groupCreateRequest: GroupCreateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GroupResponse>> => {
-    return axiosInstance.post(
-      `/api/groups`,
-      groupCreateRequest,options
-    );
-  }
+    groupCreateRequest: GroupCreateRequest,
+ options?: SecondParameter<typeof create3Mutator<GroupResponse>>,) => {
+      return create3Mutator<GroupResponse>(
+      {url: `/api/groups`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: groupCreateRequest
+    },
+      options);
+    }
 
 /**
  * Returns a single user by username
  * @summary Get a user by username
  */
 const findByUsername = (
-    username: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
-    return axiosInstance.get(
-      `/api/users/username/${username}`,options
-    );
-  }
+    username: string,
+ options?: SecondParameter<typeof findByUsernameMutator<UserResponse>>,) => {
+      return findByUsernameMutator<UserResponse>(
+      {url: `/api/users/username/${username}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single user by external identifier
  * @summary Get a user by external ID
  */
 const findByExternalId = (
-    externalId: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserResponse>> => {
-    return axiosInstance.get(
-      `/api/users/external/${externalId}`,options
-    );
-  }
+    externalId: string,
+ options?: SecondParameter<typeof findByExternalIdMutator<UserResponse>>,) => {
+      return findByExternalIdMutator<UserResponse>(
+      {url: `/api/users/external/${externalId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single assignment by user and role
@@ -657,12 +719,13 @@ const findByExternalId = (
  */
 const find = (
     userId: number,
-    roleId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserRoleResponse>> => {
-    return axiosInstance.get(
-      `/api/user-roles/${userId}/${roleId}`,options
-    );
-  }
+    roleId: number,
+ options?: SecondParameter<typeof findMutator<UserRoleResponse>>,) => {
+      return findMutator<UserRoleResponse>(
+      {url: `/api/user-roles/${userId}/${roleId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Deletes a user-role assignment
@@ -670,24 +733,26 @@ const find = (
  */
 const revoke = (
     userId: number,
-    roleId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.delete(
-      `/api/user-roles/${userId}/${roleId}`,options
-    );
-  }
+    roleId: number,
+ options?: SecondParameter<typeof revokeMutator<void>>,) => {
+      return revokeMutator<void>(
+      {url: `/api/user-roles/${userId}/${roleId}`, method: 'DELETE'
+    },
+      options);
+    }
 
 /**
  * Returns all role assignments for the given user
  * @summary List roles for a user
  */
 const findByUserId = (
-    userId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserRoleResponse[]>> => {
-    return axiosInstance.get(
-      `/api/user-roles/user/${userId}`,options
-    );
-  }
+    userId: number,
+ options?: SecondParameter<typeof findByUserIdMutator<UserRoleResponse[]>>,) => {
+      return findByUserIdMutator<UserRoleResponse[]>(
+      {url: `/api/user-roles/user/${userId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single membership by user and group
@@ -695,12 +760,13 @@ const findByUserId = (
  */
 const find1 = (
     userId: number,
-    groupId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserGroupResponse>> => {
-    return axiosInstance.get(
-      `/api/user-groups/${userId}/${groupId}`,options
-    );
-  }
+    groupId: number,
+ options?: SecondParameter<typeof find1Mutator<UserGroupResponse>>,) => {
+      return find1Mutator<UserGroupResponse>(
+      {url: `/api/user-groups/${userId}/${groupId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Deletes a user-group membership
@@ -708,36 +774,39 @@ const find1 = (
  */
 const remove = (
     userId: number,
-    groupId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.delete(
-      `/api/user-groups/${userId}/${groupId}`,options
-    );
-  }
+    groupId: number,
+ options?: SecondParameter<typeof removeMutator<void>>,) => {
+      return removeMutator<void>(
+      {url: `/api/user-groups/${userId}/${groupId}`, method: 'DELETE'
+    },
+      options);
+    }
 
 /**
  * Returns all group memberships for the given user
  * @summary List groups for a user
  */
 const findByUserId1 = (
-    userId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<UserGroupResponse[]>> => {
-    return axiosInstance.get(
-      `/api/user-groups/user/${userId}`,options
-    );
-  }
+    userId: number,
+ options?: SecondParameter<typeof findByUserId1Mutator<UserGroupResponse[]>>,) => {
+      return findByUserId1Mutator<UserGroupResponse[]>(
+      {url: `/api/user-groups/user/${userId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single role by code
  * @summary Get a role by code
  */
 const findByCode = (
-    code: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RoleResponse>> => {
-    return axiosInstance.get(
-      `/api/roles/code/${code}`,options
-    );
-  }
+    code: string,
+ options?: SecondParameter<typeof findByCodeMutator<RoleResponse>>,) => {
+      return findByCodeMutator<RoleResponse>(
+      {url: `/api/roles/code/${code}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single grant by role and permission
@@ -745,12 +814,13 @@ const findByCode = (
  */
 const find2 = (
     roleId: number,
-    permissionId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RolePermissionResponse>> => {
-    return axiosInstance.get(
-      `/api/role-permissions/${roleId}/${permissionId}`,options
-    );
-  }
+    permissionId: number,
+ options?: SecondParameter<typeof find2Mutator<RolePermissionResponse>>,) => {
+      return find2Mutator<RolePermissionResponse>(
+      {url: `/api/role-permissions/${roleId}/${permissionId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Deletes a role-permission grant
@@ -758,81 +828,85 @@ const find2 = (
  */
 const revoke1 = (
     roleId: number,
-    permissionId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.delete(
-      `/api/role-permissions/${roleId}/${permissionId}`,options
-    );
-  }
+    permissionId: number,
+ options?: SecondParameter<typeof revoke1Mutator<void>>,) => {
+      return revoke1Mutator<void>(
+      {url: `/api/role-permissions/${roleId}/${permissionId}`, method: 'DELETE'
+    },
+      options);
+    }
 
 /**
  * Returns all permission grants for the given role
  * @summary List permissions for a role
  */
 const findByRoleId = (
-    roleId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<RolePermissionResponse[]>> => {
-    return axiosInstance.get(
-      `/api/role-permissions/role/${roleId}`,options
-    );
-  }
+    roleId: number,
+ options?: SecondParameter<typeof findByRoleIdMutator<RolePermissionResponse[]>>,) => {
+      return findByRoleIdMutator<RolePermissionResponse[]>(
+      {url: `/api/role-permissions/role/${roleId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single identity provider by provider code
  * @summary Get an identity provider by code
  */
 const findByProviderCode = (
-    providerCode: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<IdentityProviderResponse>> => {
-    return axiosInstance.get(
-      `/api/identity-providers/code/${providerCode}`,options
-    );
-  }
+    providerCode: string,
+ options?: SecondParameter<typeof findByProviderCodeMutator<IdentityProviderResponse>>,) => {
+      return findByProviderCodeMutator<IdentityProviderResponse>(
+      {url: `/api/identity-providers/code/${providerCode}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Returns a single group by code
  * @summary Get a group by code
  */
 const findByCode1 = (
-    code: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GroupResponse>> => {
-    return axiosInstance.get(
-      `/api/groups/code/${code}`,options
-    );
-  }
+    code: string,
+ options?: SecondParameter<typeof findByCode1Mutator<GroupResponse>>,) => {
+      return findByCode1Mutator<GroupResponse>(
+      {url: `/api/groups/code/${code}`, method: 'GET'
+    },
+      options);
+    }
 
 return {findById,update,deactivate,findById1,update1,findById2,update2,findById3,update3,findAll,create,assign,add,findAll1,create1,grant,findAll2,create2,findAll3,create3,findByUsername,findByExternalId,find,revoke,findByUserId,find1,remove,findByUserId1,findByCode,find2,revoke1,findByRoleId,findByProviderCode,findByCode1}};
-export type FindByIdResult = AxiosResponse<UserResponse>
-export type UpdateResult = AxiosResponse<UserResponse>
-export type DeactivateResult = AxiosResponse<UserResponse>
-export type FindById1Result = AxiosResponse<RoleResponse>
-export type Update1Result = AxiosResponse<RoleResponse>
-export type FindById2Result = AxiosResponse<IdentityProviderResponse>
-export type Update2Result = AxiosResponse<IdentityProviderResponse>
-export type FindById3Result = AxiosResponse<GroupResponse>
-export type Update3Result = AxiosResponse<GroupResponse>
-export type FindAllResult = AxiosResponse<UserResponse[]>
-export type CreateResult = AxiosResponse<UserResponse>
-export type AssignResult = AxiosResponse<UserRoleResponse>
-export type AddResult = AxiosResponse<UserGroupResponse>
-export type FindAll1Result = AxiosResponse<RoleResponse[]>
-export type Create1Result = AxiosResponse<RoleResponse>
-export type GrantResult = AxiosResponse<RolePermissionResponse>
-export type FindAll2Result = AxiosResponse<IdentityProviderResponse[]>
-export type Create2Result = AxiosResponse<IdentityProviderResponse>
-export type FindAll3Result = AxiosResponse<GroupResponse[]>
-export type Create3Result = AxiosResponse<GroupResponse>
-export type FindByUsernameResult = AxiosResponse<UserResponse>
-export type FindByExternalIdResult = AxiosResponse<UserResponse>
-export type FindResult = AxiosResponse<UserRoleResponse>
-export type RevokeResult = AxiosResponse<void>
-export type FindByUserIdResult = AxiosResponse<UserRoleResponse[]>
-export type Find1Result = AxiosResponse<UserGroupResponse>
-export type RemoveResult = AxiosResponse<void>
-export type FindByUserId1Result = AxiosResponse<UserGroupResponse[]>
-export type FindByCodeResult = AxiosResponse<RoleResponse>
-export type Find2Result = AxiosResponse<RolePermissionResponse>
-export type Revoke1Result = AxiosResponse<void>
-export type FindByRoleIdResult = AxiosResponse<RolePermissionResponse[]>
-export type FindByProviderCodeResult = AxiosResponse<IdentityProviderResponse>
-export type FindByCode1Result = AxiosResponse<GroupResponse>
+export type FindByIdResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findById']>>>
+export type UpdateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['update']>>>
+export type DeactivateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['deactivate']>>>
+export type FindById1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findById1']>>>
+export type Update1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['update1']>>>
+export type FindById2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findById2']>>>
+export type Update2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['update2']>>>
+export type FindById3Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findById3']>>>
+export type Update3Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['update3']>>>
+export type FindAllResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findAll']>>>
+export type CreateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['create']>>>
+export type AssignResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['assign']>>>
+export type AddResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['add']>>>
+export type FindAll1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findAll1']>>>
+export type Create1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['create1']>>>
+export type GrantResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['grant']>>>
+export type FindAll2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findAll2']>>>
+export type Create2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['create2']>>>
+export type FindAll3Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findAll3']>>>
+export type Create3Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['create3']>>>
+export type FindByUsernameResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByUsername']>>>
+export type FindByExternalIdResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByExternalId']>>>
+export type FindResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['find']>>>
+export type RevokeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['revoke']>>>
+export type FindByUserIdResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByUserId']>>>
+export type Find1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['find1']>>>
+export type RemoveResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['remove']>>>
+export type FindByUserId1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByUserId1']>>>
+export type FindByCodeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByCode']>>>
+export type Find2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['find2']>>>
+export type Revoke1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['revoke1']>>>
+export type FindByRoleIdResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByRoleId']>>>
+export type FindByProviderCodeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByProviderCode']>>>
+export type FindByCode1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getOpenAPIDefinition>['findByCode1']>>>

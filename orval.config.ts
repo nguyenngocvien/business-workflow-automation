@@ -1,9 +1,14 @@
+const sharedAxiosMutator = './src/lib/orvalMutator.ts';
+
 export default {
   identity: {
     input: './openapi/identity/openapi.json',
     output: {
       target: './src/api/identity/index.ts',
       client: 'axios',
+      override: {
+        mutator: sharedAxiosMutator,
+      },
     },
   },
   document: {
@@ -11,6 +16,9 @@ export default {
     output: {
       target: './src/api/document/index.ts',
       client: 'axios',
+      override: {
+        mutator: sharedAxiosMutator,
+      },
     },
   },
   workflow: {
@@ -18,6 +26,9 @@ export default {
     output: {
       target: './src/api/workflow/index.ts',
       client: 'axios',
+      override: {
+        mutator: sharedAxiosMutator,
+      },
     },
   },
   connector: {
@@ -25,6 +36,9 @@ export default {
     output: {
       target: './src/api/connector/index.ts',
       client: 'axios',
+      override: {
+        mutator: sharedAxiosMutator,
+      },
     },
   },
 };

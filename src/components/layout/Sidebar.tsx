@@ -1,17 +1,16 @@
 import { NavLink } from 'react-router-dom';
 import { navigationItems } from '../../data/dashboard';
 import { useAuth } from '../../hooks/useAuth';
+import { useUiStore } from '../../stores/uiStore';
+import { cx } from '../../lib/utils';
 import { navIcons } from './navIcons';
 
-type SidebarProps = {
-  theme: 'dark' | 'light';
-  collapsed: boolean;
-  onToggleCollapsed: () => void;
-  onToggleTheme: () => void;
-};
-
-export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: SidebarProps) {
+export function Sidebar() {
   const { user, logout } = useAuth();
+  const theme = useUiStore((state) => state.theme);
+  const collapsed = useUiStore((state) => state.sidebarCollapsed);
+  const toggleCollapsed = useUiStore((state) => state.toggleSidebarCollapsed);
+  const toggleTheme = useUiStore((state) => state.toggleTheme);
   const initials = (user?.name || 'AU')
     .split(' ')
     .map((part) => part[0])
@@ -27,7 +26,7 @@ export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: 
         <div className={cx('flex items-center', collapsed ? 'justify-center' : 'gap-3')}>
           <button
             type="button"
-            onClick={onToggleCollapsed}
+            onClick={toggleCollapsed}
             className={cx(
               'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition',
               theme === 'dark'
@@ -90,8 +89,7 @@ export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: 
               }
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5">
-                {navIcons[item.icon]}
-              </svg>
+                {navIcons[item.icon]}</svg>
               {!collapsed ? item.label : null}
             </NavLink>
           ),
@@ -100,7 +98,7 @@ export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: 
       <div className="mt-auto flex flex-col gap-2 pt-6">
         <button
           type="button"
-          onClick={onToggleTheme}
+          onClick={toggleTheme}
           title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           className={cx(
@@ -164,7 +162,6 @@ export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: 
           </div>
         </button>
 
-        {/* User */}
         <div className={cx('flex rounded-xl p-3', collapsed ? 'justify-center' : 'items-center gap-3', theme === 'dark' ? 'bg-white/5' : 'bg-white/80')}>
           <div className={cx('flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold', theme === 'dark' ? 'bg-cyan-400 text-slate-950' : 'bg-slate-900 text-white')}>
             {initials}
@@ -182,7 +179,6 @@ export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: 
           ) : null}
         </div>
 
-        {/* Logout */}
         <button
           type="button"
           onClick={logout}
@@ -198,7 +194,6 @@ export function Sidebar({ theme, collapsed, onToggleCollapsed, onToggleTheme }: 
           </svg>
           {!collapsed ? 'Logout' : null}
         </button>
-
       </div>
     </aside>
   );

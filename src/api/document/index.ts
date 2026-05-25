@@ -5,13 +5,25 @@
  * API documentation for the E-Document service
  * OpenAPI spec version: v1
  */
-import * as axios from 'axios';
-import type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
+import getMutator from '../../lib/orvalMutator';
+import updateMutator from '../../lib/orvalMutator';
+import _deleteMutator from '../../lib/orvalMutator';
+import update1Mutator from '../../lib/orvalMutator';
+import createMutator from '../../lib/orvalMutator';
+import update2Mutator from '../../lib/orvalMutator';
+import presignedUploadMutator from '../../lib/orvalMutator';
+import presignedPartMutator from '../../lib/orvalMutator';
+import initMutator from '../../lib/orvalMutator';
+import completeMutator from '../../lib/orvalMutator';
+import completeUploadMutator from '../../lib/orvalMutator';
+import getAllMutator from '../../lib/orvalMutator';
+import create1Mutator from '../../lib/orvalMutator';
+import addContentTypeMutator from '../../lib/orvalMutator';
+import getAll1Mutator from '../../lib/orvalMutator';
+import create2Mutator from '../../lib/orvalMutator';
+import addOptionMutator from '../../lib/orvalMutator';
+import listMutator from '../../lib/orvalMutator';
+import presignedDownloadMutator from '../../lib/orvalMutator';
 export interface CreateFileRequest {
   fileName?: string;
   contentType?: string;
@@ -204,198 +216,231 @@ export type ListParams = {
 pageable: Pageable;
 };
 
-export const getEDocumentAPI = (axiosInstance: AxiosInstance = axios.default) => {
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+  export const getEDocumentAPI = () => {
 const get = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileResult>> => {
-    return axiosInstance.get(
-      `/api/v1/files/${id}`,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof getMutator<FileResult>>,) => {
+      return getMutator<FileResult>(
+      {url: `/api/v1/files/${id}`, method: 'GET'
+    },
+      options);
+    }
 
 const update = (
     id: number,
-    createFileRequest: CreateFileRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileResult>> => {
-    return axiosInstance.put(
-      `/api/v1/files/${id}`,
-      createFileRequest,options
-    );
-  }
+    createFileRequest: CreateFileRequest,
+ options?: SecondParameter<typeof updateMutator<FileResult>>,) => {
+      return updateMutator<FileResult>(
+      {url: `/api/v1/files/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: createFileRequest
+    },
+      options);
+    }
 
 const _delete = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.delete(
-      `/api/v1/files/${id}`,options
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof _deleteMutator<void>>,) => {
+      return _deleteMutator<void>(
+      {url: `/api/v1/files/${id}`, method: 'DELETE'
+    },
+      options);
+    }
 
 const update1 = (
     fileId: number,
-    fileAttributeValuesRequest?: FileAttributeValuesRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.put(
-      `/api/v1/files/${fileId}/attributes`,
-      fileAttributeValuesRequest,options
-    );
-  }
+    fileAttributeValuesRequest?: FileAttributeValuesRequest,
+ options?: SecondParameter<typeof update1Mutator<void>>,) => {
+      return update1Mutator<void>(
+      {url: `/api/v1/files/${fileId}/attributes`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: fileAttributeValuesRequest
+    },
+      options);
+    }
 
 const create = (
     fileId: number,
-    fileAttributeValuesRequest?: FileAttributeValuesRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.post(
-      `/api/v1/files/${fileId}/attributes`,
-      fileAttributeValuesRequest,options
-    );
-  }
+    fileAttributeValuesRequest?: FileAttributeValuesRequest,
+ options?: SecondParameter<typeof createMutator<void>>,) => {
+      return createMutator<void>(
+      {url: `/api/v1/files/${fileId}/attributes`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: fileAttributeValuesRequest
+    },
+      options);
+    }
 
 const update2 = (
     id: number,
-    updateFileCategoryRequest?: UpdateFileCategoryRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileCategoryResult>> => {
-    return axiosInstance.put(
-      `/api/v1/file-categories/${id}`,
-      updateFileCategoryRequest,options
-    );
-  }
+    updateFileCategoryRequest?: UpdateFileCategoryRequest,
+ options?: SecondParameter<typeof update2Mutator<FileCategoryResult>>,) => {
+      return update2Mutator<FileCategoryResult>(
+      {url: `/api/v1/file-categories/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateFileCategoryRequest
+    },
+      options);
+    }
 
 const presignedUpload = (
-    presignedUploadRequest: PresignedUploadRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PresignedUploadResult>> => {
-    return axiosInstance.post(
-      `/api/v1/files/presigned-upload`,
-      presignedUploadRequest,options
-    );
-  }
+    presignedUploadRequest: PresignedUploadRequest,
+ options?: SecondParameter<typeof presignedUploadMutator<PresignedUploadResult>>,) => {
+      return presignedUploadMutator<PresignedUploadResult>(
+      {url: `/api/v1/files/presigned-upload`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: presignedUploadRequest
+    },
+      options);
+    }
 
 const presignedPart = (
-    presignedPartRequest: PresignedPartRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PresignedPartResult>> => {
-    return axiosInstance.post(
-      `/api/v1/files/multipart/presigned-part`,
-      presignedPartRequest,options
-    );
-  }
+    presignedPartRequest: PresignedPartRequest,
+ options?: SecondParameter<typeof presignedPartMutator<PresignedPartResult>>,) => {
+      return presignedPartMutator<PresignedPartResult>(
+      {url: `/api/v1/files/multipart/presigned-part`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: presignedPartRequest
+    },
+      options);
+    }
 
 const init = (
-    initiateMultipartRequest: InitiateMultipartRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<InitiateMultipartResult>> => {
-    return axiosInstance.post(
-      `/api/v1/files/multipart/init`,
-      initiateMultipartRequest,options
-    );
-  }
+    initiateMultipartRequest: InitiateMultipartRequest,
+ options?: SecondParameter<typeof initMutator<InitiateMultipartResult>>,) => {
+      return initMutator<InitiateMultipartResult>(
+      {url: `/api/v1/files/multipart/init`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: initiateMultipartRequest
+    },
+      options);
+    }
 
 const complete = (
-    completeMultipartRequest: CompleteMultipartRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileResult>> => {
-    return axiosInstance.post(
-      `/api/v1/files/multipart/complete`,
-      completeMultipartRequest,options
-    );
-  }
+    completeMultipartRequest: CompleteMultipartRequest,
+ options?: SecondParameter<typeof completeMutator<FileResult>>,) => {
+      return completeMutator<FileResult>(
+      {url: `/api/v1/files/multipart/complete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: completeMultipartRequest
+    },
+      options);
+    }
 
 const completeUpload = (
-    completeUploadRequest: CompleteUploadRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileResult>> => {
-    return axiosInstance.post(
-      `/api/v1/files/complete-upload`,
-      completeUploadRequest,options
-    );
-  }
+    completeUploadRequest: CompleteUploadRequest,
+ options?: SecondParameter<typeof completeUploadMutator<FileResult>>,) => {
+      return completeUploadMutator<FileResult>(
+      {url: `/api/v1/files/complete-upload`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: completeUploadRequest
+    },
+      options);
+    }
 
 const getAll = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileCategoryResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/file-categories`,options
-    );
-  }
+
+ options?: SecondParameter<typeof getAllMutator<FileCategoryResult[]>>,) => {
+      return getAllMutator<FileCategoryResult[]>(
+      {url: `/api/v1/file-categories`, method: 'GET'
+    },
+      options);
+    }
 
 const create1 = (
-    createFileCategoryRequest?: CreateFileCategoryRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileCategoryResult>> => {
-    return axiosInstance.post(
-      `/api/v1/file-categories`,
-      createFileCategoryRequest,options
-    );
-  }
+    createFileCategoryRequest?: CreateFileCategoryRequest,
+ options?: SecondParameter<typeof create1Mutator<FileCategoryResult>>,) => {
+      return create1Mutator<FileCategoryResult>(
+      {url: `/api/v1/file-categories`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createFileCategoryRequest
+    },
+      options);
+    }
 
 const addContentType = (
     id: number,
-    addContentTypeRequest?: AddContentTypeRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.post(
-      `/api/v1/file-categories/${id}/content-types`,
-      addContentTypeRequest,options
-    );
-  }
+    addContentTypeRequest?: AddContentTypeRequest,
+ options?: SecondParameter<typeof addContentTypeMutator<void>>,) => {
+      return addContentTypeMutator<void>(
+      {url: `/api/v1/file-categories/${id}/content-types`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addContentTypeRequest
+    },
+      options);
+    }
 
 const getAll1 = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileAttributeResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/file-attributes`,options
-    );
-  }
+
+ options?: SecondParameter<typeof getAll1Mutator<FileAttributeResult[]>>,) => {
+      return getAll1Mutator<FileAttributeResult[]>(
+      {url: `/api/v1/file-attributes`, method: 'GET'
+    },
+      options);
+    }
 
 const create2 = (
-    createFileAttributeRequest?: CreateFileAttributeRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<FileAttributeResult>> => {
-    return axiosInstance.post(
-      `/api/v1/file-attributes`,
-      createFileAttributeRequest,options
-    );
-  }
+    createFileAttributeRequest?: CreateFileAttributeRequest,
+ options?: SecondParameter<typeof create2Mutator<FileAttributeResult>>,) => {
+      return create2Mutator<FileAttributeResult>(
+      {url: `/api/v1/file-attributes`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createFileAttributeRequest
+    },
+      options);
+    }
 
 const addOption = (
     id: number,
-    addOptionRequest?: AddOptionRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.post(
-      `/api/v1/file-attributes/${id}/options`,
-      addOptionRequest,options
-    );
-  }
+    addOptionRequest?: AddOptionRequest,
+ options?: SecondParameter<typeof addOptionMutator<void>>,) => {
+      return addOptionMutator<void>(
+      {url: `/api/v1/file-attributes/${id}/options`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: addOptionRequest
+    },
+      options);
+    }
 
 const list = (
-    params: ListParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PageFileResult>> => {
-    return axiosInstance.get(
-      `/api/v1/files`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+    params: ListParams,
+ options?: SecondParameter<typeof listMutator<PageFileResult>>,) => {
+      return listMutator<PageFileResult>(
+      {url: `/api/v1/files`, method: 'GET',
+        params
+    },
+      options);
+    }
 
 const presignedDownload = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
-    return axiosInstance.get(
-      `/api/v1/files/${id}/presigned-download`,{
-    ...options,}
-    );
-  }
+    id: number,
+ options?: SecondParameter<typeof presignedDownloadMutator<string>>,) => {
+      return presignedDownloadMutator<string>(
+      {url: `/api/v1/files/${id}/presigned-download`, method: 'GET'
+    },
+      options);
+    }
 
 return {get,update,_delete,update1,create,update2,presignedUpload,presignedPart,init,complete,completeUpload,getAll,create1,addContentType,getAll1,create2,addOption,list,presignedDownload}};
-export type GetResult = AxiosResponse<FileResult>
-export type UpdateResult = AxiosResponse<FileResult>
-export type _DeleteResult = AxiosResponse<void>
-export type Update1Result = AxiosResponse<void>
-export type CreateResult = AxiosResponse<void>
-export type Update2Result = AxiosResponse<FileCategoryResult>
-export type PresignedUploadResult = AxiosResponse<PresignedUploadResult>
-export type PresignedPartResult = AxiosResponse<PresignedPartResult>
-export type InitResult = AxiosResponse<InitiateMultipartResult>
-export type CompleteResult = AxiosResponse<FileResult>
-export type CompleteUploadResult = AxiosResponse<FileResult>
-export type GetAllResult = AxiosResponse<FileCategoryResult[]>
-export type Create1Result = AxiosResponse<FileCategoryResult>
-export type AddContentTypeResult = AxiosResponse<void>
-export type GetAll1Result = AxiosResponse<FileAttributeResult[]>
-export type Create2Result = AxiosResponse<FileAttributeResult>
-export type AddOptionResult = AxiosResponse<void>
-export type ListResult = AxiosResponse<PageFileResult>
-export type PresignedDownloadResult = AxiosResponse<string>
+export type GetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['get']>>>
+export type UpdateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['update']>>>
+export type _DeleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['_delete']>>>
+export type Update1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['update1']>>>
+export type CreateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['create']>>>
+export type Update2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['update2']>>>
+export type PresignedUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['presignedUpload']>>>
+export type PresignedPartResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['presignedPart']>>>
+export type InitResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['init']>>>
+export type CompleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['complete']>>>
+export type CompleteUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['completeUpload']>>>
+export type GetAllResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['getAll']>>>
+export type Create1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['create1']>>>
+export type AddContentTypeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['addContentType']>>>
+export type GetAll1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['getAll1']>>>
+export type Create2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['create2']>>>
+export type AddOptionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['addOption']>>>
+export type ListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['list']>>>
+export type PresignedDownloadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['presignedDownload']>>>

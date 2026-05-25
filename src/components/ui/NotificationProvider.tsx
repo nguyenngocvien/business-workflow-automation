@@ -1,30 +1,7 @@
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { ReactNode } from 'react';
+import { useEffect } from 'react';
+import { useUiStore } from '../../stores/uiStore';
 
-type NotificationTone = 'success' | 'error' | 'info';
-
-type NotificationItem = {
-  id: number;
-  message: string;
-  tone: NotificationTone;
-};
-
-type NotificationContextValue = {
-  show: (message: string, tone?: NotificationTone) => void;
-  success: (message: string) => void;
-  error: (message: string) => void;
-  info: (message: string) => void;
-};
-
-const NotificationContext = createContext<NotificationContextValue | null>(null);
 const AUTO_DISMISS_MS = 4000;
 
 const toneClasses = {
@@ -38,11 +15,6 @@ const toneClasses = {
     border-[rgba(var(--color-error),0.06)]
     text-[rgb(var(--color-error))]
   `,
-  warning: `
-    bg-[rgba(var(--color-warning),0.12)]
-    border-[rgba(var(--color-warning),0.06)]
-    text-[rgb(var(--color-warning))]
-  `,
   info: `
     bg-[rgba(var(--color-info),0.12)]
     border-[rgba(var(--color-info),0.06)]
@@ -50,7 +22,7 @@ const toneClasses = {
   `,
 };
 
-const toneIcons: Record<NotificationTone, ReactNode> = {
+const toneIcons = {
   success: (
     <path
       d="M20 7 9 18l-5-5"
@@ -84,18 +56,8 @@ const toneIcons: Record<NotificationTone, ReactNode> = {
 };
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const nextIdRef = useRef(1);
-
-  const dismiss = useCallback((id: number) => {
-    setNotifications((current) => current.filter((item) => item.id !== id));
-  }, []);
-
-  const show = useCallback((message: string, tone: NotificationTone = 'info') => {
-    const id = nextIdRef.current;
-    nextIdRef.current += 1;
-    setNotifications((current) => [...current, { id, message, tone }]);
-  }, []);
+  const notifications = useUiStore((state) => state.notifications);
+  const dismissNotification = useUiStore((state) => state.dismissNotification);
 
   useEffect(() => {
     if (notifications.length === 0) {
@@ -104,27 +66,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     const timers = notifications.map((item) =>
       window.setTimeout(() => {
-        dismiss(item.id);
+        dismissNotification(item.id);
       }, AUTO_DISMISS_MS),
     );
 
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));
     };
-  }, [dismiss, notifications]);
-
-  const value = useMemo<NotificationContextValue>(
-    () => ({
-      show,
-      success: (message: string) => show(message, 'success'),
-      error: (message: string) => show(message, 'error'),
-      info: (message: string) => show(message, 'info'),
-    }),
-    [show],
-  );
+  }, [dismissNotification, notifications]);
 
   return (
-    <NotificationContext.Provider value={value}>
+    <>
       {children}
       <div className="pointer-events-none fixed top-4 right-4 z-[100] flex w-[min(360px,calc(100vw-2rem))] flex-col gap-3">
         {notifications.map((item) => (
@@ -147,7 +99,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             <p className="min-w-0 flex-1 text-sm font-medium leading-snug">{item.message}</p>
             <button
               type="button"
-              onClick={() => dismiss(item.id)}
+              onClick={() => dismissNotification(item.id)}
               className="rounded-full p-1 transition hover:bg-[var(--surface-muted)]"
               aria-label="Dismiss notification"
             >
@@ -164,16 +116,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           </div>
         ))}
       </div>
-    </NotificationContext.Provider>
+    </>
   );
 }
 
 export function useNotify() {
-  const context = useContext(NotificationContext);
+  const showNotification = useUiStore((state) => state.showNotification);
 
-  if (!context) {
-    throw new Error('useNotify must be used within a NotificationProvider.');
-  }
-
-  return context;
+  return {
+    show: showNotification,
+    success: (message: string) => showNotification(message, 'success'),
+    error: (message: string) => showNotification(message, 'error'),
+    info: (message: string) => showNotification(message, 'info'),
+  };
 }

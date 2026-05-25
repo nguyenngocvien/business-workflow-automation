@@ -5,13 +5,25 @@
  * API documentation for the E-Workflow service
  * OpenAPI spec version: v1
  */
-import * as axios from 'axios';
-import type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
+import getDefinitionsByWorkflowKeyMutator from '../../lib/orvalMutator';
+import deployDefinitionMutator from '../../lib/orvalMutator';
+import uploadBpmnMutator from '../../lib/orvalMutator';
+import deployBpmnMutator from '../../lib/orvalMutator';
+import createTaskIdentityLinkMutator from '../../lib/orvalMutator';
+import startProcessMutator from '../../lib/orvalMutator';
+import reassignTaskMutator from '../../lib/orvalMutator';
+import completeTaskMutator from '../../lib/orvalMutator';
+import claimTaskMutator from '../../lib/orvalMutator';
+import claimTaskByCandidateMutator from '../../lib/orvalMutator';
+import getDefinitionMutator from '../../lib/orvalMutator';
+import getDeploymentHistoryMutator from '../../lib/orvalMutator';
+import getTaskIdentityLinksMutator from '../../lib/orvalMutator';
+import getClaimableTasksMutator from '../../lib/orvalMutator';
+import getProcessInstanceMutator from '../../lib/orvalMutator';
+import getProgressMutator from '../../lib/orvalMutator';
+import searchProcessesMutator from '../../lib/orvalMutator';
+import getProcessSearchOptionsMutator from '../../lib/orvalMutator';
+import deleteTaskIdentityLinkMutator from '../../lib/orvalMutator';
 /**
  * @nullable
  */
@@ -377,33 +389,38 @@ export type GetProcessSearchOptionsParams = {
 workflow_key?: string;
 };
 
-export const getEWorkflowAPI = (axiosInstance: AxiosInstance = axios.default) => {
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
+  export const getEWorkflowAPI = () => {
 /**
  * Return all versions of a workflow definition by workflow key
  * @summary Search definitions by workflow key
  */
 const getDefinitionsByWorkflowKey = (
-    params: GetDefinitionsByWorkflowKeyParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowDefinitionResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/workflow-definitions`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+    params: GetDefinitionsByWorkflowKeyParams,
+ options?: SecondParameter<typeof getDefinitionsByWorkflowKeyMutator<WorkflowDefinitionResult[]>>,) => {
+      return getDefinitionsByWorkflowKeyMutator<WorkflowDefinitionResult[]>(
+      {url: `/api/v1/workflow-definitions`, method: 'GET',
+        params
+    },
+      options);
+    }
 
 /**
  * Create a new workflow definition version with its step definitions
  * @summary Deploy workflow definition
  */
 const deployDefinition = (
-    deployWorkflowDefinitionRequest: DeployWorkflowDefinitionRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowDefinitionResult>> => {
-    return axiosInstance.post(
-      `/api/v1/workflow-definitions`,
-      deployWorkflowDefinitionRequest,options
-    );
-  }
+    deployWorkflowDefinitionRequest: DeployWorkflowDefinitionRequest,
+ options?: SecondParameter<typeof deployDefinitionMutator<WorkflowDefinitionResult>>,) => {
+      return deployDefinitionMutator<WorkflowDefinitionResult>(
+      {url: `/api/v1/workflow-definitions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deployWorkflowDefinitionRequest
+    },
+      options);
+    }
 
 /**
  * Upload BPMN XML for an existing workflow definition version
@@ -412,19 +429,20 @@ const deployDefinition = (
 const uploadBpmn = (
     definitionId: number,
     params: UploadBpmnParams,
-    uploadBpmnBody?: UploadBpmnBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowBpmnResult>> => {const formData = new FormData();
+    uploadBpmnBody?: UploadBpmnBody,
+ options?: SecondParameter<typeof uploadBpmnMutator<WorkflowBpmnResult>>,) => {const formData = new FormData();
 if(uploadBpmnBody?.file !== undefined) {
  formData.append(`file`, uploadBpmnBody.file);
  }
 
-    return axiosInstance.post(
-      `/api/v1/workflow-definitions/${definitionId}/bpmn`,
-      formData,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return uploadBpmnMutator<WorkflowBpmnResult>(
+      {url: `/api/v1/workflow-definitions/${definitionId}/bpmn`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData,
+        params
+    },
+      options);
+    }
 
 /**
  * Deploy uploaded BPMN of a workflow definition version to Camunda
@@ -432,39 +450,45 @@ if(uploadBpmnBody?.file !== undefined) {
  */
 const deployBpmn = (
     definitionId: number,
-    deployWorkflowBpmnRequest: DeployWorkflowBpmnRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowDefinitionDeploymentResult>> => {
-    return axiosInstance.post(
-      `/api/v1/workflow-definitions/${definitionId}/bpmn/deploy`,
-      deployWorkflowBpmnRequest,options
-    );
-  }
+    deployWorkflowBpmnRequest: DeployWorkflowBpmnRequest,
+ options?: SecondParameter<typeof deployBpmnMutator<WorkflowDefinitionDeploymentResult>>,) => {
+      return deployBpmnMutator<WorkflowDefinitionDeploymentResult>(
+      {url: `/api/v1/workflow-definitions/${definitionId}/bpmn/deploy`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: deployWorkflowBpmnRequest
+    },
+      options);
+    }
 
 /**
  * Assign candidate user or candidate group to a workflow task
  * @summary Create task identity link
  */
 const createTaskIdentityLink = (
-    createWorkflowTaskIdentityLinkRequest: CreateWorkflowTaskIdentityLinkRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowTaskIdentityLinkResult>> => {
-    return axiosInstance.post(
-      `/api/v1/tasks/task-identity-links`,
-      createWorkflowTaskIdentityLinkRequest,options
-    );
-  }
+    createWorkflowTaskIdentityLinkRequest: CreateWorkflowTaskIdentityLinkRequest,
+ options?: SecondParameter<typeof createTaskIdentityLinkMutator<WorkflowTaskIdentityLinkResult>>,) => {
+      return createTaskIdentityLinkMutator<WorkflowTaskIdentityLinkResult>(
+      {url: `/api/v1/tasks/task-identity-links`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createWorkflowTaskIdentityLinkRequest
+    },
+      options);
+    }
 
 /**
  * Start a new process instance using the latest active definition for the workflow key
  * @summary Start process
  */
 const startProcess = (
-    startProcessRequest: StartProcessRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ProcessInstanceResult>> => {
-    return axiosInstance.post(
-      `/api/v1/processes/startProcess`,
-      startProcessRequest,options
-    );
-  }
+    startProcessRequest: StartProcessRequest,
+ options?: SecondParameter<typeof startProcessMutator<ProcessInstanceResult>>,) => {
+      return startProcessMutator<ProcessInstanceResult>(
+      {url: `/api/v1/processes/startProcess`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: startProcessRequest
+    },
+      options);
+    }
 
 /**
  * Reassign an existing task to another assignee and write assignment history
@@ -472,13 +496,15 @@ const startProcess = (
  */
 const reassignTask = (
     taskId: number,
-    reassignTaskRequest: ReassignTaskRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowTaskResult>> => {
-    return axiosInstance.patch(
-      `/api/v1/tasks/${taskId}/reassign`,
-      reassignTaskRequest,options
-    );
-  }
+    reassignTaskRequest: ReassignTaskRequest,
+ options?: SecondParameter<typeof reassignTaskMutator<WorkflowTaskResult>>,) => {
+      return reassignTaskMutator<WorkflowTaskResult>(
+      {url: `/api/v1/tasks/${taskId}/reassign`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: reassignTaskRequest
+    },
+      options);
+    }
 
 /**
  * Complete a task, optionally save task data, and move workflow to the next step
@@ -486,13 +512,15 @@ const reassignTask = (
  */
 const completeTask = (
     taskId: number,
-    completeTaskRequest: CompleteTaskRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowTaskResult>> => {
-    return axiosInstance.patch(
-      `/api/v1/tasks/${taskId}/complete`,
-      completeTaskRequest,options
-    );
-  }
+    completeTaskRequest: CompleteTaskRequest,
+ options?: SecondParameter<typeof completeTaskMutator<WorkflowTaskResult>>,) => {
+      return completeTaskMutator<WorkflowTaskResult>(
+      {url: `/api/v1/tasks/${taskId}/complete`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: completeTaskRequest
+    },
+      options);
+    }
 
 /**
  * Assign a task to an assignee, mark it as claimed, and remove all CANDIDATE identity links of the task after a successful claim
@@ -500,13 +528,15 @@ const completeTask = (
  */
 const claimTask = (
     taskId: number,
-    claimTaskRequest: ClaimTaskRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowTaskResult>> => {
-    return axiosInstance.patch(
-      `/api/v1/tasks/${taskId}/claim`,
-      claimTaskRequest,options
-    );
-  }
+    claimTaskRequest: ClaimTaskRequest,
+ options?: SecondParameter<typeof claimTaskMutator<WorkflowTaskResult>>,) => {
+      return claimTaskMutator<WorkflowTaskResult>(
+      {url: `/api/v1/tasks/${taskId}/claim`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: claimTaskRequest
+    },
+      options);
+    }
 
 /**
  * Allow claim only when the user is a valid candidate directly or through candidate group membership. After a successful claim, all CANDIDATE identity links of the task are removed
@@ -514,145 +544,153 @@ const claimTask = (
  */
 const claimTaskByCandidate = (
     taskId: number,
-    claimTaskByCandidateRequest: ClaimTaskByCandidateRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowTaskResult>> => {
-    return axiosInstance.patch(
-      `/api/v1/tasks/${taskId}/claim-by-candidate`,
-      claimTaskByCandidateRequest,options
-    );
-  }
+    claimTaskByCandidateRequest: ClaimTaskByCandidateRequest,
+ options?: SecondParameter<typeof claimTaskByCandidateMutator<WorkflowTaskResult>>,) => {
+      return claimTaskByCandidateMutator<WorkflowTaskResult>(
+      {url: `/api/v1/tasks/${taskId}/claim-by-candidate`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: claimTaskByCandidateRequest
+    },
+      options);
+    }
 
 /**
  * Return workflow definition details by definition id
  * @summary Get workflow definition by id
  */
 const getDefinition = (
-    definitionId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowDefinitionResult>> => {
-    return axiosInstance.get(
-      `/api/v1/workflow-definitions/${definitionId}`,options
-    );
-  }
+    definitionId: number,
+ options?: SecondParameter<typeof getDefinitionMutator<WorkflowDefinitionResult>>,) => {
+      return getDefinitionMutator<WorkflowDefinitionResult>(
+      {url: `/api/v1/workflow-definitions/${definitionId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Return deployment history of uploaded BPMN by workflow definition id
  * @summary Get BPMN deployment history
  */
 const getDeploymentHistory = (
-    definitionId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowDefinitionDeploymentResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/workflow-definitions/${definitionId}/bpmn/deployments`,options
-    );
-  }
+    definitionId: number,
+ options?: SecondParameter<typeof getDeploymentHistoryMutator<WorkflowDefinitionDeploymentResult[]>>,) => {
+      return getDeploymentHistoryMutator<WorkflowDefinitionDeploymentResult[]>(
+      {url: `/api/v1/workflow-definitions/${definitionId}/bpmn/deployments`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Get all wf_task_identity_link records for a workflow task
  * @summary List task identity links
  */
 const getTaskIdentityLinks = (
-    taskId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowTaskIdentityLinkResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/tasks/${taskId}/identity-links`,options
-    );
-  }
+    taskId: number,
+ options?: SecondParameter<typeof getTaskIdentityLinksMutator<WorkflowTaskIdentityLinkResult[]>>,) => {
+      return getTaskIdentityLinksMutator<WorkflowTaskIdentityLinkResult[]>(
+      {url: `/api/v1/tasks/${taskId}/identity-links`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Return tasks that the user can claim directly as a candidate user or indirectly through candidate group membership. Tasks that are already claimed by another assignee or already completed are excluded
  * @summary Get claimable tasks by user
  */
 const getClaimableTasks = (
-    params: GetClaimableTasksParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ClaimableTaskResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/tasks/claimable`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+    params: GetClaimableTasksParams,
+ options?: SecondParameter<typeof getClaimableTasksMutator<ClaimableTaskResult[]>>,) => {
+      return getClaimableTasksMutator<ClaimableTaskResult[]>(
+      {url: `/api/v1/tasks/claimable`, method: 'GET',
+        params
+    },
+      options);
+    }
 
 /**
  * Return workflow instance details including step instances and tasks
  * @summary Get process instance
  */
 const getProcessInstance = (
-    instanceId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ProcessInstanceResult>> => {
-    return axiosInstance.get(
-      `/api/v1/processes/${instanceId}`,options
-    );
-  }
+    instanceId: number,
+ options?: SecondParameter<typeof getProcessInstanceMutator<ProcessInstanceResult>>,) => {
+      return getProcessInstanceMutator<ProcessInstanceResult>(
+      {url: `/api/v1/processes/${instanceId}`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Return the transaction progress timeline including total steps, step names, processor, current step, and step statuses
  * @summary Get workflow progress
  */
 const getProgress = (
-    instanceId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowProgressResult>> => {
-    return axiosInstance.get(
-      `/api/v1/processes/${instanceId}/progress`,options
-    );
-  }
+    instanceId: number,
+ options?: SecondParameter<typeof getProgressMutator<WorkflowProgressResult>>,) => {
+      return getProgressMutator<WorkflowProgressResult>(
+      {url: `/api/v1/processes/${instanceId}/progress`, method: 'GET'
+    },
+      options);
+    }
 
 /**
  * Search runtime workflow data by application name, workflow key, current step, workflow status, business key, and assignee
  * @summary Search workflow tasks
  */
 const searchProcesses = (
-    params?: SearchProcessesParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowSearchResult[]>> => {
-    return axiosInstance.get(
-      `/api/v1/processes/search`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+    params?: SearchProcessesParams,
+ options?: SecondParameter<typeof searchProcessesMutator<WorkflowSearchResult[]>>,) => {
+      return searchProcessesMutator<WorkflowSearchResult[]>(
+      {url: `/api/v1/processes/search`, method: 'GET',
+        params
+    },
+      options);
+    }
 
 /**
  * Return lookup data for workflow, step, and status dropdowns used by the search UI
  * @summary Get workflow search options
  */
 const getProcessSearchOptions = (
-    params?: GetProcessSearchOptionsParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkflowSearchOptionsResult>> => {
-    return axiosInstance.get(
-      `/api/v1/processes/search-options`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+    params?: GetProcessSearchOptionsParams,
+ options?: SecondParameter<typeof getProcessSearchOptionsMutator<WorkflowSearchOptionsResult>>,) => {
+      return getProcessSearchOptionsMutator<WorkflowSearchOptionsResult>(
+      {url: `/api/v1/processes/search-options`, method: 'GET',
+        params
+    },
+      options);
+    }
 
 /**
  * Delete a wf_task_identity_link record
  * @summary Delete task identity link
  */
 const deleteTaskIdentityLink = (
-    identityLinkId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
-    return axiosInstance.delete(
-      `/api/v1/tasks/task-identity-links/${identityLinkId}`,options
-    );
-  }
+    identityLinkId: number,
+ options?: SecondParameter<typeof deleteTaskIdentityLinkMutator<void>>,) => {
+      return deleteTaskIdentityLinkMutator<void>(
+      {url: `/api/v1/tasks/task-identity-links/${identityLinkId}`, method: 'DELETE'
+    },
+      options);
+    }
 
 return {getDefinitionsByWorkflowKey,deployDefinition,uploadBpmn,deployBpmn,createTaskIdentityLink,startProcess,reassignTask,completeTask,claimTask,claimTaskByCandidate,getDefinition,getDeploymentHistory,getTaskIdentityLinks,getClaimableTasks,getProcessInstance,getProgress,searchProcesses,getProcessSearchOptions,deleteTaskIdentityLink}};
-export type GetDefinitionsByWorkflowKeyResult = AxiosResponse<WorkflowDefinitionResult[]>
-export type DeployDefinitionResult = AxiosResponse<WorkflowDefinitionResult>
-export type UploadBpmnResult = AxiosResponse<WorkflowBpmnResult>
-export type DeployBpmnResult = AxiosResponse<WorkflowDefinitionDeploymentResult>
-export type CreateTaskIdentityLinkResult = AxiosResponse<WorkflowTaskIdentityLinkResult>
-export type StartProcessResult = AxiosResponse<ProcessInstanceResult>
-export type ReassignTaskResult = AxiosResponse<WorkflowTaskResult>
-export type CompleteTaskResult = AxiosResponse<WorkflowTaskResult>
-export type ClaimTaskResult = AxiosResponse<WorkflowTaskResult>
-export type ClaimTaskByCandidateResult = AxiosResponse<WorkflowTaskResult>
-export type GetDefinitionResult = AxiosResponse<WorkflowDefinitionResult>
-export type GetDeploymentHistoryResult = AxiosResponse<WorkflowDefinitionDeploymentResult[]>
-export type GetTaskIdentityLinksResult = AxiosResponse<WorkflowTaskIdentityLinkResult[]>
-export type GetClaimableTasksResult = AxiosResponse<ClaimableTaskResult[]>
-export type GetProcessInstanceResult = AxiosResponse<ProcessInstanceResult>
-export type GetProgressResult = AxiosResponse<WorkflowProgressResult>
-export type SearchProcessesResult = AxiosResponse<WorkflowSearchResult[]>
-export type GetProcessSearchOptionsResult = AxiosResponse<WorkflowSearchOptionsResult>
-export type DeleteTaskIdentityLinkResult = AxiosResponse<void>
+export type GetDefinitionsByWorkflowKeyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getDefinitionsByWorkflowKey']>>>
+export type DeployDefinitionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['deployDefinition']>>>
+export type UploadBpmnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['uploadBpmn']>>>
+export type DeployBpmnResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['deployBpmn']>>>
+export type CreateTaskIdentityLinkResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['createTaskIdentityLink']>>>
+export type StartProcessResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['startProcess']>>>
+export type ReassignTaskResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['reassignTask']>>>
+export type CompleteTaskResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['completeTask']>>>
+export type ClaimTaskResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['claimTask']>>>
+export type ClaimTaskByCandidateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['claimTaskByCandidate']>>>
+export type GetDefinitionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getDefinition']>>>
+export type GetDeploymentHistoryResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getDeploymentHistory']>>>
+export type GetTaskIdentityLinksResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getTaskIdentityLinks']>>>
+export type GetClaimableTasksResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getClaimableTasks']>>>
+export type GetProcessInstanceResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getProcessInstance']>>>
+export type GetProgressResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getProgress']>>>
+export type SearchProcessesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['searchProcesses']>>>
+export type GetProcessSearchOptionsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['getProcessSearchOptions']>>>
+export type DeleteTaskIdentityLinkResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEWorkflowAPI>['deleteTaskIdentityLink']>>>

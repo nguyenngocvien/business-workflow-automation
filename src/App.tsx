@@ -1,20 +1,26 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { useAuth } from './hooks/useAuth';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { EmailTemplatesPage } from './pages/EmailTemplatesPage';
 import { FilesPage } from './pages/FilesPage';
 import { LoginPage } from './pages/LoginPage';
 import { LogsPage } from './pages/LogsPage';
-import { MasterDataPage } from './pages/MetadataPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { UsersPage } from './pages/UsersPage';
 
 function ProtectedRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isReady } = useAuth();
+  const location = useLocation();
+
+  if (!isReady) {
+    return null;
+  }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   return (
@@ -26,7 +32,6 @@ function ProtectedRoutes() {
         <Route path="/email-templates" element={<EmailTemplatesPage />} />
         <Route path="/files" element={<FilesPage />} />
         <Route path="/users" element={<UsersPage />} />
-        <Route path="/metadata" element={<MasterDataPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>
@@ -34,7 +39,11 @@ function ProtectedRoutes() {
 }
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isReady } = useAuth();
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <Routes>
@@ -42,6 +51,7 @@ export default function App() {
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );
