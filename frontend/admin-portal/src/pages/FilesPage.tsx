@@ -1,467 +1,551 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  getEDocumentAPI,
+  type FileResult,
+  type PageFileResult,
+} from '../api/document';
 import { navIcons } from '../components/layout/navIcons';
-import { FileDetailPanel } from '../components/files/FileDetailPanel';
-import { FilePagination } from '../components/files/FilePagination';
 import { Card } from '../components/ui/Card';
 import { IconButton } from '../components/ui/IconButton';
 import { useNotify } from '../components/ui/NotificationProvider';
-import {
-  browseFiles,
-  createFolder,
-  fetchFileDetail,
-  fetchFileOptions,
-  fetchFolderDetail,
-  searchFiles,
-  uploadFiles,
-} from '../services/fileManagerApi';
-import type {
-  ExplorerFilters,
-  FileExplorerResponse,
-  FilePageResult,
-  FileRecord,
-  FileSearchFilters,
-  FolderRecord,
-  NameValuePair,
-} from '../types/fileManager';
+import { DEFAULT_CACHE_TIME, DEFAULT_STALE_TIME } from '../lib/queryClient';
 
-const emptyPage: FilePageResult = {
-  items: [],
-  totalElements: 0,
-  pageNumber: 0,
-  pageSize: 20,
-  totalPages: 0,
-  first: true,
-  last: true,
-  hasNext: false,
-  hasPrevious: false,
+type FileViewRow = {
+  id: number;
+  name: string;
+  contentType: string;
+  sizeLabel: string;
+  createdAt: string;
 };
 
-const defaultSearch: FileSearchFilters = {
-  classCode: '',
-  documentId: '',
-  documentName: '',
-  processCode: '',
-  docType: '',
-  page: 0,
-  size: 20,
-  sort: 'cmis:lastModificationDate',
-};
+const documentApi = getEDocumentAPI();
 
-const defaultExplorer: ExplorerFilters = {
-  path: '/',
-  q: '',
-  page: 0,
-  size: 20,
-  sort: 'cmis:lastModificationDate',
-};
+const FILE_PAGE_SIZE = 20;
+
+function toFileViewRow(file: FileResult): FileViewRow {
+  return {
+    id: file.id ?? 0,
+    name: file.fileName ?? `File ${file.id ?? ''}`.trim(),
+    contentType: file.contentType ?? '-',
+    sizeLabel: typeof file.size === 'number' ? `${Math.max(file.size, 0)} KB` : '-',
+    createdAt: file.createdAt ?? '-',
+  };
+}
+
+function toPage(result: PageFileResult): {
+  items: FileViewRow[];
+  totalElements: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+  hasNext: boolean;
+  hasPrevious: boolean;
+} {
+  const pageNumber = result.number ?? 0;
+  const pageSize = result.size ?? FILE_PAGE_SIZE;
+  const totalPages = result.totalPages ?? 0;
+  const items = (result.content ?? []).map(toFileViewRow);
+
+  return {
+    items,
+    totalElements: result.totalElements ?? 0,
+    pageNumber,
+    pageSize,
+    totalPages,
+    first: Boolean(result.first),
+    last: Boolean(result.last),
+    hasNext: !result.last && (result.pageable?.pageNumber ?? pageNumber) + 1 < totalPages,
+    hasPrevious: !result.first && pageNumber > 0,
+  };
+}
 
 export function FilesPage() {
-  const [showFolderSearch, setShowFolderSearch] = useState(false);
-  const [showFileSearch, setShowFileSearch] = useState(false);
-  const [mode, setMode] = useState<'browse' | 'search'>('browse');
-  const [classes, setClasses] = useState<NameValuePair[]>([]);
-  const [docTypes, setDocTypes] = useState<NameValuePair[]>([]);
-  const [searchDraft, setSearchDraft] = useState<FileSearchFilters>(defaultSearch);
-  const [searchFilters, setSearchFilters] = useState<FileSearchFilters>(defaultSearch);
-  const [searchResult, setSearchResult] = useState<FilePageResult>(emptyPage);
-  const [explorerFilters, setExplorerFilters] = useState<ExplorerFilters>(defaultExplorer);
-  const [explorerData, setExplorerData] = useState<FileExplorerResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedFile, setSelectedFile] = useState<FileRecord | null>(null);
-  const [selectedFolder, setSelectedFolder] = useState<FolderRecord | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
-  const [uploadingFiles, setUploadingFiles] = useState<FileList | null>(null);
   const notify = useNotify();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    let active = true;
+  const [page, setPage] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadCategoryCode, setUploadCategoryCode] = useState('');
+  const [newCategoryCode, setNewCategoryCode] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
 
-    void fetchFileOptions()
-      .then((data) => {
-        if (!active) {
-          return;
-        }
-        setClasses(data.classes);
-        setDocTypes(data.docTypes);
-      })
-      .catch((requestError) => {
-        if (!active) {
-          return;
-        }
-        notify.error(requestError instanceof Error ? requestError.message : 'Failed to load file options.');
+  const categoriesQuery = useQuery({
+    queryKey: ['document', 'file-categories'] as const,
+    queryFn: () => documentApi.getAll(),
+    staleTime: DEFAULT_STALE_TIME,
+    gcTime: DEFAULT_CACHE_TIME,
+  });
+
+  const attributesQuery = useQuery({
+    queryKey: ['document', 'file-attributes'] as const,
+    queryFn: () => documentApi.getAll1(),
+    staleTime: DEFAULT_STALE_TIME,
+    gcTime: DEFAULT_CACHE_TIME,
+  });
+
+  const filesQuery = useQuery({
+    queryKey: ['document', 'files', page] as const,
+    queryFn: () => documentApi.list({ pageable: { page, size: FILE_PAGE_SIZE, sort: ['cmis:lastModificationDate,desc'] } }),
+    staleTime: DEFAULT_STALE_TIME,
+    gcTime: DEFAULT_CACHE_TIME,
+  });
+
+  const selectedFileQuery = useQuery({
+    queryKey: ['document', 'file', selectedFileId] as const,
+    queryFn: () => documentApi.get(selectedFileId!),
+    enabled: selectedFileId !== null,
+    staleTime: DEFAULT_STALE_TIME,
+    gcTime: DEFAULT_CACHE_TIME,
+  });
+
+  const createCategoryMutation = useMutation({
+    mutationFn: (payload: { code: string; name: string }) =>
+      documentApi.create1({
+        code: payload.code,
+        name: payload.name,
+      }),
+    onSuccess: async () => {
+      setNewCategoryCode('');
+      setNewCategoryName('');
+      await queryClient.invalidateQueries({ queryKey: ['document', 'file-categories'] });
+      notify.success('File category created.');
+    },
+    onError: (error) => {
+      notify.error(error instanceof Error ? error.message : 'Failed to create file category.');
+    },
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const presigned = await documentApi.presignedUpload({
+        fileName: file.name,
+        contentType: file.type || 'application/octet-stream',
+        categoryCode: uploadCategoryCode || undefined,
       });
 
-    return () => {
-      active = false;
-    };
-  }, [notify]);
+      const uploadUrl = presigned.uploadUrl;
+      const objectKey = presigned.objectKey;
 
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
+      if (!uploadUrl || !objectKey) {
+        throw new Error('The upload service did not return a usable presigned URL.');
+      }
 
-    const request =
-      mode === 'browse' ? browseFiles(explorerFilters) : searchFiles(searchFilters);
-
-    void request
-      .then((data) => {
-        if (!active) {
-          return;
-        }
-        if (mode === 'browse') {
-          setExplorerData(data as FileExplorerResponse);
-        } else {
-          setSearchResult(data as FilePageResult);
-        }
-      })
-      .catch((requestError) => {
-        if (!active) {
-          return;
-        }
-        notify.error(requestError instanceof Error ? requestError.message : 'Failed to load files.');
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+        },
+        body: file,
       });
 
-    return () => {
-      active = false;
-    };
-  }, [explorerFilters, mode, notify, searchFilters]);
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file to storage.');
+      }
 
-  async function openFileDetail(id: string) {
-    setDetailLoading(true);
-    setSelectedFolder(null);
-    try {
-      setSelectedFile(await fetchFileDetail(id));
-    } catch (requestError) {
-      setSelectedFile(null);
-      notify.error(requestError instanceof Error ? requestError.message : 'Failed to load file detail.');
-    } finally {
-      setDetailLoading(false);
-    }
-  }
+      return documentApi.completeUpload({
+        objectKey,
+        fileName: file.name,
+        size: file.size,
+        contentType: file.type || 'application/octet-stream',
+        categoryCode: uploadCategoryCode || undefined,
+      });
+    },
+    onSuccess: async () => {
+      setUploadFile(null);
+      await queryClient.invalidateQueries({ queryKey: ['document', 'files'] });
+      notify.success('File uploaded successfully.');
+    },
+    onError: (error) => {
+      notify.error(error instanceof Error ? error.message : 'Failed to upload file.');
+    },
+  });
 
-  async function openFolderDetail(id: string) {
-    setDetailLoading(true);
-    setSelectedFile(null);
-    try {
-      setSelectedFolder(await fetchFolderDetail(id));
-    } catch (requestError) {
-      setSelectedFolder(null);
-      notify.error(requestError instanceof Error ? requestError.message : 'Failed to load folder detail.');
-    } finally {
-      setDetailLoading(false);
-    }
-  }
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => documentApi._delete(id),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['document', 'files'] }),
+        queryClient.invalidateQueries({ queryKey: ['document', 'file'] }),
+      ]);
+      setSelectedFileId(null);
+      notify.success('File deleted.');
+    },
+    onError: (error) => {
+      notify.error(error instanceof Error ? error.message : 'Failed to delete file.');
+    },
+  });
 
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSearchFilters({ ...searchDraft, page: 0 });
-  }
-
-  async function handleCreateFolder(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!explorerData?.currentFolderId || !newFolderName.trim()) {
+  useEffect(() => {
+    if (!filesQuery.error) {
       return;
     }
-    try {
-      const response = await createFolder(explorerData.currentFolderId, newFolderName.trim());
-      notify.success(response.message || 'Folder created');
-      setNewFolderName('');
-      setExplorerFilters((current) => ({ ...current }));
-    } catch (requestError) {
-      notify.error(requestError instanceof Error ? requestError.message : 'Failed to create folder.');
+
+    notify.error(filesQuery.error instanceof Error ? filesQuery.error.message : 'Failed to load files.');
+  }, [filesQuery.error, notify]);
+
+  useEffect(() => {
+    if (!categoriesQuery.error) {
+      return;
     }
-  }
+
+    notify.error(categoriesQuery.error instanceof Error ? categoriesQuery.error.message : 'Failed to load file categories.');
+  }, [categoriesQuery.error, notify]);
+
+  useEffect(() => {
+    if (!attributesQuery.error) {
+      return;
+    }
+
+    notify.error(attributesQuery.error instanceof Error ? attributesQuery.error.message : 'Failed to load file attributes.');
+  }, [attributesQuery.error, notify]);
+
+  const categories = categoriesQuery.data ?? [];
+  const attributes = attributesQuery.data ?? [];
+
+  const pageData = useMemo(() => {
+    const normalized = filesQuery.data ? toPage(filesQuery.data) : null;
+
+    if (!normalized) {
+      return null;
+    }
+
+    if (!searchTerm.trim()) {
+      return normalized;
+    }
+
+    const term = searchTerm.trim().toLowerCase();
+    return {
+      ...normalized,
+      items: normalized.items.filter((item) =>
+        [item.name, item.contentType, item.createdAt].some((value) => value.toLowerCase().includes(term)),
+      ),
+    };
+  }, [filesQuery.data, searchTerm]);
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!explorerData?.currentFolderId || !uploadingFiles?.length) {
+
+    if (!uploadFile) {
+      notify.error('Choose a file to upload.');
       return;
     }
-    try {
-      const response = await uploadFiles(explorerData.currentFolderId, uploadingFiles);
-      notify.success(response.message || 'Upload successful');
-      setUploadingFiles(null);
-      setExplorerFilters((current) => ({ ...current }));
-    } catch (requestError) {
-      notify.error(requestError instanceof Error ? requestError.message : 'Failed to upload files.');
-    }
+
+    await uploadMutation.mutateAsync(uploadFile);
   }
 
-  const activePage = mode === 'browse' ? explorerData?.files || emptyPage : searchResult;
-  const showClassDependentFields = searchDraft.classCode.trim() !== '';
+  async function handleCreateCategory(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const code = newCategoryCode.trim();
+    const name = newCategoryName.trim();
+
+    if (!code || !name) {
+      notify.error('Category code and name are required.');
+      return;
+    }
+
+    await createCategoryMutation.mutateAsync({ code, name });
+  }
+
+  const selectedFile = selectedFileQuery.data;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col overflow-visible p-4 gap-4">
-        <div className="flex h-full min-h-0 overflow-hidden">
-          <div
-            className={`flex flex-col gap-3 overflow-auto transition-all ${selectedFile || selectedFolder ? 'w-3/4 pr-3' : 'w-full'
-              }`}
-          >
-            <div className='flex flex-col gap-2'>
-              <div className="theme-card flex flex-col gap-4 rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-                  <h3 className="text-lg font-semibold">Folders</h3>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-input)] px-2">
-                      <input
-                        placeholder="Search folders..."
-                        className="theme-input border-none bg-transparent px-2 py-1.5 text-xs focus:shadow-none"
-                        value={explorerFilters.q}
-                        onChange={(e) =>
-                          setExplorerFilters((c) => ({
-                            ...c,
-                            q: e.target.value,
-                            page: 0,
-                          }))
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            setExplorerFilters((c) => ({
-                              ...c,
-                              page: 0,
-                            }));
-                          }
-                        }}
-                      />
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)_320px]">
+        <Card className="flex min-h-0 flex-col overflow-hidden">
+          <div className="border-b border-[var(--border-subtle)] px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-600">Document store</p>
+            <h2 className="mt-2 text-lg font-semibold">Categories</h2>
+            <p className="mt-1 text-sm text-slate-500">Manage file categories exposed by the document API.</p>
+          </div>
 
-                      {/* Clear button */}
-                      {explorerFilters.q && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setExplorerFilters((c) => ({
-                              ...c,
-                              q: '',
-                              page: 0,
-                            }))
-                          }
-                          className="px-1 text-xs text-slate-400 hover:text-slate-200"
-                        >
-                          ✕
-                        </button>
-                      )}
+          <div className="flex-1 overflow-auto px-4 py-4">
+            <form className="space-y-3" onSubmit={handleCreateCategory}>
+              <input
+                className="theme-input w-full rounded-xl px-3 py-2 text-sm"
+                placeholder="Category code"
+                value={newCategoryCode}
+                onChange={(event) => setNewCategoryCode(event.target.value)}
+              />
+              <input
+                className="theme-input w-full rounded-xl px-3 py-2 text-sm"
+                placeholder="Category name"
+                value={newCategoryName}
+                onChange={(event) => setNewCategoryName(event.target.value)}
+              />
+              <IconButton
+                type="submit"
+                icon={navIcons.plus}
+                label={createCategoryMutation.isPending ? 'Creating' : 'Create category'}
+                tone="primary"
+                size="sm"
+                disabled={createCategoryMutation.isPending}
+                className="w-full justify-center"
+              />
+            </form>
 
-                      <IconButton
-                        icon={navIcons.search}
-                        label="Search folders"
-                        size="sm"
-                        className="!p-1.5"
-                      />
+            <div className="mt-6 space-y-2">
+              {categoriesQuery.isLoading ? (
+                <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] px-4 py-6 text-sm text-slate-500">
+                  Loading categories...
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] px-4 py-6 text-sm text-slate-500">
+                  No file categories yet.
+                </div>
+              ) : (
+                categories.map((category) => (
+                  <button
+                    type="button"
+                    key={`${category.id ?? category.code ?? category.name}`}
+                    className="flex w-full items-start justify-between rounded-2xl border border-[var(--border-subtle)] px-4 py-3 text-left transition hover:bg-[var(--surface-input)]"
+                    onClick={() => setUploadCategoryCode(category.code ?? '')}
+                  >
+                    <div>
+                      <p className="font-semibold">{category.name ?? category.code ?? 'Category'}</p>
+                      <p className="text-xs text-slate-500">{category.code ?? '-'}</p>
                     </div>
+                    {uploadCategoryCode === category.code ? (
+                      <span className="rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700">
+                        Selected
+                      </span>
+                    ) : null}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </Card>
 
-                    {/* Create Folder */}
-                    <IconButton
-                      type="submit"
-                      icon={navIcons.plus}
-                      label="Create folder"
-                      tone="primary"
-                      size="sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Folder horizontal list */}
-                <div className="flex gap-3 overflow-x-auto pb-2 pt-2 bg-[var(--surface-muted)]/30 rounded-xl p-2">
-                  {explorerData?.folders.map((folder) => (
-                    <button
-                      key={folder.id}
-                      onDoubleClick={() =>
-                        setExplorerFilters((c) => ({
-                          ...c,
-                          path: folder.path,
-                          page: 0,
-                        }))
-                      }
-                      onClick={() => void openFolderDetail(folder.id)}
-                      className="
-                        min-w-[180px] shrink-0
-                        rounded-2xl
-                        border border-[var(--border-subtle)]
-                        bg-[var(--surface-card)]
-                        px-4 py-3
-                        text-left
-                        transition
-                        hover:bg-[var(--surface-input)]
-                        hover:border-[rgba(var(--color-info),0.3)]
-                      "
-                    >
-                      <div className="flex flex-col gap-1">
-                        <span className="font-semibold truncate">{folder.name}</span>
-                        <span className="text-xs text-slate-400">Folder</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+        <Card className="flex min-h-0 flex-col overflow-hidden">
+          <div className="border-b border-[var(--border-subtle)] px-4 py-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-500">Files</p>
+                <h2 className="mt-2 text-lg font-semibold">Recent uploads</h2>
+                <p className="mt-1 text-sm text-slate-500">Browse paginated files from the generated Orval client.</p>
               </div>
-              <div className="theme-card flex flex-col gap-4 rounded-xl p-4 shadow-sm">
-                <div className='flex flex-col gap-4 border-b border-[var(--border-subtle)] pb-3'>
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Recent Files</h3>
-                    <div className='flex gap-2'>
-                      <IconButton type="submit" icon={navIcons.upload} label="Upload files" tone="primary" size="sm" />
-                      <IconButton
-                        onClick={() => setShowFileSearch((prev) => !prev)}
-                        icon={navIcons.search}
-                        label="Search files"
-                        tone="success"
-                        size="sm"
-                      />
-                    </div>
 
-                  </div>
-                  {/* Search (toggle) */}
-                  {showFileSearch && (
-                    <form className="grid gap-3 md:grid-cols-3" onSubmit={submitSearch}>
-                      <input
-                        placeholder="Document ID"
-                        className="theme-input rounded-2xl px-3 py-2 text-xs"
-                        value={searchDraft.documentId}
-                        onChange={(e) =>
-                          setSearchDraft((c) => ({ ...c, documentId: e.target.value }))
-                        }
-                      />
-
-                      <input
-                        placeholder="Document Name"
-                        className="theme-input rounded-2xl px-3 py-2 text-xs"
-                        value={searchDraft.documentName}
-                        onChange={(e) =>
-                          setSearchDraft((c) => ({ ...c, documentName: e.target.value }))
-                        }
-                      />
-
-                      <select
-                        className="theme-input rounded-2xl px-3 py-2 text-xs"
-                        value={searchDraft.classCode}
-                        onChange={(e) =>
-                          setSearchDraft((c) => ({ ...c, classCode: e.target.value }))
-                        }
-                      >
-                        <option value="">All Classes</option>
-                        {classes.map((c) => (
-                          <option key={c.value} value={c.value}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-
-                      <div className="md:col-span-3 flex gap-2">
-                        <IconButton type="submit" icon={navIcons.search} label="Search" size="sm" />
-                        <IconButton
-                          icon={navIcons.close}
-                          label="Clear"
-                          size="sm"
-                          onClick={() => {
-                            setSearchDraft(defaultSearch);
-                            setSearchFilters(defaultSearch);
-                          }}
-                        />
-                      </div>
-                    </form>
-                  )}
-                </div>
-                <div className="flex flex-col gap-3">
-
-                  {loading ? (
-                    <div className="text-center py-10 text-sm text-[var(--text-muted)]">
-                      Loading...
-                    </div>
-                  ) : activePage.items.length === 0 ? (
-                    <div className="text-center py-10 text-sm text-[var(--text-muted)]">
-                      No files found
-                    </div>
-                  ) : (
-                    activePage.items.map((file) => (
-                      <div
-                        key={file.id}
-                        className="
-                          flex items-center justify-between gap-4
-                          rounded-2xl
-                          border border-[var(--border-subtle)]
-                          bg-[var(--surface-card)]
-                          px-4 py-3
-                          transition
-                          hover:bg-[var(--surface-input)]
-                          hover:border-[rgba(var(--color-info),0.3)]
-                        "
-                      >
-                        {/* LEFT: Info */}
-                        <div className="flex min-w-0 flex-col gap-1">
-                          <span className="font-semibold truncate">
-                            {file.name}
-                          </span>
-
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
-                            <span>{file.className || '-'}</span>
-                            <span>•</span>
-                            <span>{file.createdBy || '-'}</span>
-                            <span>•</span>
-                            <span>{file.createdAt || '-'}</span>
-                          </div>
-                        </div>
-
-                        {/* RIGHT: Actions */}
-                        <div className="flex items-center gap-2 shrink-0">
-                          <a
-                            href={`/e-connector/files/${file.id}/content`}
-                            className="
-                              text-xs
-                              text-[rgb(var(--color-info))]
-                              hover:underline
-                            "
-                          >
-                            Download
-                          </a>
-
-                          <IconButton
-                            onClick={() => void openFileDetail(file.id)}
-                            icon={navIcons.info}
-                            label="Info"
-                            size="sm"
-                          />
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Pagination */}
-                <FilePagination
-                  page={activePage}
-                  onPageChange={(page) =>
-                    setSearchFilters((c) => ({ ...c, page }))
-                  }
-                  onPageSizeChange={(size) =>
-                    setSearchFilters((c) => ({ ...c, size, page: 0 }))
-                  }
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <label className="flex items-center gap-2 rounded-2xl border border-[var(--border-subtle)] px-3 py-2">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-400">
+                    {navIcons.search}
+                  </svg>
+                  <input
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search files"
+                    className="bg-transparent text-sm outline-none"
+                  />
+                </label>
+                <IconButton
+                  type="button"
+                  icon={navIcons.upload}
+                  label="Refresh"
+                  tone="neutral"
+                  size="sm"
+                  onClick={() => void filesQuery.refetch()}
                 />
               </div>
             </div>
           </div>
 
-          {(selectedFile || selectedFolder) && (
-            <div className="w-1/4 min-w-[320px] border-l bg-white overflow-hidden">
-              <FileDetailPanel
-                file={selectedFile}
-                folder={selectedFolder}
-                loading={detailLoading}
-                onClose={() => {
-                  setSelectedFile(null);
-                  setSelectedFolder(null);
-                }}
-              />
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="flex-1 overflow-auto p-4">
+              {filesQuery.isLoading ? (
+                <div className="flex min-h-[280px] items-center justify-center text-sm text-slate-500">
+                  Loading files...
+                </div>
+              ) : pageData && pageData.items.length > 0 ? (
+                <div className="space-y-3">
+                  {pageData.items.map((file) => (
+                    <div
+                      key={file.id}
+                      className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-3 transition hover:bg-[var(--surface-input)]"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{file.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {file.contentType} - {file.sizeLabel} - {file.createdAt}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="rounded-xl px-3 py-2 text-xs font-semibold text-brand-600 transition hover:bg-brand-50"
+                          onClick={async () => {
+                            const url = await documentApi.presignedDownload(file.id);
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                          }}
+                        >
+                          Download
+                        </button>
+                        <IconButton
+                          type="button"
+                          onClick={() => setSelectedFileId(file.id)}
+                          icon={navIcons.info}
+                          label="Details"
+                          size="sm"
+                        />
+                        <IconButton
+                          type="button"
+                          onClick={() => void deleteMutation.mutateAsync(file.id)}
+                          icon={navIcons.trash}
+                          label="Delete"
+                          size="sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex min-h-[280px] items-center justify-center text-sm text-slate-500">
+                  No files found.
+                </div>
+              )}
             </div>
-          )
-          }
-        </div >
+
+            {pageData ? (
+              <div className="border-t border-[var(--border-subtle)] px-4 py-3">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="text-sm text-slate-500">
+                    Page <span className="font-semibold text-slate-900">{pageData.pageNumber + 1}</span> of{' '}
+                    <span>{Math.max(pageData.totalPages, 1)}</span> - {pageData.totalElements} items
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IconButton
+                      onClick={() => setPage(0)}
+                      disabled={!pageData.hasPrevious}
+                      icon={navIcons.chevronsLeft}
+                      label="First page"
+                      size="sm"
+                    />
+                    <IconButton
+                      onClick={() => setPage((current) => Math.max(0, current - 1))}
+                      disabled={!pageData.hasPrevious}
+                      icon={navIcons.chevronLeft}
+                      label="Previous page"
+                      size="sm"
+                    />
+                    <IconButton
+                      onClick={() => setPage((current) => current + 1)}
+                      disabled={!pageData.hasNext}
+                      icon={navIcons.chevronRight}
+                      label="Next page"
+                      size="sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </Card>
+
+        <Card className="flex min-h-0 flex-col overflow-hidden bg-slate-950 text-white">
+          <div className="border-b border-white/10 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300">Upload</p>
+            <h2 className="mt-2 text-lg font-semibold">Presigned upload</h2>
+            <p className="mt-1 text-sm text-slate-300">Send a file through the document API and upload it to storage.</p>
+          </div>
+
+          <div className="flex-1 overflow-auto px-4 py-4">
+            <form className="space-y-4" onSubmit={handleUpload}>
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-200">File</span>
+                <input
+                  type="file"
+                  className="theme-input w-full rounded-2xl px-3 py-2 text-sm text-white"
+                  onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold text-slate-200">Category code</span>
+                <input
+                  value={uploadCategoryCode}
+                  onChange={(event) => setUploadCategoryCode(event.target.value)}
+                  className="theme-input w-full rounded-2xl px-3 py-2 text-sm text-white"
+                  placeholder="Optional"
+                />
+              </label>
+
+              <IconButton
+                type="submit"
+                icon={navIcons.upload}
+                label={uploadMutation.isPending ? 'Uploading' : 'Upload file'}
+                tone="primary"
+                size="sm"
+                disabled={uploadMutation.isPending}
+                className="w-full justify-center"
+              />
+            </form>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+              <p className="font-semibold text-white">Attributes</p>
+              <p className="mt-1 text-xs text-slate-400">Loaded from `/api/v1/file-attributes`.</p>
+              <div className="mt-3 space-y-2">
+                {attributesQuery.isLoading ? (
+                  <div className="text-xs text-slate-400">Loading attributes...</div>
+                ) : attributes.length === 0 ? (
+                  <div className="text-xs text-slate-400">No attributes configured.</div>
+                ) : (
+                  attributes.slice(0, 6).map((attribute) => (
+                    <div key={attribute.id ?? attribute.keyCode} className="flex items-center justify-between gap-3 text-xs">
+                      <span className="truncate">{attribute.displayName ?? attribute.keyCode ?? 'Attribute'}</span>
+                      <span className="text-slate-400">{attribute.dataType ?? '-'}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
+
+      {selectedFileQuery.data ? (
+        <Card className="border border-[var(--border-subtle)]">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-500">Selected file</p>
+              <h3 className="mt-2 text-xl font-semibold">{selectedFileQuery.data.fileName ?? `File ${selectedFileQuery.data.id}`}</h3>
+            </div>
+            <IconButton
+              type="button"
+              onClick={() => setSelectedFileId(null)}
+              icon={navIcons.close}
+              label="Close"
+              size="sm"
+            />
+          </div>
+
+          <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">ID</p>
+              <p className="mt-1 font-semibold text-slate-900">{selectedFileQuery.data.id ?? '-'}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Content type</p>
+              <p className="mt-1 font-semibold text-slate-900">{selectedFileQuery.data.contentType ?? '-'}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Size</p>
+              <p className="mt-1 font-semibold text-slate-900">
+                {typeof selectedFileQuery.data.size === 'number' ? `${selectedFileQuery.data.size} KB` : '-'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Created</p>
+              <p className="mt-1 font-semibold text-slate-900">{selectedFileQuery.data.createdAt ?? '-'}</p>
+            </div>
+          </div>
+        </Card>
+      ) : null}
     </div>
   );
 }
