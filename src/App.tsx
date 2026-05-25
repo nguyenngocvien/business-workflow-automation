@@ -2,7 +2,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { useAuth } from './hooks/useAuth';
 import { DashboardPage } from './pages/DashboardPage';
-import { DatabaseToolPage } from './pages/DatabasePackagePage';
 import { EmailTemplatesPage } from './pages/EmailTemplatesPage';
 import { FilesPage } from './pages/FilesPage';
 import { LoginPage } from './pages/LoginPage';
@@ -28,7 +27,6 @@ function ProtectedRoutes() {
         <Route path="/files" element={<FilesPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/metadata" element={<MasterDataPage />} />
-        <Route path="/database-tool" element={<DatabaseToolPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>

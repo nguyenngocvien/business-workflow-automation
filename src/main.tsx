@@ -6,11 +6,9 @@ import App from './App';
 import { NotificationProvider } from './components/ui/NotificationProvider';
 import './index.css';
 import { AuthProvider } from './hooks/useAuth';
-import { queryClient } from './lib/queryClient';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
       <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <AuthProvider>
           <NotificationProvider>
@@ -18,6 +16,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </NotificationProvider>
         </AuthProvider>
       </BrowserRouter>
-    </QueryClientProvider>
   </React.StrictMode>,
 );

@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { navigationItems } from '../../data/dashboard';
 import { useAuth } from '../../hooks/useAuth';
-import { cx } from '../../lib/utils';
 import { navIcons } from './navIcons';
 
 type SidebarProps = {
