@@ -1,30 +1,36 @@
-import { FormEvent, useState } from 'react';
+import { useEffect } from 'react';
 import { navIcons } from '../components/layout/navIcons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { IconButton } from '../components/ui/IconButton';
 import { useNotify } from '../components/ui/NotificationProvider';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
-  const navigate = useNavigate();
   const { login } = useAuth();
-  const [username, setUername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const notify = useNotify();
+  const state = location.state as
+    | { from?: { pathname?: string; search?: string; hash?: string }; error?: string }
+    | null;
+  const from = state?.from;
+  const authError = state?.error;
+  const redirectTo = `${from?.pathname ?? '/'}${from?.search ?? ''}${from?.hash ?? ''}` || '/';
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-
-    try {
-      await login(username, password);
-      navigate('/', { replace: true });
-    } catch (submitError) {
-      notify.error(submitError instanceof Error ? submitError.message : 'Login failed.');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (authError) {
+      notify.error(authError);
+      return;
     }
+
+    void login(redirectTo).catch((submitError) => {
+      notify.error(submitError instanceof Error ? submitError.message : 'Unable to start Keycloak login.');
+    });
+  }, [authError, login, notify, redirectTo]);
+
+  function handleRetry() {
+    void login(redirectTo).catch((submitError) => {
+      notify.error(submitError instanceof Error ? submitError.message : 'Unable to start Keycloak login.');
+    });
   }
 
   return (
@@ -42,41 +48,31 @@ export function LoginPage() {
 
         <section className="p-8 sm:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-500">Welcome back</p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950">Sign in to continue</h2>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950">Redirecting to Keycloak</h2>
+          <p className="mt-3 text-sm text-slate-600">
+            You&apos;ll sign in with your identity provider, then return here with a JWT access token attached to API requests.
+          </p>
+          {authError ? (
+            <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {authError}
+            </div>
+          ) : null}
 
-          <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">Email</span>
-              <input
-                type="text"
-                value={username}
-                onChange={(event) => setUername(event.target.value)}
-                className="theme-input w-full rounded-2xl px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
-                placeholder="admin@company.com"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="theme-input w-full rounded-2xl px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
-                placeholder="password"
-              />
-            </label>
+          <div className="mt-10 space-y-5">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              If the browser does not redirect automatically, use the button below.
+            </div>
             <div className="flex justify-end">
               <IconButton
-                type="submit"
-                disabled={loading}
+                type="button"
+                onClick={handleRetry}
                 icon={navIcons.arrowRight}
-                label={loading ? 'Signing in' : 'Sign in'}
+                label="Continue with Keycloak"
                 tone="primary"
                 size="sm"
               />
             </div>
-          </form>
+          </div>
         </section>
       </div>
     </div>

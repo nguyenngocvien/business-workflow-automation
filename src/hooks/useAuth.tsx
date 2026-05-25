@@ -1,13 +1,16 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type PropsWithChildren,
-} from 'react';
-import { login as loginRequest } from '../services/api';
+import { type PropsWithChildren, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setUnauthorizedHandler } from './authHandler';
+import {
+  buildKeycloakLogoutUrl,
+  clearAuthenticatedState,
+  clearKeycloakLoginArtifacts,
+  completeKeycloakLoginFromCallback,
+  getStoredSession,
+  setPostLoginRedirect,
+  startKeycloakLogin,
+} from '../lib/keycloak';
+import { useAuthStore } from '../stores/authStore';
 
 type AuthUser = {
   name: string;
@@ -16,57 +19,57 @@ type AuthUser = {
 
 type AuthContextValue = {
   isAuthenticated: boolean;
+  isReady: boolean;
   user: AuthUser | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (redirectTo?: string) => Promise<void>;
+  handleKeycloakCallback: (searchParams: URLSearchParams) => Promise<string>;
   logout: () => void;
 };
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-const STORAGE_KEY = 'admin-dashboard-auth';
-
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<AuthUser | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedValue = window.localStorage.getItem(STORAGE_KEY);
-
-    if (storedValue) {
-      setUser(JSON.parse(storedValue) as AuthUser);
-    }
-  }, []);
+  const clearSession = useAuthStore((state) => state.clearSession);
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
-      setUser(null);
-      window.localStorage.removeItem(STORAGE_KEY);
-      navigate("/login", { replace: true });
+      clearSession();
+      clearAuthenticatedState();
+      navigate('/login', { replace: true });
     });
-  }, [navigate]);
+  }, [clearSession, navigate]);
 
-  const value: AuthContextValue = {
-    isAuthenticated: Boolean(user),
-    user,
-    async login(email, password) {
-      const response = await loginRequest(email, password);
-      setUser(response.user);
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(response.user));
-    },
-    logout() {
-      setUser(null);
-      window.localStorage.removeItem(STORAGE_KEY);
-    },
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <>{children}</>;
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
+export function useAuth(): AuthContextValue {
+  const navigate = useNavigate();
+  const session = useAuthStore((state) => state.session);
+  const isReady = useAuthStore((state) => state.isHydrated);
+  const clearSession = useAuthStore((state) => state.clearSession);
 
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  return {
+    isAuthenticated: Boolean(session),
+    isReady,
+    user: session?.user ?? null,
+    async login(redirectTo = '/') {
+      setPostLoginRedirect(redirectTo);
+      await startKeycloakLogin();
+    },
+    async handleKeycloakCallback(searchParams) {
+      const { redirectTo } = await completeKeycloakLoginFromCallback(searchParams);
+      clearKeycloakLoginArtifacts();
+      return redirectTo;
+    },
+    logout() {
+      const currentSession = getStoredSession();
+      clearSession();
+      clearAuthenticatedState();
 
-  return context;
+      try {
+        window.location.assign(buildKeycloakLogoutUrl(currentSession?.idToken));
+      } catch {
+        navigate('/login', { replace: true });
+      }
+    },
+  };
 }
