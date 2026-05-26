@@ -50,6 +50,48 @@
       ]
     },
     {
+      "clientId": "admin-portal",
+      "name": "Admin Portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:5173/",
+      "baseUrl": "http://localhost:5173/",
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://gateway.dev.localtest.me/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "http://gateway.dev.localtest.me"
+      ]
+    },
+    {
+      "clientId": "user-portal",
+      "name": "User Portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:5174/",
+      "baseUrl": "http://localhost:5174/",
+      "redirectUris": [
+        "http://localhost:5174/*",
+        "http://gateway.dev.localtest.me/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5174",
+        "http://gateway.dev.localtest.me"
+      ]
+    },
+    {
       "clientId": "identity-service",
       "name": "Identity Service",
       "enabled": true,
