@@ -15,7 +15,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8084",
+            "url": "http://localhost:8080/document",
             "description": "Generated server url"
         }
     ],
