@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: 26.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+containerPort: 8080
+
+command:
+  - start
+
+args:
+  - --import-realm
+  - --http-enabled=true
+
+auth:
+  adminUser: admin
+  adminPassword: dev-admin
+
+database:
+  host: postgres-postgresql.infra.svc.cluster.local
+  port: 5432
+  name: keycloak
+  username: postgres
+  password: postgres
+
+realmImport:
+  file: dev-realm.json
+
+health:
+  enabled: true
+  path: /health/ready
+  port: 9000
+
+resources: {}

@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: viennguyen12067/baw
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8761
+
+containerPort: 8761
+
+env:
+  SPRING_PROFILES_ACTIVE: local
+  SERVER_PORT: "8761"

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: {{ .Chart.Name }}
+
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          command:
+            {{- range .Values.command }}
+            - {{ . | quote }}
+            {{- end }}
+          args:
+            {{- range .Values.args }}
+            - {{ . | quote }}
+            {{- end }}
+
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+            {{- if .Values.health.enabled }}
+            - containerPort: {{ .Values.health.port }}
+            {{- end }}
+
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.auth.adminUser | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.auth.adminPassword | quote }}
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL
+              value: {{ printf "jdbc:postgresql://%s:%v/%s" .Values.database.host .Values.database.port .Values.database.name | quote }}
+            - name: KC_DB_USERNAME
+              value: {{ .Values.database.username | quote }}
+            - name: KC_DB_PASSWORD
+              value: {{ .Values.database.password | quote }}
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+
+          volumeMounts:
+            - name: realm-import
+              mountPath: /opt/keycloak/data/import/{{ .Values.realmImport.file }}
+              subPath: {{ .Values.realmImport.file }}
+              readOnly: true
+
+          {{- if .Values.health.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.health.path }}
+              port: {{ .Values.health.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.health.path }}
+              port: {{ .Values.health.port }}
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          {{- end }}
+
+      volumes:
+        - name: realm-import
+          configMap:
+            name: {{ .Chart.Name }}-realm-import

@@ -1,0 +1,23 @@
+replicaCount: 1
+
+image:
+  repository: viennguyen12067/baw
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+containerPort: 8080
+
+env:
+  SPRING_PROFILES_ACTIVE: local
+  SPRING_RABBITMQ_HOST: rabbitmq
+  SPRING_RABBITMQ_PORT: "5672"
+  SPRING_RABBITMQ_USERNAME: guest
+  SPRING_RABBITMQ_PASSWORD: guest
+  MAIL_HOST: smtp.gmail.com
+  MAIL_PORT: "587"
+  MAIL_USERNAME: your-email@gmail.com
+  MAIL_PASSWORD: your-app-password

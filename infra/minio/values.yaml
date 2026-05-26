@@ -1,0 +1,13 @@
+minio:
+  rootUser: minio
+
+  rootPassword: minio123
+
+  persistence:
+    enabled: true
+    size: 20Gi
+
+  mode: standalone
+
+  service:
+    type: ClusterIP

@@ -1,0 +1,10 @@
+image:
+  tag: dev
+
+env:
+  SPRING_PROFILES_ACTIVE: dev
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-dev
+  JWT_JWK_SET_URI: http://keycloak:8080/realms/baw-dev/protocol/openid-connect/certs
+
+ingress:
+  host: gateway.dev.localtest.me

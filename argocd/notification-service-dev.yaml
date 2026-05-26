@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 
 metadata:
-  name: identity-service-dev
+  name: notification-service-dev
   namespace: argocd
 
 spec:
@@ -11,11 +11,11 @@ spec:
   source:
     repoURL: https://github.com/nguyenngocvien/business-workflow-automation.git
     targetRevision: main
-    path: gitops/apps/identity-service
+    path: gitops/apps/notification-service
 
     helm:
       valueFiles:
-        - ../../environments/dev/identity-service/values.yaml
+        - ../../environments/dev/notification-service/values.yaml
 
   destination:
     server: https://kubernetes.default.svc

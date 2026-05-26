@@ -1,8 +1,10 @@
-replicaCount: 3
-
 image:
-  repository: viennn/identity-service
-  tag: 1.0.0
+  tag: prod
 
 env:
   SPRING_PROFILES_ACTIVE: prod
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-prod
+  KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+  KEYCLOAK_REALM: baw-prod
+  KEYCLOAK_CLIENT_ID: identity-service
+  KEYCLOAK_CLIENT_SECRET: prod-identity-service-secret

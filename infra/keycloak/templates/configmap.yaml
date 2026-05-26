@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-realm-import
+data:
+  {{ .Values.realmImport.file }}: |-
+{{ .Files.Get (printf "files/%s" .Values.realmImport.file) | indent 4 }}

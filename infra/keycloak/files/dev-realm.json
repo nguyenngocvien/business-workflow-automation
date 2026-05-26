@@ -1,0 +1,174 @@
+{
+  "realm": "baw-dev",
+  "enabled": true,
+  "displayName": "Business Workflow Automation Dev",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "rememberMe": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "MANAGER",
+        "description": "Approves and supervises workflows"
+      },
+      {
+        "name": "USER",
+        "description": "Standard application user"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "api-gateway",
+      "name": "API Gateway",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:8080",
+      "baseUrl": "http://localhost:8080",
+      "redirectUris": [
+        "http://localhost:8080/*",
+        "http://localhost:3000/*",
+        "http://gateway.dev.localtest.me/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080",
+        "http://localhost:3000",
+        "http://gateway.dev.localtest.me"
+      ]
+    },
+    {
+      "clientId": "admin-portal",
+      "name": "Admin Portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:5173/",
+      "baseUrl": "http://localhost:5173/",
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://gateway.dev.localtest.me/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "http://gateway.dev.localtest.me"
+      ]
+    },
+    {
+      "clientId": "user-portal",
+      "name": "User Portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:5174/",
+      "baseUrl": "http://localhost:5174/",
+      "redirectUris": [
+        "http://localhost:5174/*",
+        "http://gateway.dev.localtest.me/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5174",
+        "http://gateway.dev.localtest.me"
+      ]
+    },
+    {
+      "clientId": "identity-service",
+      "name": "Identity Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "secret": "dev-identity-service-secret",
+      "clientAuthenticatorType": "client-secret",
+      "bearerOnly": false
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@dev.local",
+      "firstName": "Dev",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevAdmin123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "view-users",
+          "manage-users",
+          "query-users",
+          "view-realm",
+          "manage-realm"
+        ]
+      }
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "manager@dev.local",
+      "firstName": "Dev",
+      "lastName": "Manager",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevManager123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "MANAGER"
+      ]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user@dev.local",
+      "firstName": "Dev",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DevUser123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "USER"
+      ]
+    }
+  ]
+}

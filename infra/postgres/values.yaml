@@ -1,0 +1,19 @@
+postgresql:
+  auth:
+    postgresPassword: postgres
+
+    username: workflow
+
+    password: workflow123
+
+    database: workflow_db
+
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+
+  architecture: standalone
+
+  service:
+    type: ClusterIP

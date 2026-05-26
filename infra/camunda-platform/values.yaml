@@ -1,0 +1,22 @@
+global:
+  identity:
+    auth:
+      enabled: false
+
+zeebe:
+  clusterSize: 1
+
+operate:
+  enabled: true
+
+tasklist:
+  enabled: false
+
+optimize:
+  enabled: false
+
+identity:
+  enabled: false
+
+connectors:
+  enabled: false

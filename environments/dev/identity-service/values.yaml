@@ -1,6 +1,10 @@
 image:
-  repository: viennn/identity-service
-  tag: dev-001
+  tag: dev
 
 env:
   SPRING_PROFILES_ACTIVE: dev
+  JWT_ISSUER_URI: http://keycloak:8080/realms/baw-dev
+  KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+  KEYCLOAK_REALM: baw-dev
+  KEYCLOAK_CLIENT_ID: identity-service
+  KEYCLOAK_CLIENT_SECRET: dev-identity-service-secret
