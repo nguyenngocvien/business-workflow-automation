@@ -4,40 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import findByIdMutator from '../../lib/orvalMutator';
-import updateMutator from '../../lib/orvalMutator';
-import deactivateMutator from '../../lib/orvalMutator';
-import findById1Mutator from '../../lib/orvalMutator';
-import update1Mutator from '../../lib/orvalMutator';
-import findById2Mutator from '../../lib/orvalMutator';
-import update2Mutator from '../../lib/orvalMutator';
-import findById3Mutator from '../../lib/orvalMutator';
-import update3Mutator from '../../lib/orvalMutator';
-import findAllMutator from '../../lib/orvalMutator';
-import createMutator from '../../lib/orvalMutator';
-import assignMutator from '../../lib/orvalMutator';
-import addMutator from '../../lib/orvalMutator';
-import findAll1Mutator from '../../lib/orvalMutator';
-import create1Mutator from '../../lib/orvalMutator';
-import grantMutator from '../../lib/orvalMutator';
-import findAll2Mutator from '../../lib/orvalMutator';
-import create2Mutator from '../../lib/orvalMutator';
-import findAll3Mutator from '../../lib/orvalMutator';
-import create3Mutator from '../../lib/orvalMutator';
-import findByUsernameMutator from '../../lib/orvalMutator';
-import findByExternalIdMutator from '../../lib/orvalMutator';
-import findMutator from '../../lib/orvalMutator';
-import revokeMutator from '../../lib/orvalMutator';
-import findByUserIdMutator from '../../lib/orvalMutator';
-import find1Mutator from '../../lib/orvalMutator';
-import removeMutator from '../../lib/orvalMutator';
-import findByUserId1Mutator from '../../lib/orvalMutator';
-import findByCodeMutator from '../../lib/orvalMutator';
-import find2Mutator from '../../lib/orvalMutator';
-import revoke1Mutator from '../../lib/orvalMutator';
-import findByRoleIdMutator from '../../lib/orvalMutator';
-import findByProviderCodeMutator from '../../lib/orvalMutator';
-import findByCode1Mutator from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutator';
 export type UserUpdateRequestStatus = typeof UserUpdateRequestStatus[keyof typeof UserUpdateRequestStatus];
 
 
@@ -407,8 +374,8 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  */
 const findById = (
     id: number,
- options?: SecondParameter<typeof findByIdMutator<UserResponse>>,) => {
-      return findByIdMutator<UserResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse>>,) => {
+      return orvalMutator<UserResponse>(
       {url: `/api/users/${id}`, method: 'GET'
     },
       options);
@@ -421,8 +388,8 @@ const findById = (
 const update = (
     id: number,
     userUpdateRequest: UserUpdateRequest,
- options?: SecondParameter<typeof updateMutator<UserResponse>>,) => {
-      return updateMutator<UserResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse>>,) => {
+      return orvalMutator<UserResponse>(
       {url: `/api/users/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: userUpdateRequest
@@ -436,8 +403,8 @@ const update = (
  */
 const deactivate = (
     id: number,
- options?: SecondParameter<typeof deactivateMutator<UserResponse>>,) => {
-      return deactivateMutator<UserResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse>>,) => {
+      return orvalMutator<UserResponse>(
       {url: `/api/users/${id}/deactivate`, method: 'PUT'
     },
       options);
@@ -449,8 +416,8 @@ const deactivate = (
  */
 const findById1 = (
     id: number,
- options?: SecondParameter<typeof findById1Mutator<RoleResponse>>,) => {
-      return findById1Mutator<RoleResponse>(
+ options?: SecondParameter<typeof orvalMutator<RoleResponse>>,) => {
+      return orvalMutator<RoleResponse>(
       {url: `/api/roles/${id}`, method: 'GET'
     },
       options);
@@ -463,8 +430,8 @@ const findById1 = (
 const update1 = (
     id: number,
     roleUpdateRequest: RoleUpdateRequest,
- options?: SecondParameter<typeof update1Mutator<RoleResponse>>,) => {
-      return update1Mutator<RoleResponse>(
+ options?: SecondParameter<typeof orvalMutator<RoleResponse>>,) => {
+      return orvalMutator<RoleResponse>(
       {url: `/api/roles/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: roleUpdateRequest
@@ -478,8 +445,8 @@ const update1 = (
  */
 const findById2 = (
     id: number,
- options?: SecondParameter<typeof findById2Mutator<IdentityProviderResponse>>,) => {
-      return findById2Mutator<IdentityProviderResponse>(
+ options?: SecondParameter<typeof orvalMutator<IdentityProviderResponse>>,) => {
+      return orvalMutator<IdentityProviderResponse>(
       {url: `/api/identity-providers/${id}`, method: 'GET'
     },
       options);
@@ -492,8 +459,8 @@ const findById2 = (
 const update2 = (
     id: number,
     identityProviderUpdateRequest: IdentityProviderUpdateRequest,
- options?: SecondParameter<typeof update2Mutator<IdentityProviderResponse>>,) => {
-      return update2Mutator<IdentityProviderResponse>(
+ options?: SecondParameter<typeof orvalMutator<IdentityProviderResponse>>,) => {
+      return orvalMutator<IdentityProviderResponse>(
       {url: `/api/identity-providers/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: identityProviderUpdateRequest
@@ -507,8 +474,8 @@ const update2 = (
  */
 const findById3 = (
     id: number,
- options?: SecondParameter<typeof findById3Mutator<GroupResponse>>,) => {
-      return findById3Mutator<GroupResponse>(
+ options?: SecondParameter<typeof orvalMutator<GroupResponse>>,) => {
+      return orvalMutator<GroupResponse>(
       {url: `/api/groups/${id}`, method: 'GET'
     },
       options);
@@ -521,8 +488,8 @@ const findById3 = (
 const update3 = (
     id: number,
     groupUpdateRequest: GroupUpdateRequest,
- options?: SecondParameter<typeof update3Mutator<GroupResponse>>,) => {
-      return update3Mutator<GroupResponse>(
+ options?: SecondParameter<typeof orvalMutator<GroupResponse>>,) => {
+      return orvalMutator<GroupResponse>(
       {url: `/api/groups/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: groupUpdateRequest
@@ -536,8 +503,8 @@ const update3 = (
  */
 const findAll = (
 
- options?: SecondParameter<typeof findAllMutator<UserResponse[]>>,) => {
-      return findAllMutator<UserResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse[]>>,) => {
+      return orvalMutator<UserResponse[]>(
       {url: `/api/users`, method: 'GET'
     },
       options);
@@ -549,8 +516,8 @@ const findAll = (
  */
 const create = (
     userCreateRequest: UserCreateRequest,
- options?: SecondParameter<typeof createMutator<UserResponse>>,) => {
-      return createMutator<UserResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse>>,) => {
+      return orvalMutator<UserResponse>(
       {url: `/api/users`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: userCreateRequest
@@ -564,8 +531,8 @@ const create = (
  */
 const assign = (
     assignUserRoleRequest: AssignUserRoleRequest,
- options?: SecondParameter<typeof assignMutator<UserRoleResponse>>,) => {
-      return assignMutator<UserRoleResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserRoleResponse>>,) => {
+      return orvalMutator<UserRoleResponse>(
       {url: `/api/user-roles`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: assignUserRoleRequest
@@ -579,8 +546,8 @@ const assign = (
  */
 const add = (
     addUserGroupRequest: AddUserGroupRequest,
- options?: SecondParameter<typeof addMutator<UserGroupResponse>>,) => {
-      return addMutator<UserGroupResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserGroupResponse>>,) => {
+      return orvalMutator<UserGroupResponse>(
       {url: `/api/user-groups`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: addUserGroupRequest
@@ -594,8 +561,8 @@ const add = (
  */
 const findAll1 = (
 
- options?: SecondParameter<typeof findAll1Mutator<RoleResponse[]>>,) => {
-      return findAll1Mutator<RoleResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<RoleResponse[]>>,) => {
+      return orvalMutator<RoleResponse[]>(
       {url: `/api/roles`, method: 'GET'
     },
       options);
@@ -607,8 +574,8 @@ const findAll1 = (
  */
 const create1 = (
     roleCreateRequest: RoleCreateRequest,
- options?: SecondParameter<typeof create1Mutator<RoleResponse>>,) => {
-      return create1Mutator<RoleResponse>(
+ options?: SecondParameter<typeof orvalMutator<RoleResponse>>,) => {
+      return orvalMutator<RoleResponse>(
       {url: `/api/roles`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: roleCreateRequest
@@ -622,8 +589,8 @@ const create1 = (
  */
 const grant = (
     grantRolePermissionRequest: GrantRolePermissionRequest,
- options?: SecondParameter<typeof grantMutator<RolePermissionResponse>>,) => {
-      return grantMutator<RolePermissionResponse>(
+ options?: SecondParameter<typeof orvalMutator<RolePermissionResponse>>,) => {
+      return orvalMutator<RolePermissionResponse>(
       {url: `/api/role-permissions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: grantRolePermissionRequest
@@ -637,8 +604,8 @@ const grant = (
  */
 const findAll2 = (
 
- options?: SecondParameter<typeof findAll2Mutator<IdentityProviderResponse[]>>,) => {
-      return findAll2Mutator<IdentityProviderResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<IdentityProviderResponse[]>>,) => {
+      return orvalMutator<IdentityProviderResponse[]>(
       {url: `/api/identity-providers`, method: 'GET'
     },
       options);
@@ -650,8 +617,8 @@ const findAll2 = (
  */
 const create2 = (
     identityProviderCreateRequest: IdentityProviderCreateRequest,
- options?: SecondParameter<typeof create2Mutator<IdentityProviderResponse>>,) => {
-      return create2Mutator<IdentityProviderResponse>(
+ options?: SecondParameter<typeof orvalMutator<IdentityProviderResponse>>,) => {
+      return orvalMutator<IdentityProviderResponse>(
       {url: `/api/identity-providers`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: identityProviderCreateRequest
@@ -665,8 +632,8 @@ const create2 = (
  */
 const findAll3 = (
 
- options?: SecondParameter<typeof findAll3Mutator<GroupResponse[]>>,) => {
-      return findAll3Mutator<GroupResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<GroupResponse[]>>,) => {
+      return orvalMutator<GroupResponse[]>(
       {url: `/api/groups`, method: 'GET'
     },
       options);
@@ -678,8 +645,8 @@ const findAll3 = (
  */
 const create3 = (
     groupCreateRequest: GroupCreateRequest,
- options?: SecondParameter<typeof create3Mutator<GroupResponse>>,) => {
-      return create3Mutator<GroupResponse>(
+ options?: SecondParameter<typeof orvalMutator<GroupResponse>>,) => {
+      return orvalMutator<GroupResponse>(
       {url: `/api/groups`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: groupCreateRequest
@@ -693,8 +660,8 @@ const create3 = (
  */
 const findByUsername = (
     username: string,
- options?: SecondParameter<typeof findByUsernameMutator<UserResponse>>,) => {
-      return findByUsernameMutator<UserResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse>>,) => {
+      return orvalMutator<UserResponse>(
       {url: `/api/users/username/${username}`, method: 'GET'
     },
       options);
@@ -706,8 +673,8 @@ const findByUsername = (
  */
 const findByExternalId = (
     externalId: string,
- options?: SecondParameter<typeof findByExternalIdMutator<UserResponse>>,) => {
-      return findByExternalIdMutator<UserResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserResponse>>,) => {
+      return orvalMutator<UserResponse>(
       {url: `/api/users/external/${externalId}`, method: 'GET'
     },
       options);
@@ -720,8 +687,8 @@ const findByExternalId = (
 const find = (
     userId: number,
     roleId: number,
- options?: SecondParameter<typeof findMutator<UserRoleResponse>>,) => {
-      return findMutator<UserRoleResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserRoleResponse>>,) => {
+      return orvalMutator<UserRoleResponse>(
       {url: `/api/user-roles/${userId}/${roleId}`, method: 'GET'
     },
       options);
@@ -734,8 +701,8 @@ const find = (
 const revoke = (
     userId: number,
     roleId: number,
- options?: SecondParameter<typeof revokeMutator<void>>,) => {
-      return revokeMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/user-roles/${userId}/${roleId}`, method: 'DELETE'
     },
       options);
@@ -747,8 +714,8 @@ const revoke = (
  */
 const findByUserId = (
     userId: number,
- options?: SecondParameter<typeof findByUserIdMutator<UserRoleResponse[]>>,) => {
-      return findByUserIdMutator<UserRoleResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<UserRoleResponse[]>>,) => {
+      return orvalMutator<UserRoleResponse[]>(
       {url: `/api/user-roles/user/${userId}`, method: 'GET'
     },
       options);
@@ -761,8 +728,8 @@ const findByUserId = (
 const find1 = (
     userId: number,
     groupId: number,
- options?: SecondParameter<typeof find1Mutator<UserGroupResponse>>,) => {
-      return find1Mutator<UserGroupResponse>(
+ options?: SecondParameter<typeof orvalMutator<UserGroupResponse>>,) => {
+      return orvalMutator<UserGroupResponse>(
       {url: `/api/user-groups/${userId}/${groupId}`, method: 'GET'
     },
       options);
@@ -775,8 +742,8 @@ const find1 = (
 const remove = (
     userId: number,
     groupId: number,
- options?: SecondParameter<typeof removeMutator<void>>,) => {
-      return removeMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/user-groups/${userId}/${groupId}`, method: 'DELETE'
     },
       options);
@@ -788,8 +755,8 @@ const remove = (
  */
 const findByUserId1 = (
     userId: number,
- options?: SecondParameter<typeof findByUserId1Mutator<UserGroupResponse[]>>,) => {
-      return findByUserId1Mutator<UserGroupResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<UserGroupResponse[]>>,) => {
+      return orvalMutator<UserGroupResponse[]>(
       {url: `/api/user-groups/user/${userId}`, method: 'GET'
     },
       options);
@@ -801,8 +768,8 @@ const findByUserId1 = (
  */
 const findByCode = (
     code: string,
- options?: SecondParameter<typeof findByCodeMutator<RoleResponse>>,) => {
-      return findByCodeMutator<RoleResponse>(
+ options?: SecondParameter<typeof orvalMutator<RoleResponse>>,) => {
+      return orvalMutator<RoleResponse>(
       {url: `/api/roles/code/${code}`, method: 'GET'
     },
       options);
@@ -815,8 +782,8 @@ const findByCode = (
 const find2 = (
     roleId: number,
     permissionId: number,
- options?: SecondParameter<typeof find2Mutator<RolePermissionResponse>>,) => {
-      return find2Mutator<RolePermissionResponse>(
+ options?: SecondParameter<typeof orvalMutator<RolePermissionResponse>>,) => {
+      return orvalMutator<RolePermissionResponse>(
       {url: `/api/role-permissions/${roleId}/${permissionId}`, method: 'GET'
     },
       options);
@@ -829,8 +796,8 @@ const find2 = (
 const revoke1 = (
     roleId: number,
     permissionId: number,
- options?: SecondParameter<typeof revoke1Mutator<void>>,) => {
-      return revoke1Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/role-permissions/${roleId}/${permissionId}`, method: 'DELETE'
     },
       options);
@@ -842,8 +809,8 @@ const revoke1 = (
  */
 const findByRoleId = (
     roleId: number,
- options?: SecondParameter<typeof findByRoleIdMutator<RolePermissionResponse[]>>,) => {
-      return findByRoleIdMutator<RolePermissionResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<RolePermissionResponse[]>>,) => {
+      return orvalMutator<RolePermissionResponse[]>(
       {url: `/api/role-permissions/role/${roleId}`, method: 'GET'
     },
       options);
@@ -855,8 +822,8 @@ const findByRoleId = (
  */
 const findByProviderCode = (
     providerCode: string,
- options?: SecondParameter<typeof findByProviderCodeMutator<IdentityProviderResponse>>,) => {
-      return findByProviderCodeMutator<IdentityProviderResponse>(
+ options?: SecondParameter<typeof orvalMutator<IdentityProviderResponse>>,) => {
+      return orvalMutator<IdentityProviderResponse>(
       {url: `/api/identity-providers/code/${providerCode}`, method: 'GET'
     },
       options);
@@ -868,8 +835,8 @@ const findByProviderCode = (
  */
 const findByCode1 = (
     code: string,
- options?: SecondParameter<typeof findByCode1Mutator<GroupResponse>>,) => {
-      return findByCode1Mutator<GroupResponse>(
+ options?: SecondParameter<typeof orvalMutator<GroupResponse>>,) => {
+      return orvalMutator<GroupResponse>(
       {url: `/api/groups/code/${code}`, method: 'GET'
     },
       options);
