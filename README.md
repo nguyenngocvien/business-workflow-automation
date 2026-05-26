@@ -24,7 +24,7 @@ admin-dashboard/
   tsconfig.json
   tsconfig.node.json
   vite.config.ts
-  .env.example
+  .env
   src/
     App.tsx
     index.css
@@ -84,6 +84,20 @@ npm run preview
 
 ## API wiring
 
-- Copy `.env.example` to `.env` if you want to set a real backend base URL.
+- The app reads these Vite env variables:
+- `VITE_API_BASE_URL` for the Axios API base URL.
+- `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`, and `VITE_KEYCLOAK_CLIENT_ID` for Keycloak login.
+- `VITE_KEYCLOAK_REDIRECT_URI` and `VITE_KEYCLOAK_LOGOUT_REDIRECT_URI` are optional overrides.
+- Example `.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+VITE_KEYCLOAK_URL=https://localhost:8180
+VITE_KEYCLOAK_REALM=baw-dev
+VITE_KEYCLOAK_CLIENT_ID=admin-portal
+VITE_KEYCLOAK_REDIRECT_URI=http://localhost:5173/auth/callback
+VITE_KEYCLOAK_LOGOUT_REDIRECT_URI=http://localhost:5173/login
+```
+
 - Update `src/services/api.ts` to replace the mocked async functions with real Axios calls.
 - Demo login accepts any non-empty email and password.
