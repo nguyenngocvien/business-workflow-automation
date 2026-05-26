@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 import { navIcons } from '../components/layout/navIcons';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { IconButton } from '../components/ui/IconButton';
 import { useNotify } from '../components/ui/NotificationProvider';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, handleKeycloakCallback } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const notify = useNotify();
   const state = location.state as
     | { from?: { pathname?: string; search?: string; hash?: string }; error?: string }
@@ -15,8 +17,22 @@ export function LoginPage() {
   const from = state?.from;
   const authError = state?.error;
   const redirectTo = `${from?.pathname ?? '/'}${from?.search ?? ''}${from?.hash ?? ''}` || '/';
+  const hasKeycloakCallbackParams = searchParams.has('code') || searchParams.has('error');
 
   useEffect(() => {
+    if (hasKeycloakCallbackParams) {
+      void handleKeycloakCallback(searchParams)
+        .then((nextRedirectTo) => {
+          navigate(nextRedirectTo, { replace: true });
+        })
+        .catch((submitError) => {
+          const errorMessage = submitError instanceof Error ? submitError.message : 'Authentication failed.';
+          notify.error(errorMessage);
+        });
+
+      return;
+    }
+
     if (authError) {
       notify.error(authError);
       return;
@@ -25,7 +41,7 @@ export function LoginPage() {
     void login(redirectTo).catch((submitError) => {
       notify.error(submitError instanceof Error ? submitError.message : 'Unable to start Keycloak login.');
     });
-  }, [authError, login, notify, redirectTo]);
+  }, [authError, handleKeycloakCallback, hasKeycloakCallbackParams, login, navigate, notify, redirectTo, searchParams]);
 
   function handleRetry() {
     void login(redirectTo).catch((submitError) => {
@@ -52,6 +68,11 @@ export function LoginPage() {
           <p className="mt-3 text-sm text-slate-600">
             You&apos;ll sign in with your identity provider, then return here with a JWT access token attached to API requests.
           </p>
+          {hasKeycloakCallbackParams ? (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Completing sign-in...
+            </div>
+          ) : null}
           {authError ? (
             <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {authError}

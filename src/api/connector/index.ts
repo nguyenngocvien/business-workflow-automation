@@ -5,7 +5,7 @@
  * Connector Platform API
  * OpenAPI spec version: 1.0
  */
-import { orvalMutator } from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutatorConnector';
 export type UpdateServiceRequestServiceType = typeof UpdateServiceRequestServiceType[keyof typeof UpdateServiceRequestServiceType];
 
 

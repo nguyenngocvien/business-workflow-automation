@@ -1,14 +1,19 @@
 import { useMemo, useState } from 'react';
+import type { EmailTemplateResult } from '../../api/connector';
 import { navIcons } from '../layout/navIcons';
 import { Card } from '../ui/Card';
 import { IconButton } from '../ui/IconButton';
-import type { EmailTemplateRecord } from '../../types/emailTemplate';
+
+type EmailTemplateEditorModel = EmailTemplateResult & {
+  processCode: string;
+  active: boolean;
+};
 
 type EmailTemplateEditorProps = {
-  template: EmailTemplateRecord | null;
+  template: EmailTemplateEditorModel | null;
   loading: boolean;
   saving: boolean;
-  onChange: (template: EmailTemplateRecord) => void;
+  onChange: (template: EmailTemplateEditorModel) => void;
   onSave: () => void;
   onEnableEdit: () => void;
   readOnly: boolean;
@@ -81,8 +86,14 @@ export function EmailTemplateEditor({
             <label className="grid gap-2 text-sm">
               <span>Process Code</span>
               <input
-                value={template?.processCode || ''}
-                onChange={(event) => onChange({ ...template!, processCode: event.target.value })}
+                value={template?.appId ?? template?.processCode ?? ''}
+                onChange={(event) =>
+                  onChange({
+                    ...template!,
+                    appId: event.target.value,
+                    processCode: event.target.value,
+                  })
+                }
                 readOnly={readOnly && Boolean(template?.id)}
                 className="theme-input rounded-2xl px-4 py-3"
               />
@@ -108,8 +119,14 @@ export function EmailTemplateEditor({
             <label className="grid gap-2 text-sm">
               <span>Active</span>
               <select
-                value={String(template?.active ?? true)}
-                onChange={(event) => onChange({ ...template!, active: event.target.value === 'true' })}
+                value={String(template?.status ?? template?.active ?? true)}
+                onChange={(event) =>
+                  onChange({
+                    ...template!,
+                    status: event.target.value === 'true',
+                    active: event.target.value === 'true',
+                  })
+                }
                 disabled={readOnly}
                 className="theme-input rounded-2xl px-4 py-3"
               >

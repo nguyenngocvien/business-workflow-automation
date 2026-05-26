@@ -1,14 +1,19 @@
 import { motion } from 'framer-motion';
+import type { EmailTemplateResult } from '../../api/connector';
 import { navIcons } from '../layout/navIcons';
 import { IconButton } from '../ui/IconButton';
 import { EmailTemplateStatusBadge } from './EmailTemplateStatusBadge';
-import type { EmailTemplateRecord } from '../../types/emailTemplate';
+
+type EmailTemplateCardModel = EmailTemplateResult & {
+  processCode: string;
+  active: boolean;
+};
 
 type EmailTemplateCardProps = {
-  template: EmailTemplateRecord;
+  template: EmailTemplateCardModel;
   index: number;
   onView: (id: number) => void;
-  onToggleStatus: (template: EmailTemplateRecord) => void;
+  onToggleStatus: (template: EmailTemplateCardModel) => void;
 };
 
 type DetailRowProps = {
@@ -48,7 +53,7 @@ export function EmailTemplateCard({
           </h3>
         </div>
 
-        <EmailTemplateStatusBadge active={template.active} />
+        <EmailTemplateStatusBadge active={Boolean(template.status ?? template.active)} />
       </div>
 
       <div className="mt-4">
@@ -61,7 +66,7 @@ export function EmailTemplateCard({
       </div>
 
       <div className="mt-4 grid gap-2">
-        <DetailRow label="Process Code" value={template.processCode} />
+        <DetailRow label="Process Code" value={template.appId ?? template.processCode} />
         <DetailRow label="Template Type" value={template.templateType} />
       </div>
 
@@ -83,9 +88,9 @@ export function EmailTemplateCard({
             <IconButton
               onClick={() => onToggleStatus(template)}
               icon={navIcons.power}
-              label={`${template.active ? 'Disable' : 'Enable'} ${template.templateCode}`}
+              label={`${Boolean(template.status ?? template.active) ? 'Disable' : 'Enable'} ${template.templateCode}`}
               size="sm"
-              tone={template.active ? 'warning' : 'success'}
+              tone={Boolean(template.status ?? template.active) ? 'warning' : 'success'}
             />
           ) : null}
         </div>

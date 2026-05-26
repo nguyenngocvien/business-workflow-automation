@@ -226,14 +226,6 @@ export function LogsPage() {
     };
   }, [filters, logsQuery.data]);
 
-  const selectedLog = useMemo(() => {
-    if (!selectedLogQuery.data) {
-      return null;
-    }
-
-    return mapLogResult(selectedLogQuery.data);
-  }, [selectedLogQuery.data]);
-
   function updateDraft<K extends keyof LogSearchFilters>(key: K, value: LogSearchFilters[K]) {
     setDraftFilters((current) => ({
       ...current,
@@ -366,15 +358,15 @@ export function LogsPage() {
         ) : (
           <div className="space-y-3 overflow-auto pr-1">
             {pageResult.items.map((log) => (
-              <button
-                key={log.id}
-                type="button"
-                onClick={() => void openDetail(log.id)}
-                className={`
+                <button
+                  key={log.id}
+                  type="button"
+                  onClick={() => void openDetail(log.id)}
+                  className={`
                   flex w-full items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left transition
                   ${log.errorCode ? 'border border-rose-200 bg-rose-50 hover:bg-rose-100' : 'border border-emerald-200 bg-emerald-50 hover:bg-emerald-100'}
-                `}
-              >
+                  `}
+                >
                 <div className="flex min-w-0 flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <LogStatusCell errorCode={log.errorCode} errorMessage={log.errorMessage} />
@@ -473,7 +465,7 @@ export function LogsPage() {
               <IconButton onClick={closeSlideOver} icon={navIcons.close} label="Close log detail panel" size="sm" />
             </div>
             <div className="h-[calc(100%-61px)] overflow-y-auto p-4 sm:p-6">
-              <LogDetailPanel log={selectedLog} loading={selectedLogQuery.isFetching} />
+              <LogDetailPanel log={selectedLogQuery.data ?? null} loading={selectedLogQuery.isFetching} />
             </div>
           </div>
         </div>

@@ -272,6 +272,16 @@ export const navIcons: Record<string, ReactNode> = {
       strokeLinejoin="round"
     />
   ),
+  connections: (
+    <path
+      d="M8.5 12.5a3.5 3.5 0 0 1 0-5l1.5-1.5a3.5 3.5 0 0 1 5 0m0 10a3.5 3.5 0 0 1 0-5l1.5-1.5a3.5 3.5 0 0 1 5 0m-8 0 4-4"
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
   box: (
     <path
       d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 0v18M4 7.5l8 4.5 8-4.5"

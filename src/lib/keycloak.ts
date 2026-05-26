@@ -50,7 +50,7 @@ function readConfig(): KeycloakConfig {
     baseUrl: baseUrl.replace(/\/$/, ''),
     realm,
     clientId,
-    redirectUri: import.meta.env.VITE_KEYCLOAK_REDIRECT_URI?.trim() || getRedirectUri('/auth/callback'),
+    redirectUri: import.meta.env.VITE_KEYCLOAK_REDIRECT_URI?.trim() || getRedirectUri('/login'),
     logoutRedirectUri: import.meta.env.VITE_KEYCLOAK_LOGOUT_REDIRECT_URI?.trim() || getRedirectUri('/login'),
   };
 }

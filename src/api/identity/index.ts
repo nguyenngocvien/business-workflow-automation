@@ -4,7 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import { orvalMutator } from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutatorIdentity';
 export type UserUpdateRequestStatus = typeof UserUpdateRequestStatus[keyof typeof UserUpdateRequestStatus];
 
 

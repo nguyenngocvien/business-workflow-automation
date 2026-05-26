@@ -1,7 +1,13 @@
-import type { ChartPoint, Metric, NavItem, User } from '../types/dashboard';
+export interface NavItem {
+  label: string;
+  path: string;
+  icon: string;
+  external?: boolean;
+}
 
 export const navigationItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: 'grid' },
+  { label: 'Connections', path: '/connections', icon: 'connections' },
   { label: 'Services', path: '/services', icon: 'sliders' },
   { label: 'Logs', path: '/logs', icon: 'logs' },
   { label: 'Emails', path: '/email-templates', icon: 'mail' },
