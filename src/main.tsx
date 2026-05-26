@@ -11,7 +11,7 @@ import { AuthProvider } from './hooks/useAuth';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+      <BrowserRouter basename="/">
         <AuthProvider>
           <NotificationProvider>
             <App />
