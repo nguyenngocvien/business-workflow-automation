@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { User } from '../../types/dashboard';
-import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { cx } from '../../lib/utils';
 import { IconButton } from '../ui/IconButton';

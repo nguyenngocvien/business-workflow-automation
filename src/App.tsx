@@ -2,8 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { useAuth } from './hooks/useAuth';
-import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ConnectionsPage } from './pages/ConnectionsPage';
 import { EmailTemplatesPage } from './pages/EmailTemplatesPage';
 import { FilesPage } from './pages/FilesPage';
 import { LoginPage } from './pages/LoginPage';
@@ -27,6 +27,7 @@ function ProtectedRoutes() {
     <AppShell>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/connections" element={<ConnectionsPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/logs" element={<LogsPage />} />
         <Route path="/email-templates" element={<EmailTemplatesPage />} />
@@ -51,7 +52,6 @@ export default function App() {
         path="/login"
         element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />}
       />
-      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>
   );

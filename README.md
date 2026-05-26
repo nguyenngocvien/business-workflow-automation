@@ -84,20 +84,19 @@ npm run preview
 
 ## API wiring
 
-- The app reads these Vite env variables:
-- `VITE_API_BASE_URL` for the Axios API base URL.
-- `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`, and `VITE_KEYCLOAK_CLIENT_ID` for Keycloak login.
-- `VITE_KEYCLOAK_REDIRECT_URI` and `VITE_KEYCLOAK_LOGOUT_REDIRECT_URI` are optional overrides.
+- The generated Orval clients call service-scoped paths like `/connector/api/connection-definitions`, `/document/api/files`, `/identity/api/users`, and `/workflow/api/...`.
+- `VITE_API_BASE_URL` should point at the API gateway origin, so in local development that is `http://localhost:8080`.
+- The app also reads `VITE_KEYCLOAK_URL`, `VITE_KEYCLOAK_REALM`, and `VITE_KEYCLOAK_CLIENT_ID` for Keycloak login.
+- `VITE_KEYCLOAK_REDIRECT_URI` and `VITE_KEYCLOAK_LOGOUT_REDIRECT_URI` are optional overrides. By default, the login flow returns to `/login` and completes there.
 - Example `.env`:
 
 ```env
-VITE_API_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:8080
 VITE_KEYCLOAK_URL=https://localhost:8180
 VITE_KEYCLOAK_REALM=baw-dev
 VITE_KEYCLOAK_CLIENT_ID=admin-portal
-VITE_KEYCLOAK_REDIRECT_URI=http://localhost:5173/auth/callback
+VITE_KEYCLOAK_REDIRECT_URI=http://localhost:5173/login
 VITE_KEYCLOAK_LOGOUT_REDIRECT_URI=http://localhost:5173/login
 ```
 
-- Update `src/services/api.ts` to replace the mocked async functions with real Axios calls.
-- Demo login accepts any non-empty email and password.
+- The shared Axios client is defined in [src/lib/http.ts](/D:/projects/admin-dashboard/src/lib/http.ts) and is the only place that needs the gateway base URL.

@@ -458,7 +458,7 @@ export function EmailTemplatesPage() {
                   template={template}
                   index={index}
                   onView={(id) => void openTemplate(id)}
-                  onToggleStatus={(item) => void toggleStatus(item)}
+                  onToggleStatus={(item) => void toggleStatus(item as EmailTemplateRecord)}
                 />
               ))}
             </div>
@@ -544,7 +544,7 @@ export function EmailTemplatesPage() {
                 template={selectedTemplate}
                 loading={detailLoading}
                 saving={saving}
-                onChange={setSelectedTemplate}
+                onChange={(template) => setSelectedTemplate(template as EmailTemplateRecord)}
                 onSave={() => void handleSave()}
                 onEnableEdit={() => setReadOnly(false)}
                 readOnly={readOnly}

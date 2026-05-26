@@ -1,7 +1,14 @@
 import { navIcons } from '../layout/navIcons';
 import { Card } from '../ui/Card';
 import { IconButton } from '../ui/IconButton';
-import type { MasterDataRecord } from '../../types/masterData';
+
+export type MasterDataRecord = {
+  id?: number;
+  groupCode: string;
+  code: string;
+  name: string;
+  active: boolean;
+};
 
 type MasterDataEditorProps = {
   item: MasterDataRecord | null;

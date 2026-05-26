@@ -5,7 +5,7 @@
  * API documentation for the E-Workflow service
  * OpenAPI spec version: v1
  */
-import { orvalMutator } from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutatorWorkflow';
 /**
  * @nullable
  */

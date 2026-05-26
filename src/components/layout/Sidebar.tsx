@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { navigationItems } from '../../data/dashboard';
+import { navigationItems } from '../../data/navItems';
 import { useAuth } from '../../hooks/useAuth';
 import { useUiStore } from '../../stores/uiStore';
 import { cx } from '../../lib/utils';

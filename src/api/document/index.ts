@@ -5,7 +5,7 @@
  * API documentation for the E-Document service
  * OpenAPI spec version: v1
  */
-import { orvalMutator } from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutatorDocument';
 export interface CreateFileRequest {
   fileName?: string;
   contentType?: string;

@@ -154,16 +154,16 @@ function mapServiceResult(result: ServiceResult): ServiceConfig {
   const sqlConfigSource = extractSection(configSource, ['sqlConfig', 'sql']) ?? (serviceType === 'SQL' ? configSource : {});
 
   return normalizeServiceDraft({
-    id: result.id ?? null,
-    appName: result.appId ?? null,
-    serviceName: result.serviceName ?? result.serviceCode ?? null,
+    id: result.id ?? undefined,
+    appName: result.appId ?? undefined,
+    serviceName: result.serviceName ?? result.serviceCode ?? undefined,
     serviceType,
-    systemName: result.serviceCode ?? null,
-    version: result.serviceVersion ?? null,
-    description: result.description ?? null,
-    status: result.active ?? null,
-    logOn: result.logEnable ?? null,
-    detailJson: result.configJson ?? null,
+    systemName: result.serviceCode ?? undefined,
+    version: result.serviceVersion ?? undefined,
+    description: configSource.description && typeof configSource.description === 'string' ? configSource.description : undefined,
+    status: result.active ?? undefined,
+    logOn: result.logEnable ?? undefined,
+    detailJson: result.configJson ?? undefined,
     apiConfig: apiConfig as ServiceConfig['apiConfig'],
     smtpConfig: smtpConfig as ServiceConfig['smtpConfig'],
     sqlConfig: {
@@ -299,7 +299,7 @@ async function fetchServiceFormOptions() {
 
 function createBlankServiceDraft(): ServiceConfig {
   return normalizeServiceDraft({
-    id: null,
+    id: undefined,
     appName: '',
     serviceName: '',
     serviceType: '',
@@ -308,7 +308,7 @@ function createBlankServiceDraft(): ServiceConfig {
     description: '',
     status: true,
     logOn: true,
-    detailJson: null,
+    detailJson: undefined,
     apiConfig: {},
     smtpConfig: {},
     sqlConfig: {

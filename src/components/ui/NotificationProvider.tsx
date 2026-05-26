@@ -6,18 +6,15 @@ const AUTO_DISMISS_MS = 4000;
 
 const toneClasses = {
   success: `
-    bg-[rgba(var(--color-success),0.12)]
-    border-[rgba(var(--color-success),0.15)]
+    bg-[rgba(var(--color-success),0.08)]
     text-[rgb(var(--color-success))]
   `,
   error: `
-    bg-[rgba(var(--color-error),0.12)]
-    border-[rgba(var(--color-error),0.06)]
+    bg-[rgba(var(--color-error),0.08)]
     text-[rgb(var(--color-error))]
   `,
   info: `
-    bg-[rgba(var(--color-info),0.12)]
-    border-[rgba(var(--color-info),0.06)]
+    bg-[rgba(var(--color-info),0.08)]
     text-[rgb(var(--color-info))]
   `,
 };
@@ -85,9 +82,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             className={`
               pointer-events-auto flex items-center gap-3
               rounded-2xl px-4 py-3
-              border backdrop-blur-md
-              shadow-[0_8px_32px_rgba(0,0,0,0.45)]
-              bg-[var(--surface-card)]
+              backdrop-blur-md
+              shadow-[0_10px_30px_rgba(15,23,42,0.12)]
+              bg-white/85 dark:bg-slate-900/80
               ${toneClasses[item.tone]}
             `}
             role="status"

@@ -1,14 +1,17 @@
+import type { ServiceResult } from '../../api/connector';
 import { navIcons } from '../layout/navIcons';
 import { IconButton } from '../ui/IconButton';
 import type { ServiceConfig, ServiceFormOptions, SqlParam } from '../../types/service';
 
+type ServiceDraft = ServiceConfig & Partial<Omit<ServiceResult, 'serviceType'>>;
+
 type ServiceCreatePanelProps = {
-  service: ServiceConfig | null;
+  service: ServiceDraft | null;
   options: ServiceFormOptions | null;
   loading: boolean;
   saving: boolean;
   readOnly?: boolean;
-  onChange: (service: ServiceConfig) => void;
+  onChange: (service: ServiceDraft) => void;
   onSave: () => void;
   onEnableEdit?: () => void;
 };
@@ -53,7 +56,7 @@ export function ServiceCreatePanel({
     );
   }
 
-  function updateField<K extends keyof ServiceConfig>(key: K, value: ServiceConfig[K]) {
+  function updateField<K extends keyof ServiceDraft>(key: K, value: ServiceDraft[K]) {
     if (!service) {
       return;
     }
