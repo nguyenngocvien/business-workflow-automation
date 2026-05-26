@@ -1,0 +1,2027 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "E-Workflow API",
+        "description": "API documentation for the E-Workflow service",
+        "contact": {
+            "name": "E-Workflow Team",
+            "email": "team@example.com"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "https://example.com/license"
+        },
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8083",
+            "description": "Generated server url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "User Tasks",
+            "description": "APIs for claiming, reassigning, and completing user tasks"
+        },
+        {
+            "name": "Process Instances",
+            "description": "APIs for workflow runtime, task processing, and search"
+        },
+        {
+            "name": "Workflow Definition",
+            "description": "APIs for workflow definition management"
+        }
+    ],
+    "paths": {
+        "/api/v1/workflow-definitions": {
+            "get": {
+                "tags": [
+                    "Workflow Definition"
+                ],
+                "summary": "Search definitions by workflow key",
+                "description": "Return all versions of a workflow definition by workflow key",
+                "operationId": "getDefinitionsByWorkflowKey",
+                "parameters": [
+                    {
+                        "name": "workflowKey",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WorkflowDefinitionResult"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Workflow Definition"
+                ],
+                "summary": "Deploy workflow definition",
+                "description": "Create a new workflow definition version with its step definitions",
+                "operationId": "deployDefinition",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeployWorkflowDefinitionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowDefinitionResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow-definitions/{definitionId}/bpmn": {
+            "post": {
+                "tags": [
+                    "Workflow Definition"
+                ],
+                "summary": "Upload BPMN source",
+                "description": "Upload BPMN XML for an existing workflow definition version",
+                "operationId": "uploadBpmn",
+                "parameters": [
+                    {
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "resource_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "uploaded_by",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "required": [
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowBpmnResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow-definitions/{definitionId}/bpmn/deploy": {
+            "post": {
+                "tags": [
+                    "Workflow Definition"
+                ],
+                "summary": "Deploy BPMN to Camunda",
+                "description": "Deploy uploaded BPMN of a workflow definition version to Camunda",
+                "operationId": "deployBpmn",
+                "parameters": [
+                    {
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeployWorkflowBpmnRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowDefinitionDeploymentResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/task-identity-links": {
+            "post": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Create task identity link",
+                "description": "Assign candidate user or candidate group to a workflow task",
+                "operationId": "createTaskIdentityLink",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateWorkflowTaskIdentityLinkRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowTaskIdentityLinkResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/startProcess": {
+            "post": {
+                "tags": [
+                    "Process Instances"
+                ],
+                "summary": "Start process",
+                "description": "Start a new process instance using the latest active definition for the workflow key",
+                "operationId": "startProcess",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartProcessRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProcessInstanceResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{taskId}/reassign": {
+            "patch": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Reassign task",
+                "description": "Reassign an existing task to another assignee and write assignment history",
+                "operationId": "reassignTask",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReassignTaskRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowTaskResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{taskId}/complete": {
+            "patch": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Complete task",
+                "description": "Complete a task, optionally save task data, and move workflow to the next step",
+                "operationId": "completeTask",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteTaskRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowTaskResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{taskId}/claim": {
+            "patch": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Claim task",
+                "description": "Assign a task to an assignee, mark it as claimed, and remove all CANDIDATE identity links of the task after a successful claim",
+                "operationId": "claimTask",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClaimTaskRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowTaskResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{taskId}/claim-by-candidate": {
+            "patch": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Claim task by candidate",
+                "description": "Allow claim only when the user is a valid candidate directly or through candidate group membership. After a successful claim, all CANDIDATE identity links of the task are removed",
+                "operationId": "claimTaskByCandidate",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClaimTaskByCandidateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowTaskResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow-definitions/{definitionId}": {
+            "get": {
+                "tags": [
+                    "Workflow Definition"
+                ],
+                "summary": "Get workflow definition by id",
+                "description": "Return workflow definition details by definition id",
+                "operationId": "getDefinition",
+                "parameters": [
+                    {
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowDefinitionResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workflow-definitions/{definitionId}/bpmn/deployments": {
+            "get": {
+                "tags": [
+                    "Workflow Definition"
+                ],
+                "summary": "Get BPMN deployment history",
+                "description": "Return deployment history of uploaded BPMN by workflow definition id",
+                "operationId": "getDeploymentHistory",
+                "parameters": [
+                    {
+                        "name": "definitionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WorkflowDefinitionDeploymentResult"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{taskId}/identity-links": {
+            "get": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "List task identity links",
+                "description": "Get all wf_task_identity_link records for a workflow task",
+                "operationId": "getTaskIdentityLinks",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WorkflowTaskIdentityLinkResult"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/claimable": {
+            "get": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Get claimable tasks by user",
+                "description": "Return tasks that the user can claim directly as a candidate user or indirectly through candidate group membership. Tasks that are already claimed by another assignee or already completed are excluded",
+                "operationId": "getClaimableTasks",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ClaimableTaskResult"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/{instanceId}": {
+            "get": {
+                "tags": [
+                    "Process Instances"
+                ],
+                "summary": "Get process instance",
+                "description": "Return workflow instance details including step instances and tasks",
+                "operationId": "getProcessInstance",
+                "parameters": [
+                    {
+                        "name": "instanceId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProcessInstanceResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/{instanceId}/progress": {
+            "get": {
+                "tags": [
+                    "Process Instances"
+                ],
+                "summary": "Get workflow progress",
+                "description": "Return the transaction progress timeline including total steps, step names, processor, current step, and step statuses",
+                "operationId": "getProgress",
+                "parameters": [
+                    {
+                        "name": "instanceId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowProgressResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/search": {
+            "get": {
+                "tags": [
+                    "Process Instances"
+                ],
+                "summary": "Search workflow tasks",
+                "description": "Search runtime workflow data by application name, workflow key, current step, workflow status, business key, and assignee",
+                "operationId": "searchProcesses",
+                "parameters": [
+                    {
+                        "name": "application_name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "workflow_key",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "current_step_code",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "business_key",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assignee",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WorkflowSearchResult"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/processes/search-options": {
+            "get": {
+                "tags": [
+                    "Process Instances"
+                ],
+                "summary": "Get workflow search options",
+                "description": "Return lookup data for workflow, step, and status dropdowns used by the search UI",
+                "operationId": "getProcessSearchOptions",
+                "parameters": [
+                    {
+                        "name": "workflow_key",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowSearchOptionsResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/task-identity-links/{identityLinkId}": {
+            "delete": {
+                "tags": [
+                    "User Tasks"
+                ],
+                "summary": "Delete task identity link",
+                "description": "Delete a wf_task_identity_link record",
+                "operationId": "deleteTaskIdentityLink",
+                "parameters": [
+                    {
+                        "name": "identityLinkId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ProblemDetail": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "title": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "detail": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "instance": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri"
+                    },
+                    "properties": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "additionalProperties": {}
+                    }
+                }
+            },
+            "DeployWorkflowDefinitionRequest": {
+                "type": "object",
+                "properties": {
+                    "applicationName": {
+                        "type": "string",
+                        "description": "Application name",
+                        "example": "ERP",
+                        "minLength": 1
+                    },
+                    "workflowName": {
+                        "type": "string",
+                        "description": "Workflow display name",
+                        "example": "Purchase Approval",
+                        "minLength": 1
+                    },
+                    "workflowKey": {
+                        "type": "string",
+                        "description": "Unique workflow key",
+                        "example": "PURCHASE_APPROVAL",
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Workflow description",
+                        "example": "Approval flow for purchase request"
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "description": "User who deploys the workflow",
+                        "example": "architect"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StepDefinitionRequest"
+                        },
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "applicationName",
+                    "steps",
+                    "workflowKey",
+                    "workflowName"
+                ]
+            },
+            "StepDefinitionRequest": {
+                "type": "object",
+                "properties": {
+                    "stepName": {
+                        "type": "string",
+                        "description": "Step display name",
+                        "example": "Submit Request",
+                        "minLength": 1
+                    },
+                    "stepCode": {
+                        "type": "string",
+                        "description": "Unique step code inside the workflow",
+                        "example": "SUBMIT",
+                        "minLength": 1
+                    },
+                    "stepType": {
+                        "type": "string",
+                        "description": "Step type",
+                        "example": "USER_TASK",
+                        "minLength": 1
+                    },
+                    "stepOrder": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Execution order of the step",
+                        "example": 1
+                    },
+                    "nextStepCode": {
+                        "type": "string",
+                        "description": "Next step code",
+                        "example": "MANAGER_APPROVAL"
+                    },
+                    "conditionExpression": {
+                        "type": "string",
+                        "description": "Conditional expression for transition",
+                        "example": "amount > 1000"
+                    },
+                    "slaMinutes": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SLA in minutes",
+                        "example": 60
+                    }
+                },
+                "required": [
+                    "stepCode",
+                    "stepName",
+                    "stepType"
+                ]
+            },
+            "WorkflowDefinitionResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "applicationName": {
+                        "type": "string"
+                    },
+                    "workflowName": {
+                        "type": "string"
+                    },
+                    "workflowKey": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowStepDefinitionResult"
+                        }
+                    }
+                }
+            },
+            "WorkflowStepDefinitionResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "stepName": {
+                        "type": "string"
+                    },
+                    "stepCode": {
+                        "type": "string"
+                    },
+                    "stepType": {
+                        "type": "string"
+                    },
+                    "stepOrder": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "nextStepCode": {
+                        "type": "string"
+                    },
+                    "conditionExpression": {
+                        "type": "string"
+                    },
+                    "slaMinutes": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "WorkflowBpmnResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowDefinitionId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowKey": {
+                        "type": "string"
+                    },
+                    "definitionVersion": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "resourceName": {
+                        "type": "string"
+                    },
+                    "deploymentStatus": {
+                        "type": "string"
+                    },
+                    "bpmnChecksum": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedBy": {
+                        "type": "string"
+                    },
+                    "deployedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "deployedBy": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DeployWorkflowBpmnRequest": {
+                "type": "object",
+                "properties": {
+                    "deployedBy": {
+                        "type": "string",
+                        "description": "User who deploys the BPMN to Camunda",
+                        "example": "architect",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "deployedBy"
+                ]
+            },
+            "WorkflowDefinitionDeploymentResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowDefinitionId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowKey": {
+                        "type": "string"
+                    },
+                    "definitionVersion": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "deploymentStatus": {
+                        "type": "string"
+                    },
+                    "camundaDeploymentId": {
+                        "type": "string"
+                    },
+                    "camundaProcessDefinitionId": {
+                        "type": "string"
+                    },
+                    "camundaProcessDefinitionKey": {
+                        "type": "string"
+                    },
+                    "camundaProcessDefinitionVersion": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "deployedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "deployedBy": {
+                        "type": "string"
+                    },
+                    "failureReason": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CreateWorkflowTaskIdentityLinkRequest": {
+                "type": "object",
+                "properties": {
+                    "taskId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "groupId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "CANDIDATE",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "taskId",
+                    "type"
+                ]
+            },
+            "WorkflowTaskIdentityLinkResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "taskId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "alice"
+                    },
+                    "userFullName": {
+                        "type": "string",
+                        "example": "Alice Nguyen"
+                    },
+                    "groupId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "groupCode": {
+                        "type": "string",
+                        "example": "FINANCE"
+                    },
+                    "groupName": {
+                        "type": "string",
+                        "example": "Finance"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "CANDIDATE"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "StartProcessRequest": {
+                "type": "object",
+                "properties": {
+                    "workflowKey": {
+                        "type": "string",
+                        "description": "Workflow key to start",
+                        "example": "PURCHASE_APPROVAL",
+                        "minLength": 1
+                    },
+                    "businessKey": {
+                        "type": "string",
+                        "description": "Business key that links workflow to business object",
+                        "example": "PO-2026-0001"
+                    },
+                    "startedBy": {
+                        "type": "string",
+                        "description": "User who starts the workflow",
+                        "example": "alice",
+                        "minLength": 1
+                    },
+                    "formData": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "Detailed form data from frontend to initialize Camunda process variables"
+                    }
+                },
+                "required": [
+                    "startedBy",
+                    "workflowKey"
+                ]
+            },
+            "ProcessInstanceResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowDefinitionId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "businessKey": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "currentStepCode": {
+                        "type": "string"
+                    },
+                    "startedBy": {
+                        "type": "string"
+                    },
+                    "startedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "stepInstances": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowStepInstanceResult"
+                        }
+                    }
+                }
+            },
+            "WorkflowStepInstanceResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "stepDefinitionId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "stepCode": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "processedBy": {
+                        "type": "string"
+                    },
+                    "startedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "tasks": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowTaskResult"
+                        }
+                    }
+                }
+            },
+            "WorkflowTaskResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowInstanceId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "stepInstanceId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "taskName": {
+                        "type": "string"
+                    },
+                    "taskCode": {
+                        "type": "string"
+                    },
+                    "assignee": {
+                        "type": "string"
+                    },
+                    "owner": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "dueDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "claimedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "completedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "ReassignTaskRequest": {
+                "type": "object",
+                "properties": {
+                    "assignee": {
+                        "type": "string",
+                        "description": "New assignee username",
+                        "example": "bob",
+                        "minLength": 1
+                    },
+                    "actionBy": {
+                        "type": "string",
+                        "description": "User performing the reassignment",
+                        "example": "manager"
+                    },
+                    "comment": {
+                        "type": "string",
+                        "description": "Reassignment note",
+                        "example": "Move task to Bob"
+                    }
+                },
+                "required": [
+                    "assignee"
+                ]
+            },
+            "CompleteTaskRequest": {
+                "type": "object",
+                "properties": {
+                    "actionBy": {
+                        "type": "string",
+                        "description": "User completing the task",
+                        "example": "bob",
+                        "minLength": 1
+                    },
+                    "comment": {
+                        "type": "string",
+                        "description": "Completion note",
+                        "example": "Approved"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "Business data payload stored into task data",
+                        "example": {
+                            "approved": true,
+                            "approvalLevel": "MANAGER"
+                        }
+                    }
+                },
+                "required": [
+                    "actionBy"
+                ]
+            },
+            "ClaimTaskRequest": {
+                "type": "object",
+                "properties": {
+                    "assignee": {
+                        "type": "string",
+                        "description": "Assignee username",
+                        "example": "bob",
+                        "minLength": 1
+                    },
+                    "actionBy": {
+                        "type": "string",
+                        "description": "User performing the action",
+                        "example": "team-lead"
+                    },
+                    "comment": {
+                        "type": "string",
+                        "description": "Claim note",
+                        "example": "Assign task to Bob"
+                    }
+                },
+                "required": [
+                    "assignee"
+                ]
+            },
+            "ClaimTaskByCandidateRequest": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Candidate username claiming the task for themselves",
+                        "example": "alice",
+                        "minLength": 1
+                    },
+                    "comment": {
+                        "type": "string",
+                        "description": "Claim note",
+                        "example": "Candidate user claims the task"
+                    }
+                },
+                "required": [
+                    "username"
+                ]
+            },
+            "ClaimableTaskResult": {
+                "type": "object",
+                "properties": {
+                    "taskId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "workflowInstanceId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "businessKey": {
+                        "type": "string"
+                    },
+                    "workflowStatus": {
+                        "type": "string"
+                    },
+                    "currentStepCode": {
+                        "type": "string"
+                    },
+                    "taskName": {
+                        "type": "string"
+                    },
+                    "taskCode": {
+                        "type": "string"
+                    },
+                    "taskStatus": {
+                        "type": "string"
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "dueDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "candidateSourceType": {
+                        "type": "string",
+                        "description": "How the user can claim the task: directly as a candidate user or through candidate group membership",
+                        "example": "GROUP"
+                    },
+                    "candidateGroupCode": {
+                        "type": "string",
+                        "description": "Candidate group code when the task is claimable through a group",
+                        "example": "FINANCE"
+                    },
+                    "candidateGroupName": {
+                        "type": "string",
+                        "description": "Candidate group name when the task is claimable through a group",
+                        "example": "Finance Department"
+                    }
+                }
+            },
+            "WorkflowProgressResult": {
+                "type": "object",
+                "properties": {
+                    "workflowInstanceId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "businessKey": {
+                        "type": "string"
+                    },
+                    "workflowStatus": {
+                        "type": "string"
+                    },
+                    "currentStepCode": {
+                        "type": "string"
+                    },
+                    "totalSteps": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowProgressStepResult"
+                        }
+                    }
+                }
+            },
+            "WorkflowProgressStepResult": {
+                "type": "object",
+                "properties": {
+                    "stepOrder": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "stepCode": {
+                        "type": "string"
+                    },
+                    "stepName": {
+                        "type": "string"
+                    },
+                    "stepType": {
+                        "type": "string"
+                    },
+                    "processor": {
+                        "type": "string"
+                    },
+                    "processorFullName": {
+                        "type": "string",
+                        "description": "Full name of the processor resolved from wf_user.full_name",
+                        "example": "Tran Thi B"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "currentStep": {
+                        "type": "boolean"
+                    },
+                    "startedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "WorkflowSearchResult": {
+                "type": "object",
+                "properties": {
+                    "wfInstanceId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "businessKey": {
+                        "type": "string"
+                    },
+                    "workflowStatus": {
+                        "type": "string"
+                    },
+                    "currentStepCode": {
+                        "type": "string"
+                    },
+                    "assignee": {
+                        "type": "string"
+                    },
+                    "assigneeFullName": {
+                        "type": "string",
+                        "description": "Full name of the assignee resolved from wf_user.full_name",
+                        "example": "Nguyen Van A"
+                    },
+                    "taskStatus": {
+                        "type": "string"
+                    },
+                    "reminderDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "taskCreatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "completedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "WorkflowLookupItemResult": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "WorkflowSearchOptionsResult": {
+                "type": "object",
+                "properties": {
+                    "workflows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowLookupItemResult"
+                        }
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowLookupItemResult"
+                        }
+                    },
+                    "statuses": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
