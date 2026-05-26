@@ -58,7 +58,7 @@ Spring Boot 4 + Spring Cloud Gateway MVC API Gateway for routing requests to dow
   - Identity Service
   - Document Service
   - Workflow Service
-  - Integration Service
+  - Connector Service
 
 ### Resilience
 
@@ -72,7 +72,7 @@ Current gateway routes are configured in `src/main/resources/application.yaml`:
 - `/identity/**` -> `lb://IDENTITY-SERVICE`
 - `/document/**` -> `lb://DOCUMENT-SERVICE`
 - `/workflow/**` -> `lb://WORKFLOW-SERVICE`
-- `/integration/**` -> `lb://INTEGRATION-SERVICE`
+- `/connector/**` -> `lb://CONNECTOR-SERVICE`
 
 The gateway strips the first path segment before forwarding the request.
 
@@ -87,7 +87,7 @@ Available API docs entries:
 - `/identity/v3/api-docs`
 - `/document/v3/api-docs`
 - `/workflow/v3/api-docs`
-- `/integration/v3/api-docs`
+- `/connector/v3/api-docs`
 
 ## Fallback API
 
