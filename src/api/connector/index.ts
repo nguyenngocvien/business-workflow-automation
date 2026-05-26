@@ -5,48 +5,7 @@
  * Connector Platform API
  * OpenAPI spec version: 1.0
  */
-import findByIdMutator from '../../lib/orvalMutator';
-import updateMutator from '../../lib/orvalMutator';
-import _deleteMutator from '../../lib/orvalMutator';
-import findById1Mutator from '../../lib/orvalMutator';
-import update1Mutator from '../../lib/orvalMutator';
-import delete1Mutator from '../../lib/orvalMutator';
-import findById2Mutator from '../../lib/orvalMutator';
-import update2Mutator from '../../lib/orvalMutator';
-import delete2Mutator from '../../lib/orvalMutator';
-import findById3Mutator from '../../lib/orvalMutator';
-import update3Mutator from '../../lib/orvalMutator';
-import delete3Mutator from '../../lib/orvalMutator';
-import findById4Mutator from '../../lib/orvalMutator';
-import update4Mutator from '../../lib/orvalMutator';
-import delete4Mutator from '../../lib/orvalMutator';
-import findById5Mutator from '../../lib/orvalMutator';
-import update5Mutator from '../../lib/orvalMutator';
-import delete5Mutator from '../../lib/orvalMutator';
-import findById6Mutator from '../../lib/orvalMutator';
-import update6Mutator from '../../lib/orvalMutator';
-import delete6Mutator from '../../lib/orvalMutator';
-import findAllMutator from '../../lib/orvalMutator';
-import createMutator from '../../lib/orvalMutator';
-import findAll1Mutator from '../../lib/orvalMutator';
-import create1Mutator from '../../lib/orvalMutator';
-import findAll2Mutator from '../../lib/orvalMutator';
-import create2Mutator from '../../lib/orvalMutator';
-import findAll3Mutator from '../../lib/orvalMutator';
-import create3Mutator from '../../lib/orvalMutator';
-import findAll4Mutator from '../../lib/orvalMutator';
-import create4Mutator from '../../lib/orvalMutator';
-import executeMutator from '../../lib/orvalMutator';
-import findAll5Mutator from '../../lib/orvalMutator';
-import create5Mutator from '../../lib/orvalMutator';
-import findAll6Mutator from '../../lib/orvalMutator';
-import create6Mutator from '../../lib/orvalMutator';
-import getSchemaMutator from '../../lib/orvalMutator';
-import findAll7Mutator from '../../lib/orvalMutator';
-import findById7Mutator from '../../lib/orvalMutator';
-import findAll8Mutator from '../../lib/orvalMutator';
-import findByNameMutator from '../../lib/orvalMutator';
-import getSchema1Mutator from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutator';
 export type UpdateServiceRequestServiceType = typeof UpdateServiceRequestServiceType[keyof typeof UpdateServiceRequestServiceType];
 
 
@@ -826,8 +785,8 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  */
 const findById = (
     id: number,
- options?: SecondParameter<typeof findByIdMutator<ServiceResult>>,) => {
-      return findByIdMutator<ServiceResult>(
+ options?: SecondParameter<typeof orvalMutator<ServiceResult>>,) => {
+      return orvalMutator<ServiceResult>(
       {url: `/api/service-definitions/${id}`, method: 'GET'
     },
       options);
@@ -839,8 +798,8 @@ const findById = (
 const update = (
     id: number,
     updateServiceRequest: UpdateServiceRequest,
- options?: SecondParameter<typeof updateMutator<ServiceResult>>,) => {
-      return updateMutator<ServiceResult>(
+ options?: SecondParameter<typeof orvalMutator<ServiceResult>>,) => {
+      return orvalMutator<ServiceResult>(
       {url: `/api/service-definitions/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateServiceRequest
@@ -853,8 +812,8 @@ const update = (
  */
 const _delete = (
     id: number,
- options?: SecondParameter<typeof _deleteMutator<void>>,) => {
-      return _deleteMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/service-definitions/${id}`, method: 'DELETE'
     },
       options);
@@ -865,8 +824,8 @@ const _delete = (
  */
 const findById1 = (
     id: number,
- options?: SecondParameter<typeof findById1Mutator<ScheduleJobResult>>,) => {
-      return findById1Mutator<ScheduleJobResult>(
+ options?: SecondParameter<typeof orvalMutator<ScheduleJobResult>>,) => {
+      return orvalMutator<ScheduleJobResult>(
       {url: `/api/schedule-jobs/${id}`, method: 'GET'
     },
       options);
@@ -878,8 +837,8 @@ const findById1 = (
 const update1 = (
     id: number,
     updateScheduleJobRequest: UpdateScheduleJobRequest,
- options?: SecondParameter<typeof update1Mutator<ScheduleJobResult>>,) => {
-      return update1Mutator<ScheduleJobResult>(
+ options?: SecondParameter<typeof orvalMutator<ScheduleJobResult>>,) => {
+      return orvalMutator<ScheduleJobResult>(
       {url: `/api/schedule-jobs/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateScheduleJobRequest
@@ -892,8 +851,8 @@ const update1 = (
  */
 const delete1 = (
     id: number,
- options?: SecondParameter<typeof delete1Mutator<void>>,) => {
-      return delete1Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/schedule-jobs/${id}`, method: 'DELETE'
     },
       options);
@@ -904,8 +863,8 @@ const delete1 = (
  */
 const findById2 = (
     id: number,
- options?: SecondParameter<typeof findById2Mutator<PipelineResult>>,) => {
-      return findById2Mutator<PipelineResult>(
+ options?: SecondParameter<typeof orvalMutator<PipelineResult>>,) => {
+      return orvalMutator<PipelineResult>(
       {url: `/api/pipelines/${id}`, method: 'GET'
     },
       options);
@@ -917,8 +876,8 @@ const findById2 = (
 const update2 = (
     id: number,
     updatePipelineRequest: UpdatePipelineRequest,
- options?: SecondParameter<typeof update2Mutator<PipelineResult>>,) => {
-      return update2Mutator<PipelineResult>(
+ options?: SecondParameter<typeof orvalMutator<PipelineResult>>,) => {
+      return orvalMutator<PipelineResult>(
       {url: `/api/pipelines/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updatePipelineRequest
@@ -931,8 +890,8 @@ const update2 = (
  */
 const delete2 = (
     id: number,
- options?: SecondParameter<typeof delete2Mutator<void>>,) => {
-      return delete2Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/pipelines/${id}`, method: 'DELETE'
     },
       options);
@@ -943,8 +902,8 @@ const delete2 = (
  */
 const findById3 = (
     id: number,
- options?: SecondParameter<typeof findById3Mutator<PipelineStepResult>>,) => {
-      return findById3Mutator<PipelineStepResult>(
+ options?: SecondParameter<typeof orvalMutator<PipelineStepResult>>,) => {
+      return orvalMutator<PipelineStepResult>(
       {url: `/api/pipeline-steps/${id}`, method: 'GET'
     },
       options);
@@ -956,8 +915,8 @@ const findById3 = (
 const update3 = (
     id: number,
     updatePipelineStepRequest: UpdatePipelineStepRequest,
- options?: SecondParameter<typeof update3Mutator<PipelineStepResult>>,) => {
-      return update3Mutator<PipelineStepResult>(
+ options?: SecondParameter<typeof orvalMutator<PipelineStepResult>>,) => {
+      return orvalMutator<PipelineStepResult>(
       {url: `/api/pipeline-steps/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updatePipelineStepRequest
@@ -970,8 +929,8 @@ const update3 = (
  */
 const delete3 = (
     id: number,
- options?: SecondParameter<typeof delete3Mutator<void>>,) => {
-      return delete3Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/pipeline-steps/${id}`, method: 'DELETE'
     },
       options);
@@ -982,8 +941,8 @@ const delete3 = (
  */
 const findById4 = (
     id: number,
- options?: SecondParameter<typeof findById4Mutator<JobExecutionResult>>,) => {
-      return findById4Mutator<JobExecutionResult>(
+ options?: SecondParameter<typeof orvalMutator<JobExecutionResult>>,) => {
+      return orvalMutator<JobExecutionResult>(
       {url: `/api/job-executions/${id}`, method: 'GET'
     },
       options);
@@ -995,8 +954,8 @@ const findById4 = (
 const update4 = (
     id: number,
     updateJobExecutionRequest: UpdateJobExecutionRequest,
- options?: SecondParameter<typeof update4Mutator<JobExecutionResult>>,) => {
-      return update4Mutator<JobExecutionResult>(
+ options?: SecondParameter<typeof orvalMutator<JobExecutionResult>>,) => {
+      return orvalMutator<JobExecutionResult>(
       {url: `/api/job-executions/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateJobExecutionRequest
@@ -1009,8 +968,8 @@ const update4 = (
  */
 const delete4 = (
     id: number,
- options?: SecondParameter<typeof delete4Mutator<void>>,) => {
-      return delete4Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/job-executions/${id}`, method: 'DELETE'
     },
       options);
@@ -1021,8 +980,8 @@ const delete4 = (
  */
 const findById5 = (
     id: number,
- options?: SecondParameter<typeof findById5Mutator<EmailTemplateResult>>,) => {
-      return findById5Mutator<EmailTemplateResult>(
+ options?: SecondParameter<typeof orvalMutator<EmailTemplateResult>>,) => {
+      return orvalMutator<EmailTemplateResult>(
       {url: `/api/email-templates/${id}`, method: 'GET'
     },
       options);
@@ -1034,8 +993,8 @@ const findById5 = (
 const update5 = (
     id: number,
     updateEmailTemplateRequest: UpdateEmailTemplateRequest,
- options?: SecondParameter<typeof update5Mutator<EmailTemplateResult>>,) => {
-      return update5Mutator<EmailTemplateResult>(
+ options?: SecondParameter<typeof orvalMutator<EmailTemplateResult>>,) => {
+      return orvalMutator<EmailTemplateResult>(
       {url: `/api/email-templates/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateEmailTemplateRequest
@@ -1048,8 +1007,8 @@ const update5 = (
  */
 const delete5 = (
     id: number,
- options?: SecondParameter<typeof delete5Mutator<void>>,) => {
-      return delete5Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/email-templates/${id}`, method: 'DELETE'
     },
       options);
@@ -1060,8 +1019,8 @@ const delete5 = (
  */
 const findById6 = (
     id: number,
- options?: SecondParameter<typeof findById6Mutator<ConnectionResult>>,) => {
-      return findById6Mutator<ConnectionResult>(
+ options?: SecondParameter<typeof orvalMutator<ConnectionResult>>,) => {
+      return orvalMutator<ConnectionResult>(
       {url: `/api/connection-definitions/${id}`, method: 'GET'
     },
       options);
@@ -1073,8 +1032,8 @@ const findById6 = (
 const update6 = (
     id: number,
     updateConnectionRequest: UpdateConnectionRequest,
- options?: SecondParameter<typeof update6Mutator<ConnectionResult>>,) => {
-      return update6Mutator<ConnectionResult>(
+ options?: SecondParameter<typeof orvalMutator<ConnectionResult>>,) => {
+      return orvalMutator<ConnectionResult>(
       {url: `/api/connection-definitions/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateConnectionRequest
@@ -1087,8 +1046,8 @@ const update6 = (
  */
 const delete6 = (
     id: number,
- options?: SecondParameter<typeof delete6Mutator<void>>,) => {
-      return delete6Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/connection-definitions/${id}`, method: 'DELETE'
     },
       options);
@@ -1099,8 +1058,8 @@ const delete6 = (
  */
 const findAll = (
     params?: FindAllParams,
- options?: SecondParameter<typeof findAllMutator<PageServiceResult>>,) => {
-      return findAllMutator<PageServiceResult>(
+ options?: SecondParameter<typeof orvalMutator<PageServiceResult>>,) => {
+      return orvalMutator<PageServiceResult>(
       {url: `/api/service-definitions`, method: 'GET',
         params
     },
@@ -1112,8 +1071,8 @@ const findAll = (
  */
 const create = (
     createServiceRequest: CreateServiceRequest,
- options?: SecondParameter<typeof createMutator<ServiceResult>>,) => {
-      return createMutator<ServiceResult>(
+ options?: SecondParameter<typeof orvalMutator<ServiceResult>>,) => {
+      return orvalMutator<ServiceResult>(
       {url: `/api/service-definitions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createServiceRequest
@@ -1126,8 +1085,8 @@ const create = (
  */
 const findAll1 = (
     params?: FindAll1Params,
- options?: SecondParameter<typeof findAll1Mutator<PageScheduleJobResult>>,) => {
-      return findAll1Mutator<PageScheduleJobResult>(
+ options?: SecondParameter<typeof orvalMutator<PageScheduleJobResult>>,) => {
+      return orvalMutator<PageScheduleJobResult>(
       {url: `/api/schedule-jobs`, method: 'GET',
         params
     },
@@ -1139,8 +1098,8 @@ const findAll1 = (
  */
 const create1 = (
     createScheduleJobRequest: CreateScheduleJobRequest,
- options?: SecondParameter<typeof create1Mutator<ScheduleJobResult>>,) => {
-      return create1Mutator<ScheduleJobResult>(
+ options?: SecondParameter<typeof orvalMutator<ScheduleJobResult>>,) => {
+      return orvalMutator<ScheduleJobResult>(
       {url: `/api/schedule-jobs`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createScheduleJobRequest
@@ -1153,8 +1112,8 @@ const create1 = (
  */
 const findAll2 = (
     params?: FindAll2Params,
- options?: SecondParameter<typeof findAll2Mutator<PagePipelineResult>>,) => {
-      return findAll2Mutator<PagePipelineResult>(
+ options?: SecondParameter<typeof orvalMutator<PagePipelineResult>>,) => {
+      return orvalMutator<PagePipelineResult>(
       {url: `/api/pipelines`, method: 'GET',
         params
     },
@@ -1166,8 +1125,8 @@ const findAll2 = (
  */
 const create2 = (
     createPipelineRequest: CreatePipelineRequest,
- options?: SecondParameter<typeof create2Mutator<PipelineResult>>,) => {
-      return create2Mutator<PipelineResult>(
+ options?: SecondParameter<typeof orvalMutator<PipelineResult>>,) => {
+      return orvalMutator<PipelineResult>(
       {url: `/api/pipelines`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createPipelineRequest
@@ -1180,8 +1139,8 @@ const create2 = (
  */
 const findAll3 = (
     params?: FindAll3Params,
- options?: SecondParameter<typeof findAll3Mutator<PagePipelineStepResult>>,) => {
-      return findAll3Mutator<PagePipelineStepResult>(
+ options?: SecondParameter<typeof orvalMutator<PagePipelineStepResult>>,) => {
+      return orvalMutator<PagePipelineStepResult>(
       {url: `/api/pipeline-steps`, method: 'GET',
         params
     },
@@ -1193,8 +1152,8 @@ const findAll3 = (
  */
 const create3 = (
     createPipelineStepRequest: CreatePipelineStepRequest,
- options?: SecondParameter<typeof create3Mutator<PipelineStepResult>>,) => {
-      return create3Mutator<PipelineStepResult>(
+ options?: SecondParameter<typeof orvalMutator<PipelineStepResult>>,) => {
+      return orvalMutator<PipelineStepResult>(
       {url: `/api/pipeline-steps`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createPipelineStepRequest
@@ -1207,8 +1166,8 @@ const create3 = (
  */
 const findAll4 = (
     params?: FindAll4Params,
- options?: SecondParameter<typeof findAll4Mutator<PageJobExecutionResult>>,) => {
-      return findAll4Mutator<PageJobExecutionResult>(
+ options?: SecondParameter<typeof orvalMutator<PageJobExecutionResult>>,) => {
+      return orvalMutator<PageJobExecutionResult>(
       {url: `/api/job-executions`, method: 'GET',
         params
     },
@@ -1220,8 +1179,8 @@ const findAll4 = (
  */
 const create4 = (
     createJobExecutionRequest: CreateJobExecutionRequest,
- options?: SecondParameter<typeof create4Mutator<JobExecutionResult>>,) => {
-      return create4Mutator<JobExecutionResult>(
+ options?: SecondParameter<typeof orvalMutator<JobExecutionResult>>,) => {
+      return orvalMutator<JobExecutionResult>(
       {url: `/api/job-executions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createJobExecutionRequest
@@ -1237,8 +1196,8 @@ const execute = (
     serviceCode: string,
     serviceVersion: string,
     executeServiceRequest?: ExecuteServiceRequest,
- options?: SecondParameter<typeof executeMutator<ExecuteServiceResponse>>,) => {
-      return executeMutator<ExecuteServiceResponse>(
+ options?: SecondParameter<typeof orvalMutator<ExecuteServiceResponse>>,) => {
+      return orvalMutator<ExecuteServiceResponse>(
       {url: `/api/execute/${appId}/${serviceCode}/${serviceVersion}`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: executeServiceRequest
@@ -1251,8 +1210,8 @@ const execute = (
  */
 const findAll5 = (
     params?: FindAll5Params,
- options?: SecondParameter<typeof findAll5Mutator<PageEmailTemplateResult>>,) => {
-      return findAll5Mutator<PageEmailTemplateResult>(
+ options?: SecondParameter<typeof orvalMutator<PageEmailTemplateResult>>,) => {
+      return orvalMutator<PageEmailTemplateResult>(
       {url: `/api/email-templates`, method: 'GET',
         params
     },
@@ -1264,8 +1223,8 @@ const findAll5 = (
  */
 const create5 = (
     createEmailTemplateRequest: CreateEmailTemplateRequest,
- options?: SecondParameter<typeof create5Mutator<EmailTemplateResult>>,) => {
-      return create5Mutator<EmailTemplateResult>(
+ options?: SecondParameter<typeof orvalMutator<EmailTemplateResult>>,) => {
+      return orvalMutator<EmailTemplateResult>(
       {url: `/api/email-templates`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createEmailTemplateRequest
@@ -1278,8 +1237,8 @@ const create5 = (
  */
 const findAll6 = (
     params?: FindAll6Params,
- options?: SecondParameter<typeof findAll6Mutator<PageConnectionResult>>,) => {
-      return findAll6Mutator<PageConnectionResult>(
+ options?: SecondParameter<typeof orvalMutator<PageConnectionResult>>,) => {
+      return orvalMutator<PageConnectionResult>(
       {url: `/api/connection-definitions`, method: 'GET',
         params
     },
@@ -1291,8 +1250,8 @@ const findAll6 = (
  */
 const create6 = (
     createConnectionRequest: CreateConnectionRequest,
- options?: SecondParameter<typeof create6Mutator<ConnectionResult>>,) => {
-      return create6Mutator<ConnectionResult>(
+ options?: SecondParameter<typeof orvalMutator<ConnectionResult>>,) => {
+      return orvalMutator<ConnectionResult>(
       {url: `/api/connection-definitions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createConnectionRequest
@@ -1305,8 +1264,8 @@ const create6 = (
  */
 const getSchema = (
     serviceType: 'REST' | 'DB' | 'PIPELINE' | 'EMAIL',
- options?: SecondParameter<typeof getSchemaMutator<GetSchema200>>,) => {
-      return getSchemaMutator<GetSchema200>(
+ options?: SecondParameter<typeof orvalMutator<GetSchema200>>,) => {
+      return orvalMutator<GetSchema200>(
       {url: `/api/service-definition-schemas/${serviceType}`, method: 'GET'
     },
       options);
@@ -1317,8 +1276,8 @@ const getSchema = (
  */
 const findAll7 = (
     params?: FindAll7Params,
- options?: SecondParameter<typeof findAll7Mutator<PageLogResult>>,) => {
-      return findAll7Mutator<PageLogResult>(
+ options?: SecondParameter<typeof orvalMutator<PageLogResult>>,) => {
+      return orvalMutator<PageLogResult>(
       {url: `/api/logs`, method: 'GET',
         params
     },
@@ -1330,8 +1289,8 @@ const findAll7 = (
  */
 const findById7 = (
     id: number,
- options?: SecondParameter<typeof findById7Mutator<LogResult>>,) => {
-      return findById7Mutator<LogResult>(
+ options?: SecondParameter<typeof orvalMutator<LogResult>>,) => {
+      return orvalMutator<LogResult>(
       {url: `/api/logs/${id}`, method: 'GET'
     },
       options);
@@ -1342,8 +1301,8 @@ const findById7 = (
  */
 const findAll8 = (
 
- options?: SecondParameter<typeof findAll8Mutator<FindAll8200>>,) => {
-      return findAll8Mutator<FindAll8200>(
+ options?: SecondParameter<typeof orvalMutator<FindAll8200>>,) => {
+      return orvalMutator<FindAll8200>(
       {url: `/api/enums`, method: 'GET'
     },
       options);
@@ -1354,8 +1313,8 @@ const findAll8 = (
  */
 const findByName = (
     enumName: string,
- options?: SecondParameter<typeof findByNameMutator<EnumOptionResponse[]>>,) => {
-      return findByNameMutator<EnumOptionResponse[]>(
+ options?: SecondParameter<typeof orvalMutator<EnumOptionResponse[]>>,) => {
+      return orvalMutator<EnumOptionResponse[]>(
       {url: `/api/enums/${enumName}`, method: 'GET'
     },
       options);
@@ -1366,8 +1325,8 @@ const findByName = (
  */
 const getSchema1 = (
     connectionType: 'DB' | 'REST' | 'SOAP' | 'SFTP' | 'SMTP' | 'KAFKA',
- options?: SecondParameter<typeof getSchema1Mutator<GetSchema1200>>,) => {
-      return getSchema1Mutator<GetSchema1200>(
+ options?: SecondParameter<typeof orvalMutator<GetSchema1200>>,) => {
+      return orvalMutator<GetSchema1200>(
       {url: `/api/connection-definition-schemas/${connectionType}`, method: 'GET'
     },
       options);

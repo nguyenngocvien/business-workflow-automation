@@ -5,25 +5,7 @@
  * API documentation for the E-Workflow service
  * OpenAPI spec version: v1
  */
-import getDefinitionsByWorkflowKeyMutator from '../../lib/orvalMutator';
-import deployDefinitionMutator from '../../lib/orvalMutator';
-import uploadBpmnMutator from '../../lib/orvalMutator';
-import deployBpmnMutator from '../../lib/orvalMutator';
-import createTaskIdentityLinkMutator from '../../lib/orvalMutator';
-import startProcessMutator from '../../lib/orvalMutator';
-import reassignTaskMutator from '../../lib/orvalMutator';
-import completeTaskMutator from '../../lib/orvalMutator';
-import claimTaskMutator from '../../lib/orvalMutator';
-import claimTaskByCandidateMutator from '../../lib/orvalMutator';
-import getDefinitionMutator from '../../lib/orvalMutator';
-import getDeploymentHistoryMutator from '../../lib/orvalMutator';
-import getTaskIdentityLinksMutator from '../../lib/orvalMutator';
-import getClaimableTasksMutator from '../../lib/orvalMutator';
-import getProcessInstanceMutator from '../../lib/orvalMutator';
-import getProgressMutator from '../../lib/orvalMutator';
-import searchProcessesMutator from '../../lib/orvalMutator';
-import getProcessSearchOptionsMutator from '../../lib/orvalMutator';
-import deleteTaskIdentityLinkMutator from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutator';
 /**
  * @nullable
  */
@@ -399,8 +381,8 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  */
 const getDefinitionsByWorkflowKey = (
     params: GetDefinitionsByWorkflowKeyParams,
- options?: SecondParameter<typeof getDefinitionsByWorkflowKeyMutator<WorkflowDefinitionResult[]>>,) => {
-      return getDefinitionsByWorkflowKeyMutator<WorkflowDefinitionResult[]>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowDefinitionResult[]>>,) => {
+      return orvalMutator<WorkflowDefinitionResult[]>(
       {url: `/api/v1/workflow-definitions`, method: 'GET',
         params
     },
@@ -413,8 +395,8 @@ const getDefinitionsByWorkflowKey = (
  */
 const deployDefinition = (
     deployWorkflowDefinitionRequest: DeployWorkflowDefinitionRequest,
- options?: SecondParameter<typeof deployDefinitionMutator<WorkflowDefinitionResult>>,) => {
-      return deployDefinitionMutator<WorkflowDefinitionResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowDefinitionResult>>,) => {
+      return orvalMutator<WorkflowDefinitionResult>(
       {url: `/api/v1/workflow-definitions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: deployWorkflowDefinitionRequest
@@ -430,12 +412,12 @@ const uploadBpmn = (
     definitionId: number,
     params: UploadBpmnParams,
     uploadBpmnBody?: UploadBpmnBody,
- options?: SecondParameter<typeof uploadBpmnMutator<WorkflowBpmnResult>>,) => {const formData = new FormData();
+ options?: SecondParameter<typeof orvalMutator<WorkflowBpmnResult>>,) => {const formData = new FormData();
 if(uploadBpmnBody?.file !== undefined) {
  formData.append(`file`, uploadBpmnBody.file);
  }
 
-      return uploadBpmnMutator<WorkflowBpmnResult>(
+      return orvalMutator<WorkflowBpmnResult>(
       {url: `/api/v1/workflow-definitions/${definitionId}/bpmn`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData,
@@ -451,8 +433,8 @@ if(uploadBpmnBody?.file !== undefined) {
 const deployBpmn = (
     definitionId: number,
     deployWorkflowBpmnRequest: DeployWorkflowBpmnRequest,
- options?: SecondParameter<typeof deployBpmnMutator<WorkflowDefinitionDeploymentResult>>,) => {
-      return deployBpmnMutator<WorkflowDefinitionDeploymentResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowDefinitionDeploymentResult>>,) => {
+      return orvalMutator<WorkflowDefinitionDeploymentResult>(
       {url: `/api/v1/workflow-definitions/${definitionId}/bpmn/deploy`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: deployWorkflowBpmnRequest
@@ -466,8 +448,8 @@ const deployBpmn = (
  */
 const createTaskIdentityLink = (
     createWorkflowTaskIdentityLinkRequest: CreateWorkflowTaskIdentityLinkRequest,
- options?: SecondParameter<typeof createTaskIdentityLinkMutator<WorkflowTaskIdentityLinkResult>>,) => {
-      return createTaskIdentityLinkMutator<WorkflowTaskIdentityLinkResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowTaskIdentityLinkResult>>,) => {
+      return orvalMutator<WorkflowTaskIdentityLinkResult>(
       {url: `/api/v1/tasks/task-identity-links`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createWorkflowTaskIdentityLinkRequest
@@ -481,8 +463,8 @@ const createTaskIdentityLink = (
  */
 const startProcess = (
     startProcessRequest: StartProcessRequest,
- options?: SecondParameter<typeof startProcessMutator<ProcessInstanceResult>>,) => {
-      return startProcessMutator<ProcessInstanceResult>(
+ options?: SecondParameter<typeof orvalMutator<ProcessInstanceResult>>,) => {
+      return orvalMutator<ProcessInstanceResult>(
       {url: `/api/v1/processes/startProcess`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: startProcessRequest
@@ -497,8 +479,8 @@ const startProcess = (
 const reassignTask = (
     taskId: number,
     reassignTaskRequest: ReassignTaskRequest,
- options?: SecondParameter<typeof reassignTaskMutator<WorkflowTaskResult>>,) => {
-      return reassignTaskMutator<WorkflowTaskResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowTaskResult>>,) => {
+      return orvalMutator<WorkflowTaskResult>(
       {url: `/api/v1/tasks/${taskId}/reassign`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: reassignTaskRequest
@@ -513,8 +495,8 @@ const reassignTask = (
 const completeTask = (
     taskId: number,
     completeTaskRequest: CompleteTaskRequest,
- options?: SecondParameter<typeof completeTaskMutator<WorkflowTaskResult>>,) => {
-      return completeTaskMutator<WorkflowTaskResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowTaskResult>>,) => {
+      return orvalMutator<WorkflowTaskResult>(
       {url: `/api/v1/tasks/${taskId}/complete`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: completeTaskRequest
@@ -529,8 +511,8 @@ const completeTask = (
 const claimTask = (
     taskId: number,
     claimTaskRequest: ClaimTaskRequest,
- options?: SecondParameter<typeof claimTaskMutator<WorkflowTaskResult>>,) => {
-      return claimTaskMutator<WorkflowTaskResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowTaskResult>>,) => {
+      return orvalMutator<WorkflowTaskResult>(
       {url: `/api/v1/tasks/${taskId}/claim`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: claimTaskRequest
@@ -545,8 +527,8 @@ const claimTask = (
 const claimTaskByCandidate = (
     taskId: number,
     claimTaskByCandidateRequest: ClaimTaskByCandidateRequest,
- options?: SecondParameter<typeof claimTaskByCandidateMutator<WorkflowTaskResult>>,) => {
-      return claimTaskByCandidateMutator<WorkflowTaskResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowTaskResult>>,) => {
+      return orvalMutator<WorkflowTaskResult>(
       {url: `/api/v1/tasks/${taskId}/claim-by-candidate`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: claimTaskByCandidateRequest
@@ -560,8 +542,8 @@ const claimTaskByCandidate = (
  */
 const getDefinition = (
     definitionId: number,
- options?: SecondParameter<typeof getDefinitionMutator<WorkflowDefinitionResult>>,) => {
-      return getDefinitionMutator<WorkflowDefinitionResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowDefinitionResult>>,) => {
+      return orvalMutator<WorkflowDefinitionResult>(
       {url: `/api/v1/workflow-definitions/${definitionId}`, method: 'GET'
     },
       options);
@@ -573,8 +555,8 @@ const getDefinition = (
  */
 const getDeploymentHistory = (
     definitionId: number,
- options?: SecondParameter<typeof getDeploymentHistoryMutator<WorkflowDefinitionDeploymentResult[]>>,) => {
-      return getDeploymentHistoryMutator<WorkflowDefinitionDeploymentResult[]>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowDefinitionDeploymentResult[]>>,) => {
+      return orvalMutator<WorkflowDefinitionDeploymentResult[]>(
       {url: `/api/v1/workflow-definitions/${definitionId}/bpmn/deployments`, method: 'GET'
     },
       options);
@@ -586,8 +568,8 @@ const getDeploymentHistory = (
  */
 const getTaskIdentityLinks = (
     taskId: number,
- options?: SecondParameter<typeof getTaskIdentityLinksMutator<WorkflowTaskIdentityLinkResult[]>>,) => {
-      return getTaskIdentityLinksMutator<WorkflowTaskIdentityLinkResult[]>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowTaskIdentityLinkResult[]>>,) => {
+      return orvalMutator<WorkflowTaskIdentityLinkResult[]>(
       {url: `/api/v1/tasks/${taskId}/identity-links`, method: 'GET'
     },
       options);
@@ -599,8 +581,8 @@ const getTaskIdentityLinks = (
  */
 const getClaimableTasks = (
     params: GetClaimableTasksParams,
- options?: SecondParameter<typeof getClaimableTasksMutator<ClaimableTaskResult[]>>,) => {
-      return getClaimableTasksMutator<ClaimableTaskResult[]>(
+ options?: SecondParameter<typeof orvalMutator<ClaimableTaskResult[]>>,) => {
+      return orvalMutator<ClaimableTaskResult[]>(
       {url: `/api/v1/tasks/claimable`, method: 'GET',
         params
     },
@@ -613,8 +595,8 @@ const getClaimableTasks = (
  */
 const getProcessInstance = (
     instanceId: number,
- options?: SecondParameter<typeof getProcessInstanceMutator<ProcessInstanceResult>>,) => {
-      return getProcessInstanceMutator<ProcessInstanceResult>(
+ options?: SecondParameter<typeof orvalMutator<ProcessInstanceResult>>,) => {
+      return orvalMutator<ProcessInstanceResult>(
       {url: `/api/v1/processes/${instanceId}`, method: 'GET'
     },
       options);
@@ -626,8 +608,8 @@ const getProcessInstance = (
  */
 const getProgress = (
     instanceId: number,
- options?: SecondParameter<typeof getProgressMutator<WorkflowProgressResult>>,) => {
-      return getProgressMutator<WorkflowProgressResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowProgressResult>>,) => {
+      return orvalMutator<WorkflowProgressResult>(
       {url: `/api/v1/processes/${instanceId}/progress`, method: 'GET'
     },
       options);
@@ -639,8 +621,8 @@ const getProgress = (
  */
 const searchProcesses = (
     params?: SearchProcessesParams,
- options?: SecondParameter<typeof searchProcessesMutator<WorkflowSearchResult[]>>,) => {
-      return searchProcessesMutator<WorkflowSearchResult[]>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowSearchResult[]>>,) => {
+      return orvalMutator<WorkflowSearchResult[]>(
       {url: `/api/v1/processes/search`, method: 'GET',
         params
     },
@@ -653,8 +635,8 @@ const searchProcesses = (
  */
 const getProcessSearchOptions = (
     params?: GetProcessSearchOptionsParams,
- options?: SecondParameter<typeof getProcessSearchOptionsMutator<WorkflowSearchOptionsResult>>,) => {
-      return getProcessSearchOptionsMutator<WorkflowSearchOptionsResult>(
+ options?: SecondParameter<typeof orvalMutator<WorkflowSearchOptionsResult>>,) => {
+      return orvalMutator<WorkflowSearchOptionsResult>(
       {url: `/api/v1/processes/search-options`, method: 'GET',
         params
     },
@@ -667,8 +649,8 @@ const getProcessSearchOptions = (
  */
 const deleteTaskIdentityLink = (
     identityLinkId: number,
- options?: SecondParameter<typeof deleteTaskIdentityLinkMutator<void>>,) => {
-      return deleteTaskIdentityLinkMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/v1/tasks/task-identity-links/${identityLinkId}`, method: 'DELETE'
     },
       options);

@@ -5,25 +5,7 @@
  * API documentation for the E-Document service
  * OpenAPI spec version: v1
  */
-import getMutator from '../../lib/orvalMutator';
-import updateMutator from '../../lib/orvalMutator';
-import _deleteMutator from '../../lib/orvalMutator';
-import update1Mutator from '../../lib/orvalMutator';
-import createMutator from '../../lib/orvalMutator';
-import update2Mutator from '../../lib/orvalMutator';
-import presignedUploadMutator from '../../lib/orvalMutator';
-import presignedPartMutator from '../../lib/orvalMutator';
-import initMutator from '../../lib/orvalMutator';
-import completeMutator from '../../lib/orvalMutator';
-import completeUploadMutator from '../../lib/orvalMutator';
-import getAllMutator from '../../lib/orvalMutator';
-import create1Mutator from '../../lib/orvalMutator';
-import addContentTypeMutator from '../../lib/orvalMutator';
-import getAll1Mutator from '../../lib/orvalMutator';
-import create2Mutator from '../../lib/orvalMutator';
-import addOptionMutator from '../../lib/orvalMutator';
-import listMutator from '../../lib/orvalMutator';
-import presignedDownloadMutator from '../../lib/orvalMutator';
+import { orvalMutator } from '../../lib/orvalMutator';
 export interface CreateFileRequest {
   fileName?: string;
   contentType?: string;
@@ -222,8 +204,8 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
   export const getEDocumentAPI = () => {
 const get = (
     id: number,
- options?: SecondParameter<typeof getMutator<FileResult>>,) => {
-      return getMutator<FileResult>(
+ options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
+      return orvalMutator<FileResult>(
       {url: `/api/v1/files/${id}`, method: 'GET'
     },
       options);
@@ -232,8 +214,8 @@ const get = (
 const update = (
     id: number,
     createFileRequest: CreateFileRequest,
- options?: SecondParameter<typeof updateMutator<FileResult>>,) => {
-      return updateMutator<FileResult>(
+ options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
+      return orvalMutator<FileResult>(
       {url: `/api/v1/files/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: createFileRequest
@@ -243,8 +225,8 @@ const update = (
 
 const _delete = (
     id: number,
- options?: SecondParameter<typeof _deleteMutator<void>>,) => {
-      return _deleteMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/v1/files/${id}`, method: 'DELETE'
     },
       options);
@@ -253,8 +235,8 @@ const _delete = (
 const update1 = (
     fileId: number,
     fileAttributeValuesRequest?: FileAttributeValuesRequest,
- options?: SecondParameter<typeof update1Mutator<void>>,) => {
-      return update1Mutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/v1/files/${fileId}/attributes`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: fileAttributeValuesRequest
@@ -265,8 +247,8 @@ const update1 = (
 const create = (
     fileId: number,
     fileAttributeValuesRequest?: FileAttributeValuesRequest,
- options?: SecondParameter<typeof createMutator<void>>,) => {
-      return createMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/v1/files/${fileId}/attributes`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: fileAttributeValuesRequest
@@ -277,8 +259,8 @@ const create = (
 const update2 = (
     id: number,
     updateFileCategoryRequest?: UpdateFileCategoryRequest,
- options?: SecondParameter<typeof update2Mutator<FileCategoryResult>>,) => {
-      return update2Mutator<FileCategoryResult>(
+ options?: SecondParameter<typeof orvalMutator<FileCategoryResult>>,) => {
+      return orvalMutator<FileCategoryResult>(
       {url: `/api/v1/file-categories/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateFileCategoryRequest
@@ -288,8 +270,8 @@ const update2 = (
 
 const presignedUpload = (
     presignedUploadRequest: PresignedUploadRequest,
- options?: SecondParameter<typeof presignedUploadMutator<PresignedUploadResult>>,) => {
-      return presignedUploadMutator<PresignedUploadResult>(
+ options?: SecondParameter<typeof orvalMutator<PresignedUploadResult>>,) => {
+      return orvalMutator<PresignedUploadResult>(
       {url: `/api/v1/files/presigned-upload`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: presignedUploadRequest
@@ -299,8 +281,8 @@ const presignedUpload = (
 
 const presignedPart = (
     presignedPartRequest: PresignedPartRequest,
- options?: SecondParameter<typeof presignedPartMutator<PresignedPartResult>>,) => {
-      return presignedPartMutator<PresignedPartResult>(
+ options?: SecondParameter<typeof orvalMutator<PresignedPartResult>>,) => {
+      return orvalMutator<PresignedPartResult>(
       {url: `/api/v1/files/multipart/presigned-part`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: presignedPartRequest
@@ -310,8 +292,8 @@ const presignedPart = (
 
 const init = (
     initiateMultipartRequest: InitiateMultipartRequest,
- options?: SecondParameter<typeof initMutator<InitiateMultipartResult>>,) => {
-      return initMutator<InitiateMultipartResult>(
+ options?: SecondParameter<typeof orvalMutator<InitiateMultipartResult>>,) => {
+      return orvalMutator<InitiateMultipartResult>(
       {url: `/api/v1/files/multipart/init`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: initiateMultipartRequest
@@ -321,8 +303,8 @@ const init = (
 
 const complete = (
     completeMultipartRequest: CompleteMultipartRequest,
- options?: SecondParameter<typeof completeMutator<FileResult>>,) => {
-      return completeMutator<FileResult>(
+ options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
+      return orvalMutator<FileResult>(
       {url: `/api/v1/files/multipart/complete`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: completeMultipartRequest
@@ -332,8 +314,8 @@ const complete = (
 
 const completeUpload = (
     completeUploadRequest: CompleteUploadRequest,
- options?: SecondParameter<typeof completeUploadMutator<FileResult>>,) => {
-      return completeUploadMutator<FileResult>(
+ options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
+      return orvalMutator<FileResult>(
       {url: `/api/v1/files/complete-upload`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: completeUploadRequest
@@ -343,8 +325,8 @@ const completeUpload = (
 
 const getAll = (
 
- options?: SecondParameter<typeof getAllMutator<FileCategoryResult[]>>,) => {
-      return getAllMutator<FileCategoryResult[]>(
+ options?: SecondParameter<typeof orvalMutator<FileCategoryResult[]>>,) => {
+      return orvalMutator<FileCategoryResult[]>(
       {url: `/api/v1/file-categories`, method: 'GET'
     },
       options);
@@ -352,8 +334,8 @@ const getAll = (
 
 const create1 = (
     createFileCategoryRequest?: CreateFileCategoryRequest,
- options?: SecondParameter<typeof create1Mutator<FileCategoryResult>>,) => {
-      return create1Mutator<FileCategoryResult>(
+ options?: SecondParameter<typeof orvalMutator<FileCategoryResult>>,) => {
+      return orvalMutator<FileCategoryResult>(
       {url: `/api/v1/file-categories`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createFileCategoryRequest
@@ -364,8 +346,8 @@ const create1 = (
 const addContentType = (
     id: number,
     addContentTypeRequest?: AddContentTypeRequest,
- options?: SecondParameter<typeof addContentTypeMutator<void>>,) => {
-      return addContentTypeMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/v1/file-categories/${id}/content-types`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: addContentTypeRequest
@@ -375,8 +357,8 @@ const addContentType = (
 
 const getAll1 = (
 
- options?: SecondParameter<typeof getAll1Mutator<FileAttributeResult[]>>,) => {
-      return getAll1Mutator<FileAttributeResult[]>(
+ options?: SecondParameter<typeof orvalMutator<FileAttributeResult[]>>,) => {
+      return orvalMutator<FileAttributeResult[]>(
       {url: `/api/v1/file-attributes`, method: 'GET'
     },
       options);
@@ -384,8 +366,8 @@ const getAll1 = (
 
 const create2 = (
     createFileAttributeRequest?: CreateFileAttributeRequest,
- options?: SecondParameter<typeof create2Mutator<FileAttributeResult>>,) => {
-      return create2Mutator<FileAttributeResult>(
+ options?: SecondParameter<typeof orvalMutator<FileAttributeResult>>,) => {
+      return orvalMutator<FileAttributeResult>(
       {url: `/api/v1/file-attributes`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createFileAttributeRequest
@@ -396,8 +378,8 @@ const create2 = (
 const addOption = (
     id: number,
     addOptionRequest?: AddOptionRequest,
- options?: SecondParameter<typeof addOptionMutator<void>>,) => {
-      return addOptionMutator<void>(
+ options?: SecondParameter<typeof orvalMutator<void>>,) => {
+      return orvalMutator<void>(
       {url: `/api/v1/file-attributes/${id}/options`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: addOptionRequest
@@ -407,8 +389,8 @@ const addOption = (
 
 const list = (
     params: ListParams,
- options?: SecondParameter<typeof listMutator<PageFileResult>>,) => {
-      return listMutator<PageFileResult>(
+ options?: SecondParameter<typeof orvalMutator<PageFileResult>>,) => {
+      return orvalMutator<PageFileResult>(
       {url: `/api/v1/files`, method: 'GET',
         params
     },
@@ -417,8 +399,8 @@ const list = (
 
 const presignedDownload = (
     id: number,
- options?: SecondParameter<typeof presignedDownloadMutator<string>>,) => {
-      return presignedDownloadMutator<string>(
+ options?: SecondParameter<typeof orvalMutator<string>>,) => {
+      return orvalMutator<string>(
       {url: `/api/v1/files/${id}/presigned-download`, method: 'GET'
     },
       options);
