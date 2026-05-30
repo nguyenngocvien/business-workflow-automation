@@ -27,19 +27,24 @@ import com.dms.interfaces.rest.request.InitiateMultipartRequest;
 import com.dms.interfaces.rest.request.PresignedPartRequest;
 import com.dms.interfaces.rest.request.PresignedUploadRequest;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/files")
-@Tag(name = "Files")
+@Tag(name = "Files", description = "Upload, download, update, and delete files.")
 @RequiredArgsConstructor
 public class FileController {
 
     private final FileUseCase useCase;
 
     @PostMapping("/presigned-upload")
-    public PresignedUploadResult presignedUpload(@RequestBody PresignedUploadRequest req) {
+    @Operation(
+            operationId = "createPresignedUpload",
+            summary = "Create a presigned upload",
+            description = "Generates a presigned upload URL for a file.")
+    public PresignedUploadResult createPresignedUpload(@RequestBody PresignedUploadRequest req) {
         return useCase.presignedUpload(
                 new PresignedUploadCommand(
                         req.getFileName(),
@@ -48,6 +53,10 @@ public class FileController {
     }
 
     @PostMapping("/complete-upload")
+    @Operation(
+            operationId = "completeUpload",
+            summary = "Complete a file upload",
+            description = "Completes a direct upload and persists the resulting file metadata.")
     public FileResult completeUpload(@RequestBody CompleteUploadRequest req) {
         return useCase.completeUpload(
                 new CompleteUploadCommand(
@@ -59,17 +68,29 @@ public class FileController {
     }
 
     @GetMapping("/{id}/presigned-download")
-    public String presignedDownload(@PathVariable Long id) {
+    @Operation(
+            operationId = "createPresignedDownload",
+            summary = "Create a presigned download",
+            description = "Generates a presigned download URL for the requested file.")
+    public String createPresignedDownload(@PathVariable Long id) {
         return useCase.presignedDownload(id);
     }
 
     @PostMapping("/multipart/init")
+    @Operation(
+            operationId = "initMultipartUpload",
+            summary = "Initiate a multipart upload",
+            description = "Starts a multipart upload flow for a file category.")
     public InitiateMultipartResult init(@RequestBody InitiateMultipartRequest req) {
         return useCase.initiateMultipart(req.getCategoryCode());
     }
 
     @PostMapping("/multipart/presigned-part")
-    public PresignedPartResult presignedPart(@RequestBody PresignedPartRequest req) {
+    @Operation(
+            operationId = "createPresignedPart",
+            summary = "Create a presigned multipart part",
+            description = "Generates a presigned URL for uploading one multipart segment.")
+    public PresignedPartResult createPresignedPart(@RequestBody PresignedPartRequest req) {
 
         String url = useCase.getPresignedPartUrl(
                 req.getBucket(),
@@ -81,7 +102,11 @@ public class FileController {
     }
 
     @PostMapping("/multipart/complete")
-    public FileResult complete(@RequestBody CompleteMultipartRequest req) {
+    @Operation(
+            operationId = "completeMultipartUpload",
+            summary = "Complete a multipart upload",
+            description = "Completes a multipart upload and returns the stored file metadata.")
+    public FileResult completeMultipartUpload(@RequestBody CompleteMultipartRequest req) {
 
         FileEntity file = useCase.completeMultipartUpload(req);
 
@@ -94,21 +119,37 @@ public class FileController {
     }
 
     @GetMapping("/{id}")
+    @Operation(
+            operationId = "getFile",
+            summary = "Get a file",
+            description = "Returns the file metadata for the requested identifier.")
     public FileResult get(@PathVariable Long id) {
         return useCase.get(id);
     }
 
     @GetMapping
+    @Operation(
+            operationId = "listFiles",
+            summary = "List files",
+            description = "Returns a paginated list of files.")
     public Page<FileResult> list(Pageable pageable) {
         return useCase.list(pageable);
     }
 
     @PutMapping("/{id}")
+    @Operation(
+            operationId = "updateFile",
+            summary = "Update a file",
+            description = "Updates the file name for the requested file.")
     public FileResult update(@PathVariable Long id, @RequestBody CreateFileRequest req) {
         return useCase.update(new UpdateFileCommand(id, req.getFileName()));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+            operationId = "deleteFile",
+            summary = "Delete a file",
+            description = "Deletes the requested file.")
     public void delete(@PathVariable Long id) {
         useCase.delete(id);
     }
