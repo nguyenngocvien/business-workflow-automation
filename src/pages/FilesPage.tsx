@@ -76,28 +76,31 @@ export function FilesPage() {
 
   const categoriesQuery = useQuery({
     queryKey: ['document', 'file-categories'] as const,
-    queryFn: () => documentApi.getAll(),
+    queryFn: () => documentApi.listFileCategories(),
     staleTime: DEFAULT_STALE_TIME,
     gcTime: DEFAULT_CACHE_TIME,
   });
 
   const attributesQuery = useQuery({
     queryKey: ['document', 'file-attributes'] as const,
-    queryFn: () => documentApi.getAll1(),
+    queryFn: () => documentApi.listFileAttributes(),
     staleTime: DEFAULT_STALE_TIME,
     gcTime: DEFAULT_CACHE_TIME,
   });
 
   const filesQuery = useQuery({
     queryKey: ['document', 'files', page] as const,
-    queryFn: () => documentApi.list({ pageable: { page, size: FILE_PAGE_SIZE, sort: ['cmis:lastModificationDate,desc'] } }),
+    queryFn: () =>
+      documentApi.listFiles({
+        pageable: { page, size: FILE_PAGE_SIZE, sort: ['cmis:lastModificationDate,desc'] },
+      }),
     staleTime: DEFAULT_STALE_TIME,
     gcTime: DEFAULT_CACHE_TIME,
   });
 
   const selectedFileQuery = useQuery({
     queryKey: ['document', 'file', selectedFileId] as const,
-    queryFn: () => documentApi.get(selectedFileId!),
+    queryFn: () => documentApi.getFile(selectedFileId!),
     enabled: selectedFileId !== null,
     staleTime: DEFAULT_STALE_TIME,
     gcTime: DEFAULT_CACHE_TIME,
@@ -105,7 +108,7 @@ export function FilesPage() {
 
   const createCategoryMutation = useMutation({
     mutationFn: (payload: { code: string; name: string }) =>
-      documentApi.create1({
+      documentApi.createFileCategory({
         code: payload.code,
         name: payload.name,
       }),
@@ -122,7 +125,7 @@ export function FilesPage() {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
-      const presigned = await documentApi.presignedUpload({
+      const presigned = await documentApi.createPresignedUpload({
         fileName: file.name,
         contentType: file.type || 'application/octet-stream',
         categoryCode: uploadCategoryCode || undefined,
@@ -166,7 +169,7 @@ export function FilesPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => documentApi._delete(id),
+    mutationFn: (id: number) => documentApi.deleteFile(id),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['document', 'files'] }),
@@ -380,7 +383,7 @@ export function FilesPage() {
                           type="button"
                           className="rounded-xl px-3 py-2 text-xs font-semibold text-brand-600 transition hover:bg-brand-50"
                           onClick={async () => {
-                            const url = await documentApi.presignedDownload(file.id);
+                            const url = await documentApi.createPresignedDownload(file.id);
                             window.open(url, '_blank', 'noopener,noreferrer');
                           }}
                         >

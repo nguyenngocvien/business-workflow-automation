@@ -21,16 +21,20 @@
     ],
     "tags": [
         {
-            "name": "Files"
+            "name": "File Attribute Values",
+            "description": "Create and update attribute values for uploaded files."
         },
         {
-            "name": "File Categories"
+            "name": "File Attributes",
+            "description": "Define file attributes and their selectable options."
         },
         {
-            "name": "File Attributes"
+            "name": "Files",
+            "description": "Upload, download, update, and delete files."
         },
         {
-            "name": "File Attribute Values"
+            "name": "File Categories",
+            "description": "Manage file categories and supported content types."
         }
     ],
     "paths": {
@@ -39,7 +43,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "get",
+                "summary": "Get a file",
+                "description": "Returns the file metadata for the requested identifier.",
+                "operationId": "getFile",
                 "parameters": [
                     {
                         "name": "id",
@@ -68,7 +74,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "update",
+                "summary": "Update a file",
+                "description": "Updates the file name for the requested file.",
+                "operationId": "updateFile",
                 "parameters": [
                     {
                         "name": "id",
@@ -107,7 +115,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "delete",
+                "summary": "Delete a file",
+                "description": "Deletes the requested file.",
+                "operationId": "deleteFile",
                 "parameters": [
                     {
                         "name": "id",
@@ -131,7 +141,9 @@
                 "tags": [
                     "File Attribute Values"
                 ],
-                "operationId": "update_1",
+                "summary": "Update attribute values",
+                "description": "Updates attribute values for a file.",
+                "operationId": "updateFileAttributeValues",
                 "parameters": [
                     {
                         "name": "fileId",
@@ -162,7 +174,9 @@
                 "tags": [
                     "File Attribute Values"
                 ],
-                "operationId": "create",
+                "summary": "Create attribute values",
+                "description": "Creates attribute values for a file.",
+                "operationId": "createFileAttributeValues",
                 "parameters": [
                     {
                         "name": "fileId",
@@ -195,7 +209,9 @@
                 "tags": [
                     "File Categories"
                 ],
-                "operationId": "update_2",
+                "summary": "Update a file category",
+                "description": "Updates an existing file category.",
+                "operationId": "updateFileCategory",
                 "parameters": [
                     {
                         "name": "id",
@@ -235,7 +251,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "presignedUpload",
+                "summary": "Create a presigned upload",
+                "description": "Generates a presigned upload URL for a file.",
+                "operationId": "createPresignedUpload",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -265,7 +283,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "presignedPart",
+                "summary": "Create a presigned multipart part",
+                "description": "Generates a presigned URL for uploading one multipart segment.",
+                "operationId": "createPresignedPart",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -295,7 +315,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "init",
+                "summary": "Initiate a multipart upload",
+                "description": "Starts a multipart upload flow for a file category.",
+                "operationId": "initMultipartUpload",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -325,7 +347,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "complete",
+                "summary": "Complete a multipart upload",
+                "description": "Completes a multipart upload and returns the stored file metadata.",
+                "operationId": "completeMultipartUpload",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -355,6 +379,8 @@
                 "tags": [
                     "Files"
                 ],
+                "summary": "Complete a file upload",
+                "description": "Completes a direct upload and persists the resulting file metadata.",
                 "operationId": "completeUpload",
                 "requestBody": {
                     "content": {
@@ -385,7 +411,9 @@
                 "tags": [
                     "File Categories"
                 ],
-                "operationId": "getAll",
+                "summary": "List file categories",
+                "description": "Returns all configured file categories.",
+                "operationId": "listFileCategories",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -406,7 +434,9 @@
                 "tags": [
                     "File Categories"
                 ],
-                "operationId": "create_1",
+                "summary": "Create a file category",
+                "description": "Creates a new file category.",
+                "operationId": "createFileCategory",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -435,7 +465,9 @@
                 "tags": [
                     "File Categories"
                 ],
-                "operationId": "addContentType",
+                "summary": "Add a content type",
+                "description": "Adds a supported content type to a file category.",
+                "operationId": "addFileCategoryContentType",
                 "parameters": [
                     {
                         "name": "id",
@@ -468,7 +500,9 @@
                 "tags": [
                     "File Attributes"
                 ],
-                "operationId": "getAll_1",
+                "summary": "List file attributes",
+                "description": "Returns all configured file attributes.",
+                "operationId": "listFileAttributes",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -489,7 +523,9 @@
                 "tags": [
                     "File Attributes"
                 ],
-                "operationId": "create_2",
+                "summary": "Create a file attribute",
+                "description": "Creates a new file attribute definition.",
+                "operationId": "createFileAttribute",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -518,7 +554,9 @@
                 "tags": [
                     "File Attributes"
                 ],
-                "operationId": "addOption",
+                "summary": "Add an option",
+                "description": "Adds an option to a file attribute.",
+                "operationId": "addFileAttributeOption",
                 "parameters": [
                     {
                         "name": "id",
@@ -551,7 +589,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "list",
+                "summary": "List files",
+                "description": "Returns a paginated list of files.",
+                "operationId": "listFiles",
                 "parameters": [
                     {
                         "name": "pageable",
@@ -581,7 +621,9 @@
                 "tags": [
                     "Files"
                 ],
-                "operationId": "presignedDownload",
+                "summary": "Create a presigned download",
+                "description": "Generates a presigned download URL for the requested file.",
+                "operationId": "createPresignedDownload",
                 "parameters": [
                     {
                         "name": "id",
@@ -973,22 +1015,13 @@
             "PageFileResult": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "first": {
-                        "type": "boolean"
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -1007,9 +1040,18 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -1019,23 +1061,23 @@
             "PageableObject": {
                 "type": "object",
                 "properties": {
-                    "paged": {
-                        "type": "boolean"
-                    },
-                    "pageNumber": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "pageSize": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "offset": {
                         "type": "integer",
                         "format": "int64"
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "paged": {
+                        "type": "boolean"
                     },
                     "unpaged": {
                         "type": "boolean"
@@ -1045,10 +1087,10 @@
             "SortObject": {
                 "type": "object",
                 "properties": {
-                    "sorted": {
+                    "empty": {
                         "type": "boolean"
                     },
-                    "empty": {
+                    "sorted": {
                         "type": "boolean"
                     },
                     "unsorted": {
