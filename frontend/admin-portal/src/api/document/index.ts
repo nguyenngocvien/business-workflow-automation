@@ -166,35 +166,35 @@ export interface Pageable {
 }
 
 export interface SortObject {
-  sorted?: boolean;
   empty?: boolean;
+  sorted?: boolean;
   unsorted?: boolean;
 }
 
 export interface PageableObject {
-  paged?: boolean;
-  pageNumber?: number;
-  pageSize?: number;
   offset?: number;
   sort?: SortObject;
+  pageSize?: number;
+  pageNumber?: number;
+  paged?: boolean;
   unpaged?: boolean;
 }
 
 export interface PageFileResult {
-  totalElements?: number;
   totalPages?: number;
-  pageable?: PageableObject;
-  last?: boolean;
-  first?: boolean;
+  totalElements?: number;
   size?: number;
   content?: FileResult[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
+  pageable?: PageableObject;
   empty?: boolean;
 }
 
-export type ListParams = {
+export type ListFilesParams = {
 pageable: Pageable;
 };
 
@@ -202,7 +202,11 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   export const getEDocumentAPI = () => {
-const get = (
+/**
+ * Returns the file metadata for the requested identifier.
+ * @summary Get a file
+ */
+const getFile = (
     id: number,
  options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
       return orvalMutator<FileResult>(
@@ -211,7 +215,11 @@ const get = (
       options);
     }
 
-const update = (
+/**
+ * Updates the file name for the requested file.
+ * @summary Update a file
+ */
+const updateFile = (
     id: number,
     createFileRequest: CreateFileRequest,
  options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
@@ -223,7 +231,11 @@ const update = (
       options);
     }
 
-const _delete = (
+/**
+ * Deletes the requested file.
+ * @summary Delete a file
+ */
+const deleteFile = (
     id: number,
  options?: SecondParameter<typeof orvalMutator<void>>,) => {
       return orvalMutator<void>(
@@ -232,7 +244,11 @@ const _delete = (
       options);
     }
 
-const update1 = (
+/**
+ * Updates attribute values for a file.
+ * @summary Update attribute values
+ */
+const updateFileAttributeValues = (
     fileId: number,
     fileAttributeValuesRequest?: FileAttributeValuesRequest,
  options?: SecondParameter<typeof orvalMutator<void>>,) => {
@@ -244,7 +260,11 @@ const update1 = (
       options);
     }
 
-const create = (
+/**
+ * Creates attribute values for a file.
+ * @summary Create attribute values
+ */
+const createFileAttributeValues = (
     fileId: number,
     fileAttributeValuesRequest?: FileAttributeValuesRequest,
  options?: SecondParameter<typeof orvalMutator<void>>,) => {
@@ -256,7 +276,11 @@ const create = (
       options);
     }
 
-const update2 = (
+/**
+ * Updates an existing file category.
+ * @summary Update a file category
+ */
+const updateFileCategory = (
     id: number,
     updateFileCategoryRequest?: UpdateFileCategoryRequest,
  options?: SecondParameter<typeof orvalMutator<FileCategoryResult>>,) => {
@@ -268,7 +292,11 @@ const update2 = (
       options);
     }
 
-const presignedUpload = (
+/**
+ * Generates a presigned upload URL for a file.
+ * @summary Create a presigned upload
+ */
+const createPresignedUpload = (
     presignedUploadRequest: PresignedUploadRequest,
  options?: SecondParameter<typeof orvalMutator<PresignedUploadResult>>,) => {
       return orvalMutator<PresignedUploadResult>(
@@ -279,7 +307,11 @@ const presignedUpload = (
       options);
     }
 
-const presignedPart = (
+/**
+ * Generates a presigned URL for uploading one multipart segment.
+ * @summary Create a presigned multipart part
+ */
+const createPresignedPart = (
     presignedPartRequest: PresignedPartRequest,
  options?: SecondParameter<typeof orvalMutator<PresignedPartResult>>,) => {
       return orvalMutator<PresignedPartResult>(
@@ -290,7 +322,11 @@ const presignedPart = (
       options);
     }
 
-const init = (
+/**
+ * Starts a multipart upload flow for a file category.
+ * @summary Initiate a multipart upload
+ */
+const initMultipartUpload = (
     initiateMultipartRequest: InitiateMultipartRequest,
  options?: SecondParameter<typeof orvalMutator<InitiateMultipartResult>>,) => {
       return orvalMutator<InitiateMultipartResult>(
@@ -301,7 +337,11 @@ const init = (
       options);
     }
 
-const complete = (
+/**
+ * Completes a multipart upload and returns the stored file metadata.
+ * @summary Complete a multipart upload
+ */
+const completeMultipartUpload = (
     completeMultipartRequest: CompleteMultipartRequest,
  options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
       return orvalMutator<FileResult>(
@@ -312,6 +352,10 @@ const complete = (
       options);
     }
 
+/**
+ * Completes a direct upload and persists the resulting file metadata.
+ * @summary Complete a file upload
+ */
 const completeUpload = (
     completeUploadRequest: CompleteUploadRequest,
  options?: SecondParameter<typeof orvalMutator<FileResult>>,) => {
@@ -323,7 +367,11 @@ const completeUpload = (
       options);
     }
 
-const getAll = (
+/**
+ * Returns all configured file categories.
+ * @summary List file categories
+ */
+const listFileCategories = (
 
  options?: SecondParameter<typeof orvalMutator<FileCategoryResult[]>>,) => {
       return orvalMutator<FileCategoryResult[]>(
@@ -332,7 +380,11 @@ const getAll = (
       options);
     }
 
-const create1 = (
+/**
+ * Creates a new file category.
+ * @summary Create a file category
+ */
+const createFileCategory = (
     createFileCategoryRequest?: CreateFileCategoryRequest,
  options?: SecondParameter<typeof orvalMutator<FileCategoryResult>>,) => {
       return orvalMutator<FileCategoryResult>(
@@ -343,7 +395,11 @@ const create1 = (
       options);
     }
 
-const addContentType = (
+/**
+ * Adds a supported content type to a file category.
+ * @summary Add a content type
+ */
+const addFileCategoryContentType = (
     id: number,
     addContentTypeRequest?: AddContentTypeRequest,
  options?: SecondParameter<typeof orvalMutator<void>>,) => {
@@ -355,7 +411,11 @@ const addContentType = (
       options);
     }
 
-const getAll1 = (
+/**
+ * Returns all configured file attributes.
+ * @summary List file attributes
+ */
+const listFileAttributes = (
 
  options?: SecondParameter<typeof orvalMutator<FileAttributeResult[]>>,) => {
       return orvalMutator<FileAttributeResult[]>(
@@ -364,7 +424,11 @@ const getAll1 = (
       options);
     }
 
-const create2 = (
+/**
+ * Creates a new file attribute definition.
+ * @summary Create a file attribute
+ */
+const createFileAttribute = (
     createFileAttributeRequest?: CreateFileAttributeRequest,
  options?: SecondParameter<typeof orvalMutator<FileAttributeResult>>,) => {
       return orvalMutator<FileAttributeResult>(
@@ -375,7 +439,11 @@ const create2 = (
       options);
     }
 
-const addOption = (
+/**
+ * Adds an option to a file attribute.
+ * @summary Add an option
+ */
+const addFileAttributeOption = (
     id: number,
     addOptionRequest?: AddOptionRequest,
  options?: SecondParameter<typeof orvalMutator<void>>,) => {
@@ -387,8 +455,12 @@ const addOption = (
       options);
     }
 
-const list = (
-    params: ListParams,
+/**
+ * Returns a paginated list of files.
+ * @summary List files
+ */
+const listFiles = (
+    params: ListFilesParams,
  options?: SecondParameter<typeof orvalMutator<PageFileResult>>,) => {
       return orvalMutator<PageFileResult>(
       {url: `/api/v1/files`, method: 'GET',
@@ -397,7 +469,11 @@ const list = (
       options);
     }
 
-const presignedDownload = (
+/**
+ * Generates a presigned download URL for the requested file.
+ * @summary Create a presigned download
+ */
+const createPresignedDownload = (
     id: number,
  options?: SecondParameter<typeof orvalMutator<string>>,) => {
       return orvalMutator<string>(
@@ -406,23 +482,23 @@ const presignedDownload = (
       options);
     }
 
-return {get,update,_delete,update1,create,update2,presignedUpload,presignedPart,init,complete,completeUpload,getAll,create1,addContentType,getAll1,create2,addOption,list,presignedDownload}};
-export type GetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['get']>>>
-export type UpdateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['update']>>>
-export type _DeleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['_delete']>>>
-export type Update1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['update1']>>>
-export type CreateResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['create']>>>
-export type Update2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['update2']>>>
-export type PresignedUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['presignedUpload']>>>
-export type PresignedPartResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['presignedPart']>>>
-export type InitResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['init']>>>
-export type CompleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['complete']>>>
+return {getFile,updateFile,deleteFile,updateFileAttributeValues,createFileAttributeValues,updateFileCategory,createPresignedUpload,createPresignedPart,initMultipartUpload,completeMultipartUpload,completeUpload,listFileCategories,createFileCategory,addFileCategoryContentType,listFileAttributes,createFileAttribute,addFileAttributeOption,listFiles,createPresignedDownload}};
+export type GetFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['getFile']>>>
+export type UpdateFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['updateFile']>>>
+export type DeleteFileResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['deleteFile']>>>
+export type UpdateFileAttributeValuesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['updateFileAttributeValues']>>>
+export type CreateFileAttributeValuesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['createFileAttributeValues']>>>
+export type UpdateFileCategoryResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['updateFileCategory']>>>
+export type CreatePresignedUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['createPresignedUpload']>>>
+export type CreatePresignedPartResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['createPresignedPart']>>>
+export type InitMultipartUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['initMultipartUpload']>>>
+export type CompleteMultipartUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['completeMultipartUpload']>>>
 export type CompleteUploadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['completeUpload']>>>
-export type GetAllResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['getAll']>>>
-export type Create1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['create1']>>>
-export type AddContentTypeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['addContentType']>>>
-export type GetAll1Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['getAll1']>>>
-export type Create2Result = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['create2']>>>
-export type AddOptionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['addOption']>>>
-export type ListResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['list']>>>
-export type PresignedDownloadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['presignedDownload']>>>
+export type ListFileCategoriesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['listFileCategories']>>>
+export type CreateFileCategoryResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['createFileCategory']>>>
+export type AddFileCategoryContentTypeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['addFileCategoryContentType']>>>
+export type ListFileAttributesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['listFileAttributes']>>>
+export type CreateFileAttributeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['createFileAttribute']>>>
+export type AddFileAttributeOptionResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['addFileAttributeOption']>>>
+export type ListFilesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['listFiles']>>>
+export type CreatePresignedDownloadResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getEDocumentAPI>['createPresignedDownload']>>>

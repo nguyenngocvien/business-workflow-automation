@@ -24,7 +24,7 @@ export default {
 
       override: {
         mutator: {
-          path: './src/lib/orvalMutator.ts',
+          path: './src/lib/orvalMutatorDocument.ts',
           name: 'orvalMutator',
         },
       },
